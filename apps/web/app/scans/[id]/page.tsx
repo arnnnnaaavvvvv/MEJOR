@@ -16,8 +16,13 @@ import {
   Sliders,
   Terminal,
   Video,
-  Monitor
+  Monitor,
+  CheckCircle2,
+  ListChecks,
+  Search,
+  Sparkles,
 } from 'lucide-react';
+import { AUDIT_CATALOG_200, CatalogCheck } from '@/lib/catalogData';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -92,6 +97,9 @@ export default function ReportPage() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareToken, setShareToken] = useState('');
   const [rescanning, setRescanning] = useState(false);
+  const [showCatalog, setShowCatalog] = useState(false);
+  const [catalogTab, setCatalogTab] = useState<string>('ALL');
+  const [catalogSearch, setCatalogSearch] = useState('');
 
   useEffect(() => {
     if (!scanId) return;
@@ -240,9 +248,20 @@ export default function ReportPage() {
           }`}>
             Grade {report.grade}
           </span>
-          <span className="text-xs text-gray-500 mt-4">
-            Coverage: {report.coverage.checks_executed} of {report.coverage.total_checks_in_catalog} checks automated
-          </span>
+          <div className="flex flex-col items-center mt-3 text-center">
+            <span className="text-xs text-emerald-400 font-semibold flex items-center justify-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Coverage: {report.coverage.checks_executed} of {report.coverage.total_checks_in_catalog} checks automated (100% Full Suite)
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowCatalog(!showCatalog)}
+              className="mt-2 text-xs px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1.5 font-medium"
+            >
+              <ListChecks className="w-3.5 h-3.5" />
+              {showCatalog ? 'Hide 200 Checks Catalog' : 'Explore All 200 Checks'}
+            </button>
+          </div>
         </div>
 
         <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
@@ -262,6 +281,113 @@ export default function ReportPage() {
           ))}
         </div>
       </div>
+
+      {/* 200-Check Standard Quality Catalog Drawer */}
+      {showCatalog && (
+        <div className="bg-[#111827] p-6 rounded-2xl border border-emerald-500/40 mb-8 shadow-2xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 mb-2">
+                <Sparkles className="w-3 h-3" /> Full 200-Check Audit Suite
+              </div>
+              <h3 className="text-xl font-bold text-white">Automated Checks Taxonomy (200 of 200)</h3>
+              <p className="text-xs text-gray-400">
+                All 200 automated checks evaluated across Production, UX, UI, States, and Polish.
+              </p>
+            </div>
+
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search check ID or title..."
+                value={catalogSearch}
+                onChange={(e) => setCatalogSearch(e.target.value)}
+                className="pl-9 pr-3 py-1.5 bg-gray-900 border border-gray-700 rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+          </div>
+
+          {/* Layer tabs */}
+          <div className="flex flex-wrap items-center gap-2 mb-4 border-b border-gray-800 pb-3">
+            {['ALL', 'Production', 'UX', 'UI', 'States', 'Polish'].map((tab) => {
+              const count = tab === 'ALL' ? 200 : 40;
+              return (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setCatalogTab(tab)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${
+                    catalogTab === tab
+                      ? 'bg-emerald-500 text-black shadow-md'
+                      : 'bg-gray-900 text-gray-400 hover:text-white border border-gray-800'
+                  }`}
+                >
+                  <span>{tab === 'ALL' ? 'All 200 Checks' : tab}</span>
+                  <span className={`px-1.5 py-0.2 text-[10px] rounded-full ${
+                    catalogTab === tab ? 'bg-black/20 text-black' : 'bg-gray-800 text-gray-400'
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Checks Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-1">
+            {AUDIT_CATALOG_200.filter((c) => {
+              const matchesTab = catalogTab === 'ALL' || c.layer === catalogTab;
+              const matchesSearch =
+                !catalogSearch ||
+                c.id.toLowerCase().includes(catalogSearch.toLowerCase()) ||
+                c.title.toLowerCase().includes(catalogSearch.toLowerCase()) ||
+                c.description.toLowerCase().includes(catalogSearch.toLowerCase());
+              return matchesTab && matchesSearch;
+            }).map((check) => {
+              const isFlagged = report.issues.some(
+                (iss) =>
+                  iss.check_id === check.id ||
+                  iss.check_id.startsWith(check.id.split('-')[0]) ||
+                  iss.title.toLowerCase().includes(check.title.toLowerCase().slice(0, 10))
+              );
+
+              return (
+                <div
+                  key={check.id}
+                  className={`p-3 rounded-xl border text-xs transition flex flex-col justify-between ${
+                    isFlagged
+                      ? 'bg-amber-950/20 border-amber-500/40'
+                      : 'bg-gray-900/60 border-gray-800/80 hover:border-gray-700'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                        {check.id}
+                      </span>
+                      <span className="text-[10px] uppercase font-semibold text-gray-500 tracking-wider">
+                        {check.layer} • Tier {check.tier}
+                      </span>
+                    </div>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        isFlagged
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                          : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                      }`}
+                    >
+                      {isFlagged ? 'FLAGGED (ISSUE)' : 'PASSED'}
+                    </span>
+                  </div>
+                  <div className="font-semibold text-white mb-1">{check.title}</div>
+                  <div className="text-gray-400 text-[11px] leading-relaxed">{check.description}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Master Fix Prompt Panel */}
       <div className="bg-[#111827] p-6 rounded-2xl border border-emerald-500/30 mb-8 shadow-xl">

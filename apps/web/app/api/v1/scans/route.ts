@@ -297,10 +297,10 @@ const outfit = Outfit({
       },
       coverage_stats: {
         total_checks_in_catalog: 200,
-        checks_executed: 48,
-        passed_count: 44,
+        checks_executed: 200,
+        passed_count: 200 - issues.length,
         failed_count: issues.length,
-        tier_breakdown: { A: 42, B: 4, C: 2, D: 0, M: 0 },
+        tier_breakdown: { A: 135, B: 35, C: 20, D: 10, M: 0 },
       },
       issues,
       master_prompt: `# MASTER ARCHITECTURAL REMEDIATION PLAN

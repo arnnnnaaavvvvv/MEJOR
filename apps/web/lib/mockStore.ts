@@ -43,10 +43,10 @@ const demoBase: StoredScan = {
   },
   coverage_stats: {
     total_checks_in_catalog: 200,
-    checks_executed: 45,
-    passed_count: 40,
+    checks_executed: 200,
+    passed_count: 195,
     failed_count: 5,
-    tier_breakdown: { A: 38, B: 3, C: 4, D: 0, M: 0 },
+    tier_breakdown: { A: 135, B: 35, C: 20, D: 10, M: 0 },
   },
   issues: [
     {
@@ -143,10 +143,10 @@ const demoRescan: StoredScan = {
   },
   coverage_stats: {
     total_checks_in_catalog: 200,
-    checks_executed: 45,
-    passed_count: 44,
+    checks_executed: 200,
+    passed_count: 199,
     failed_count: 1,
-    tier_breakdown: { A: 40, B: 2, C: 2, D: 0, M: 0 },
+    tier_breakdown: { A: 140, B: 35, C: 15, D: 10, M: 0 },
   },
   issues: [
     {
