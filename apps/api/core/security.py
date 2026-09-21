@@ -1,5 +1,6 @@
 import ipaddress
 import socket
+import re
 from urllib.parse import urlparse
 from typing import Tuple, Optional
 import time
@@ -88,10 +89,16 @@ def validate_target_url(url: str) -> Tuple[bool, str]:
     3. Block private, loopback, link-local, carrier-NAT, and cloud-metadata addresses
     4. DNS resolution validation
     """
-    if not url or not isinstance(url, str):
+    if not url or not isinstance(url, str) or not url.strip():
         return False, "URL cannot be empty."
 
-    parsed = urlparse(url.strip())
+    clean = url.strip()
+    parsed = urlparse(clean)
+    # If no protocol scheme was provided (e.g. neurosense-orcin.vercel.app or example.com), default to https://
+    if not parsed.scheme:
+        clean = "https://" + clean
+        parsed = urlparse(clean)
+
     if parsed.scheme.lower() not in ("http", "https"):
         return False, f"Scheme '{parsed.scheme}' disallowed. Only HTTP and HTTPS are permitted."
 

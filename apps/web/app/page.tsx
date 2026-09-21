@@ -48,18 +48,24 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!url) return;
+    if (!url.trim()) return;
 
     setErrorMsg('');
     setScanning(true);
     setProgressPct(5);
     setCurrentMessage('Initiating scan pre-flight checks...');
 
+    // Auto-prepend https:// if protocol was omitted (e.g. neurosense-orcin.vercel.app)
+    let targetUrl = url.trim().replace(/^["'`]+|["'`]+$/g, '');
+    if (!targetUrl.match(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//)) {
+      targetUrl = 'https://' + targetUrl;
+    }
+
     try {
       const res = await fetch(`${API_BASE}/api/v1/scans`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, mode }),
+        body: JSON.stringify({ url: targetUrl, mode }),
       });
 
       if (!res.ok) {
@@ -135,18 +141,38 @@ export default function Home() {
         <form onSubmit={handleSubmit} className="bg-[#111827] p-6 sm:p-8 rounded-2xl border border-gray-800 shadow-2xl">
           <div className="flex flex-col gap-4">
             <div>
-              <label htmlFor="url-input" className="block text-sm font-medium text-gray-300 mb-2">
-                Target Website URL
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="url-input" className="block text-sm font-medium text-gray-300">
+                  Target Website URL
+                </label>
+                <span className="text-xs text-gray-400">Supports Vercel, Netlify, Custom Domains & IPs</span>
+              </div>
               <input
                 id="url-input"
                 type="text"
-                placeholder="https://your-app.com"
+                placeholder="e.g. neurosense-orcin.vercel.app or https://your-site.com"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 required
                 className="w-full px-4 py-3.5 rounded-xl bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition text-base"
               />
+              <div className="flex flex-wrap items-center gap-2 mt-2.5 text-xs text-gray-400">
+                <span className="text-gray-400 font-medium">Try example:</span>
+                <button
+                  type="button"
+                  onClick={() => setUrl('neurosense-orcin.vercel.app')}
+                  className="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-emerald-400 border border-gray-700/60 transition"
+                >
+                  neurosense-orcin.vercel.app
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUrl('https://vibe-saas-example.dev')}
+                  className="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700/60 transition"
+                >
+                  vibe-saas-example.dev
+                </button>
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">

@@ -35,6 +35,15 @@ def test_decimal_octal_hex_ip_blocking():
         assert not valid
         assert "disallowed" in msg.lower()
 
+    # Schemeless URLs and Vercel domains
+    valid, canonical = validate_target_url("neurosense-orcin.vercel.app")
+    assert valid
+    assert canonical == "https://neurosense-orcin.vercel.app"
+
+    valid, canonical = validate_target_url("https://neurosense-orcin.vercel.app/test")
+    assert valid
+    assert canonical == "https://neurosense-orcin.vercel.app/test"
+
 @pytest.mark.asyncio
 async def test_prompt_injection_sanitization():
     # Construct an adversarial DOM attempting prompt injection & delimiter escape
