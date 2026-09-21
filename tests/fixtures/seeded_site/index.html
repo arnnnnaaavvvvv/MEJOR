@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vibe Saas — Synthetic Demo Site with Seeded Defects</title>
+  <!-- NOTE: Intentionally missing viewport meta tag for MOBI-VIEW-01 defect -->
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --brand-blue: #2563eb; /* Defect: DS-TOK-01 duplicate token drift */
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      color: #333333;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 13px; /* Defect: DS-SPAC-01 off-scale spacing */
+      background: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    nav a {
+      margin-left: 15px;
+      color: #9ca3af; /* Defect: A11Y-CONT-01 low contrast */
+      text-decoration: none;
+    }
+    .hero {
+      padding: 40px 20px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    h2 {
+      font-size: 38px; /* Defect: UI-HEAD-01 heading scale inversion h2 > h1 */
+      color: #111827;
+    }
+    p.long-copy {
+      /* Defect: UI-LINE-01 line length unbounded */
+      font-size: 14px;
+      line-height: 1.1; /* Defect: UI-LHGT-01 line-height too tight */
+    }
+    button.tiny-btn {
+      /* Defect: MOBI-TAP-01 undersized tap target */
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+    }
+    .animated-box {
+      /* Defect: PERF-PROP-01 layout-triggering animation on height/width */
+      transition: width 0.3s ease;
+    }
+    .user-info {
+      margin-top: 20px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div><strong>VibeApp</strong></div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About Us</a>
+      <a href="http://localhost:8080/dev">Dev Portal</a> <!-- Defect: PROD-LEAK-01 localhost leak -->
+    </nav>
+  </header>
+
+  <main class="hero">
+    <h1>Revolutionize Your Workflow</h1>
+    <h2>Everything you need to launch in seconds</h2>
+    <p class="long-copy">
+      This is an intentionally long, unconstrained sentence that runs across the entire display without a max-width wrapper, forcing reader eyes to dart back and forth across hundreds of characters on widescreen monitors without a comfortable prose reading boundary.
+    </p>
+
+    <!-- Defect: A11Y-PHL-01 input with placeholder only, no label -->
+    <input type="text" placeholder="Enter your email address">
+    <button class="tiny-btn">Go</button>
+
+    <div class="user-info">
+      <!-- Defect: PROD-UNDEF-01 unhandled undefined literal -->
+      Logged in as: <span>undefined</span>
+    </div>
+  </main>
+</body>
+</html>
