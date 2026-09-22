@@ -462,6 +462,9 @@ export default function ReportPage() {
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
                     <span className="font-bold text-red-400">BEFORE (CURRENT DEFECTS)</span>
+                    <span className="hidden sm:inline-block text-[10px] font-mono bg-red-500/10 text-red-400 px-2 py-0.5 rounded border border-red-500/20">
+                      Defects Highlighted
+                    </span>
                   </div>
                   <span className="font-mono text-[11px] text-gray-400 truncate max-w-[200px]">
                     {report.normalized_domain}
@@ -484,6 +487,9 @@ export default function ReportPage() {
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                     <span className="font-bold text-emerald-400">AFTER (REMEDIATION INJECTED)</span>
+                    <span className="hidden sm:inline-block text-[10px] font-mono bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">
+                      Clean Remediated
+                    </span>
                   </div>
                   <span className="font-mono text-[11px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                     Live Patched
