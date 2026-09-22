@@ -21,6 +21,10 @@ import {
   ListChecks,
   Search,
   Sparkles,
+  ChevronUp,
+  ArrowDown,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import { AUDIT_CATALOG_200, CatalogCheck } from '@/lib/catalogData';
 
@@ -100,6 +104,7 @@ export default function ReportPage() {
   const [showCatalog, setShowCatalog] = useState(false);
   const [catalogTab, setCatalogTab] = useState<string>('ALL');
   const [catalogSearch, setCatalogSearch] = useState('');
+  const [promptExpanded, setPromptExpanded] = useState(false);
 
   useEffect(() => {
     if (!scanId) return;
@@ -393,7 +398,7 @@ export default function ReportPage() {
       <div className="bg-[#111827] p-6 rounded-2xl border border-emerald-500/30 mb-8 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
               <Terminal className="w-5 h-5" />
             </div>
             <div>
@@ -401,21 +406,71 @@ export default function ReportPage() {
               <p className="text-xs text-gray-400">Bundles all findings in priority order for Cursor, Claude Code, and Antigravity.</p>
             </div>
           </div>
-          <button
-            onClick={copyMasterPrompt}
-            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl text-xs transition flex items-center justify-center gap-2 self-start sm:self-auto"
-          >
-            {copiedMaster ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            {copiedMaster ? 'Copied to Clipboard!' : 'Copy Master Fix Prompt'}
-          </button>
+          <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={() => setPromptExpanded(!promptExpanded)}
+              className="px-3 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 rounded-xl text-xs font-medium transition flex items-center gap-1.5"
+              title={promptExpanded ? 'Collapse prompt height' : 'Expand full prompt'}
+            >
+              {promptExpanded ? <Minimize2 className="w-3.5 h-3.5 text-emerald-400" /> : <Maximize2 className="w-3.5 h-3.5 text-emerald-400" />}
+              <span>{promptExpanded ? 'Collapse' : 'Expand Prompt'}</span>
+            </button>
+            <button
+              onClick={copyMasterPrompt}
+              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl text-xs transition flex items-center justify-center gap-2"
+            >
+              {copiedMaster ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copiedMaster ? 'Copied to Clipboard!' : 'Copy Master Fix Prompt'}
+            </button>
+          </div>
         </div>
-        <div className="bg-gray-950 p-4 rounded-xl font-mono text-xs text-gray-300 max-h-48 overflow-y-auto border border-gray-800 select-all whitespace-pre-wrap">
-          {report.master_prompt}
+
+        <div className="relative">
+          <div
+            id="master-prompt-codebox"
+            tabIndex={0}
+            className={`bg-gray-950 p-4 rounded-xl font-mono text-xs text-gray-300 border border-gray-800 select-all whitespace-pre-wrap transition-all duration-300 focus:outline-none focus:border-emerald-500/50 ${
+              promptExpanded
+                ? 'max-h-[750px] overflow-y-auto'
+                : 'max-h-56 overflow-y-auto overscroll-contain'
+            }`}
+            style={{ overscrollBehavior: 'auto' }}
+          >
+            {report.master_prompt}
+          </div>
+
+          {/* Quick jump & collapse bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2 mt-3 pt-2.5 border-t border-gray-800/80 text-xs">
+            <span className="text-[11px] text-gray-400 font-mono">
+              {report.master_prompt ? report.master_prompt.split('\n').length : 0} lines • {promptExpanded ? 'Full expanded view' : 'Preview view'}
+            </span>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setPromptExpanded(!promptExpanded)}
+                className="text-emerald-400 hover:text-emerald-300 font-medium inline-flex items-center gap-1 transition text-xs"
+              >
+                {promptExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                {promptExpanded ? 'Collapse height' : 'Expand full prompt'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  document.getElementById('findings-section')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="text-gray-400 hover:text-gray-200 inline-flex items-center gap-1 transition text-xs"
+              >
+                <ArrowDown className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Jump to Findings</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Issues Section */}
-      <div className="mb-12">
+      <div id="findings-section" className="mb-12 scroll-mt-24">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h2 className="text-2xl font-bold text-white">Actionable Findings ({report.issues.length})</h2>
