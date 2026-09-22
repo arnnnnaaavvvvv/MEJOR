@@ -120,6 +120,17 @@ export default function ReportPage() {
   const [previewMode, setPreviewMode] = useState<'split' | 'before' | 'after' | 'snaps'>('split');
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [previewKey, setPreviewKey] = useState(0);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFullScreen) {
+        setIsFullScreen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullScreen]);
 
   useEffect(() => {
     if (!scanId) return;
@@ -293,14 +304,21 @@ export default function ReportPage() {
 
       {/* Live Interactive Project Preview: Before & After Fixes */}
       {showLivePreview && (
-        <div className="bg-[#111827] border border-emerald-500/40 rounded-2xl p-5 sm:p-6 my-8 shadow-2xl">
+        <div
+          id="preview-comparison-section"
+          className={
+            isFullScreen
+              ? 'fixed inset-0 z-50 bg-[#070b14] p-4 sm:p-6 flex flex-col w-screen h-screen overflow-hidden'
+              : 'bg-[#111827] border border-emerald-500/40 rounded-2xl p-5 sm:p-6 my-8 shadow-2xl relative'
+          }
+        >
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-gray-800">
             <div>
               <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 mb-2">
                 <Sparkles className="w-3.5 h-3.5" /> Interactive Sandbox & Live Patches
               </div>
               <h2 className="text-xl font-bold text-white tracking-tight">
-                Live Project Preview: Before & After Fixes
+                {isFullScreen ? 'Full Screen Comparison: Before & After Fixes' : 'Live Project Preview: Before & After Fixes'}
               </h2>
               <p className="text-xs text-gray-400 mt-0.5">
                 Interact live with your real website. Click, scroll, and feel how your project behaves before and after fixes are applied.
@@ -377,11 +395,74 @@ export default function ReportPage() {
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
+
+              {/* Full Screen Comparison Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setIsFullScreen(!isFullScreen)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow ${
+                  isFullScreen
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
+                    : 'bg-blue-600/20 text-blue-300 border border-blue-500/40 hover:bg-blue-600/30'
+                }`}
+                title={isFullScreen ? 'Exit Full Screen (ESC)' : 'Open Full Screen Comparison View'}
+              >
+                {isFullScreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                <span>{isFullScreen ? 'Exit Full Screen' : 'Full Screen View'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* All Detected Changes Radar Bar */}
+          <div className="bg-gray-950/80 rounded-xl border border-gray-800 p-3 my-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="text-xs font-bold text-white uppercase tracking-wider">
+                  All Detected Audit Findings & Live Remediations ({report.issues.length} Changes Active)
+                </span>
+              </div>
+              <span className="text-[10px] text-gray-400 font-mono">
+                🔴 Before: Defects Highlighted in Red &nbsp;|&nbsp; 🟢 After: Clean Remediations Applied
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+              {report.issues.map((iss) => (
+                <div
+                  key={iss.id}
+                  className="bg-gray-900/90 p-2.5 rounded-lg border border-gray-800 text-[11px] flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <span className="font-mono text-emerald-400 font-bold text-[10px]">
+                        {iss.check_id}
+                      </span>
+                      <span className="text-[9px] text-gray-500 uppercase font-semibold">
+                        {iss.layer} • Tier {iss.tier}
+                      </span>
+                    </div>
+                    <div className="font-semibold text-gray-200 line-clamp-1 mb-1 text-xs">
+                      {iss.title}
+                    </div>
+                  </div>
+                  <div className="space-y-1 mt-1.5 pt-1.5 border-t border-gray-800 text-[10px]">
+                    <div className="text-red-400 flex items-start gap-1">
+                      <span className="shrink-0 font-bold">🔴 Defect:</span>
+                      <span className="truncate text-gray-400">{iss.problem}</span>
+                    </div>
+                    <div className="text-emerald-400 flex items-start gap-1 font-medium">
+                      <span className="shrink-0 font-bold">🟢 Fixed:</span>
+                      <span className="truncate text-emerald-300">{iss.fix_goal}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Active Remediation Pill List */}
-          <div className="flex flex-wrap items-center justify-between gap-2 my-3 text-[11px]">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3 text-[11px]">
             <div className="flex flex-wrap items-center gap-1.5 text-gray-400">
               <span className="font-semibold text-gray-300">Live Remediation Active:</span>
               <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
@@ -405,57 +486,111 @@ export default function ReportPage() {
 
           {/* Canvas Section */}
           {previewMode === 'snaps' ? (
-            /* Real Snaps Gallery Comparison */
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div className="bg-gray-950 rounded-xl border border-red-500/30 p-4">
-                <div className="flex items-center justify-between mb-3">
+            /* Real Snaps Gallery: Showcase ALL Changes Side-by-Side */
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 overflow-y-auto" style={{ maxHeight: isFullScreen ? 'calc(100vh - 220px)' : '650px' }}>
+              {/* Snap: Before */}
+              <div className="bg-gray-950 rounded-xl border border-red-500/30 p-4 space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-gray-800">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
                     <span className="text-xs font-bold text-red-400 uppercase tracking-wider">Snap: Before Fixes (Defects Present)</span>
                   </div>
-                  <span className="text-[10px] font-mono text-gray-500">3 Defects Flagged</span>
+                  <span className="text-[10px] font-mono bg-red-500/10 text-red-400 px-2 py-0.5 rounded border border-red-500/20">
+                    All Defects Highlighted in Red
+                  </span>
                 </div>
-                <div className="relative bg-gray-900/90 rounded-lg p-6 border border-gray-800 text-center min-h-[260px] flex flex-col items-center justify-center">
-                  <div className="absolute top-3 left-3 text-[10px] font-mono bg-red-500/20 text-red-400 px-2 py-0.5 rounded border border-red-500/30">
-                    Defect: Tap target 24px &lt; 44px
-                  </div>
-                  <div className="text-sm font-bold text-gray-200 mb-1">{report.normalized_domain}</div>
-                  <div className="text-xs text-gray-500 mb-4 max-w-sm">
-                    Low contrast text (#9ca3af on light/dark), cramped mobile buttons, layout-inducing animation reflows.
-                  </div>
-                  <button className="w-6 h-6 bg-blue-600 text-[10px] text-white rounded flex items-center justify-center border border-red-400 shadow-md animate-pulse">
+
+                {/* 1. Touch Target */}
+                <div className="bg-gray-900/90 rounded-lg p-3 border border-red-500/30">
+                  <div className="text-[11px] font-mono text-red-400 font-bold mb-1">1. [MOBI-TAP-01] Undersized Touch Target</div>
+                  <p className="text-xs text-gray-400 mb-2">Button restricted to 24px width/height, failing touch ergonomics.</p>
+                  <button className="w-6 h-6 bg-blue-600 text-[10px] text-white rounded flex items-center justify-center border-2 border-dashed border-red-400 shadow animate-pulse">
                     Go
                   </button>
-                  <span className="text-[10px] text-red-400 font-mono mt-2">↑ 24x24px button (Fails WCAG 2.5.5)</span>
+                  <span className="text-[10px] text-red-400 font-mono mt-1 block">↑ 24x24px button (Fails WCAG 2.5.5)</span>
+                </div>
+
+                {/* 2. Leaked Localhost URL */}
+                <div className="bg-gray-900/90 rounded-lg p-3 border border-red-500/30">
+                  <div className="text-[11px] font-mono text-red-400 font-bold mb-1">2. [PROD-LEAK-01] Production URL Leak</div>
+                  <p className="text-xs text-gray-400 mb-1">Hardcoded development URL found in anchor reference:</p>
+                  <code className="text-xs text-red-300 bg-red-950/40 p-1.5 rounded border border-red-500/30 block">
+                    http://localhost:8080/dev/portal
+                  </code>
+                </div>
+
+                {/* 3. Literal Undefined */}
+                <div className="bg-gray-900/90 rounded-lg p-3 border border-red-500/30">
+                  <div className="text-[11px] font-mono text-red-400 font-bold mb-1">3. [PROD-UNDEF-01] Literal 'undefined' Rendered</div>
+                  <p className="text-xs text-gray-400 mb-1">User identity node displays unhandled literal string:</p>
+                  <div className="text-xs bg-black/40 p-2 rounded border border-red-500/30">
+                    Account: <span className="text-red-400 font-mono font-bold bg-red-500/10 px-1 border border-red-400">undefined</span>
+                  </div>
+                </div>
+
+                {/* 4. Animation Jank */}
+                <div className="bg-gray-900/90 rounded-lg p-3 border border-red-500/30">
+                  <div className="text-[11px] font-mono text-red-400 font-bold mb-1">4. [PERF-PROP-01] Layout-Triggering Motion</div>
+                  <p className="text-xs text-gray-400 mb-2">CSS transition modifies layout width, causing main-thread reflow:</p>
+                  <div className="w-3/4 h-7 bg-blue-700/60 rounded border-2 border-dashed border-red-400 flex items-center justify-center text-[10px] text-red-300 font-mono">
+                    transition: width 0.3s ease;
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-gray-950 rounded-xl border border-emerald-500/40 p-4">
-                <div className="flex items-center justify-between mb-3">
+              {/* Snap: After */}
+              <div className="bg-gray-950 rounded-xl border border-emerald-500/40 p-4 space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-gray-800">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
                     <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Snap: After Fixes Applied (Remediated)</span>
                   </div>
-                  <span className="text-[10px] font-mono text-emerald-400">100% Passed</span>
+                  <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">
+                    All Remediations Cleanly Active
+                  </span>
                 </div>
-                <div className="relative bg-gray-900/90 rounded-lg p-6 border border-gray-800 text-center min-h-[260px] flex flex-col items-center justify-center">
-                  <div className="absolute top-3 left-3 text-[10px] font-mono bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30">
-                    Verified: 44x44px Touch Boundary + GPU Motion
-                  </div>
-                  <div className="text-sm font-bold text-white mb-1">{report.normalized_domain}</div>
-                  <div className="text-xs text-gray-300 mb-4 max-w-sm">
-                    High contrast text (#ffffff / #e5e7eb), 44px ergonomic touch bounds, GPU-accelerated 60fps animation.
-                  </div>
-                  <button className="min-w-[120px] min-h-[44px] px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white rounded-xl shadow-lg border border-emerald-400 transition transform hover:scale-105">
+
+                {/* 1. Touch Target Remediated */}
+                <div className="bg-gray-900/90 rounded-lg p-3 border border-emerald-500/30">
+                  <div className="text-[11px] font-mono text-emerald-400 font-bold mb-1">1. [MOBI-TAP-01] 44x44px Ergonomic Touch Target</div>
+                  <p className="text-xs text-gray-300 mb-2">Expanded to satisfy Apple HIG and Google Material guidelines.</p>
+                  <button className="min-w-[120px] min-h-[44px] px-4 py-2 bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white rounded-xl shadow border border-emerald-400/50 transition transform hover:scale-105">
                     Click Me (44px)
                   </button>
-                  <span className="text-[10px] text-emerald-400 font-mono mt-2">✓ 44px ergonomic touch boundary</span>
+                  <span className="text-[10px] text-emerald-400 font-mono mt-1 block">✓ 44x44px ergonomic touch bounds</span>
+                </div>
+
+                {/* 2. Leaked Localhost Remediated */}
+                <div className="bg-gray-900/90 rounded-lg p-3 border border-emerald-500/30">
+                  <div className="text-[11px] font-mono text-emerald-400 font-bold mb-1">2. [PROD-LEAK-01] Environment Variable Protected</div>
+                  <p className="text-xs text-gray-300 mb-1">Properly routed to validated production endpoint:</p>
+                  <code className="text-xs text-emerald-300 bg-emerald-950/40 p-1.5 rounded border border-emerald-500/30 block">
+                    https://api.vibe-saas-example.dev/portal
+                  </code>
+                </div>
+
+                {/* 3. Literal Undefined Remediated */}
+                <div className="bg-gray-900/90 rounded-lg p-3 border border-emerald-500/30">
+                  <div className="text-[11px] font-mono text-emerald-400 font-bold mb-1">3. [PROD-UNDEF-01] Nullish Coalescing Fallback</div>
+                  <p className="text-xs text-gray-300 mb-1">Guarded with safe fallback interpolation:</p>
+                  <div className="text-xs bg-black/40 p-2 rounded border border-emerald-500/30">
+                    Account: <span className="text-emerald-400 font-mono font-bold">Alex Morgan (Pro Member)</span>
+                  </div>
+                </div>
+
+                {/* 4. Animation Jank Remediated */}
+                <div className="bg-gray-900/90 rounded-lg p-3 border border-emerald-500/30">
+                  <div className="text-[11px] font-mono text-emerald-400 font-bold mb-1">4. [PERF-PROP-01] 60 FPS GPU Composited Transform</div>
+                  <p className="text-xs text-gray-300 mb-2">Offloaded to GPU compositor thread without triggering layout:</p>
+                  <div className="w-full h-7 bg-blue-600 rounded border border-emerald-400 flex items-center justify-center text-[10px] text-emerald-200 font-mono">
+                    transform: scaleX(1); will-change: transform;
+                  </div>
                 </div>
               </div>
             </div>
           ) : previewMode === 'split' ? (
             /* Split Screen: Side-by-side interactive iframes */
-            <div className={`grid grid-cols-1 ${previewDevice === 'mobile' ? 'md:grid-cols-2 max-w-3xl mx-auto' : 'lg:grid-cols-2'} gap-4 mt-4`}>
+            <div className={`grid grid-cols-1 ${previewDevice === 'mobile' ? 'md:grid-cols-2 max-w-3xl mx-auto' : 'lg:grid-cols-2'} gap-4 mt-2 flex-1`}>
               {/* Before Window */}
               <div className="bg-gray-950 rounded-xl border border-red-500/30 overflow-hidden shadow-xl flex flex-col">
                 <div className="bg-gray-900 px-4 py-2 border-b border-gray-800 flex items-center justify-between text-xs">
@@ -470,7 +605,16 @@ export default function ReportPage() {
                     {report.normalized_domain}
                   </span>
                 </div>
-                <div className="relative bg-white flex-1 overflow-hidden" style={{ height: previewDevice === 'mobile' ? '560px' : '480px' }}>
+                <div
+                  className="relative bg-white flex-1 overflow-hidden"
+                  style={{
+                    height: isFullScreen
+                      ? 'calc(100vh - 240px)'
+                      : previewDevice === 'mobile'
+                      ? '600px'
+                      : '520px',
+                  }}
+                >
                   <iframe
                     key={`before-${previewKey}`}
                     src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=original&url=${encodeURIComponent(report.target_url)}`}
@@ -495,7 +639,16 @@ export default function ReportPage() {
                     Live Patched
                   </span>
                 </div>
-                <div className="relative bg-white flex-1 overflow-hidden" style={{ height: previewDevice === 'mobile' ? '560px' : '480px' }}>
+                <div
+                  className="relative bg-white flex-1 overflow-hidden"
+                  style={{
+                    height: isFullScreen
+                      ? 'calc(100vh - 240px)'
+                      : previewDevice === 'mobile'
+                      ? '600px'
+                      : '520px',
+                  }}
+                >
                   <iframe
                     key={`after-${previewKey}`}
                     src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=patched&url=${encodeURIComponent(report.target_url)}`}
@@ -508,28 +661,35 @@ export default function ReportPage() {
             </div>
           ) : (
             /* Single Full-width Window (Before or After) */
-            <div className={`mt-4 ${previewDevice === 'mobile' ? 'max-w-md mx-auto' : 'w-full'}`}>
+            <div className={`mt-2 flex-1 ${previewDevice === 'mobile' ? 'max-w-md mx-auto' : 'w-full'}`}>
               <div className={`bg-gray-950 rounded-xl border ${
                 previewMode === 'after' ? 'border-emerald-500/40' : 'border-red-500/30'
-              } overflow-hidden shadow-2xl flex flex-col`}>
+              } overflow-hidden shadow-2xl flex flex-col h-full`}>
                 <div className="bg-gray-900 px-4 py-2.5 border-b border-gray-800 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className={`w-2.5 h-2.5 rounded-full ${previewMode === 'after' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
                     <span className={`font-bold ${previewMode === 'after' ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {previewMode === 'after' ? 'LIVE PATCHED PREVIEW (REMEDIATION APPLIED)' : 'ORIGINAL SITE PREVIEW (BEFORE FIXES)'}
+                      {previewMode === 'after' ? 'LIVE PATCHED PREVIEW (ALL REMEDIATIONS APPLIED - CLEAN)' : 'ORIGINAL SITE PREVIEW (ALL DEFECTS HIGHLIGHTED IN RED)'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[11px] text-gray-400 bg-gray-950 px-2.5 py-0.5 rounded border border-gray-800">
-                      https://{report.normalized_domain}
-                    </span>
-                  </div>
+                  <span className="font-mono text-[11px] text-gray-400">
+                    {report.normalized_domain}
+                  </span>
                 </div>
-                <div className="relative bg-white" style={{ height: previewDevice === 'mobile' ? '600px' : '520px' }}>
+                <div
+                  className="relative bg-white flex-1 overflow-hidden"
+                  style={{
+                    height: isFullScreen
+                      ? 'calc(100vh - 240px)'
+                      : previewDevice === 'mobile'
+                      ? '620px'
+                      : '540px',
+                  }}
+                >
                   <iframe
-                    key={`${previewMode}-${previewKey}`}
+                    key={`single-${previewMode}-${previewKey}`}
                     src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=${previewMode === 'after' ? 'patched' : 'original'}&url=${encodeURIComponent(report.target_url)}`}
-                    title={`Site Preview ${previewMode}`}
+                    title="Site Preview Single View"
                     className="w-full h-full border-0"
                     sandbox="allow-scripts allow-same-origin"
                   />
