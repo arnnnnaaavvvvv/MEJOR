@@ -27,6 +27,7 @@ import {
   Minimize2,
 } from 'lucide-react';
 import { AUDIT_CATALOG_200, CatalogCheck } from '@/lib/catalogData';
+import { generateWebsiteFeedback } from '@/lib/feedback';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -269,22 +270,110 @@ export default function ReportPage() {
           </div>
         </div>
 
-        <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-          {Object.entries(report.layer_scores).map(([layer, score]) => (
-            <div key={layer} className="bg-[#111827] p-4 rounded-xl border border-gray-800 flex flex-col justify-between">
-              <span className="text-xs text-gray-400 font-medium">{layer}</span>
-              <div className="text-2xl font-bold text-white my-2">{score}</div>
-              <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                <div
-                  className={`h-full ${
-                    score >= 90 ? 'bg-emerald-400' : score >= 70 ? 'bg-blue-400' : 'bg-amber-400'
-                  }`}
-                  style={{ width: `${score}%` }}
-                />
+        {/* Website Score-Dependent Feedback & Diagnostic Panel */}
+        {(() => {
+          const siteFeedback = generateWebsiteFeedback(
+            report.overall_score,
+            report.grade,
+            report.layer_scores,
+            report.issues,
+            report.normalized_domain
+          );
+
+          return (
+            <div className="lg:col-span-3 bg-[#111827] p-5 sm:p-6 rounded-2xl border border-gray-800 flex flex-col justify-between shadow-xl">
+              {/* Executive Diagnosis Header */}
+              <div className="border-b border-gray-800/80 pb-4 mb-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                      siteFeedback.statusTheme === 'emerald'
+                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                        : siteFeedback.statusTheme === 'blue'
+                        ? 'bg-blue-500/15 text-blue-400 border-blue-500/30'
+                        : siteFeedback.statusTheme === 'amber'
+                        ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                        : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+                    }`}>
+                      {siteFeedback.gradeBadge} Assessment
+                    </span>
+                    <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
+                      {siteFeedback.verdictTitle}
+                    </h3>
+                  </div>
+                </div>
+
+                <p className="text-xs sm:text-sm text-gray-300 leading-relaxed mb-3">
+                  {siteFeedback.verdictDescription}
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <div className="bg-gray-900/90 p-2.5 rounded-xl border border-gray-800 flex items-start gap-2">
+                    <span className="text-emerald-400 font-bold text-[10px] uppercase tracking-wider shrink-0 mt-0.5">Top Strength:</span>
+                    <span className="text-gray-300 text-[11px] leading-snug">{siteFeedback.strength}</span>
+                  </div>
+                  <div className="bg-gray-900/90 p-2.5 rounded-xl border border-gray-800 flex items-start gap-2">
+                    <span className="text-blue-400 font-bold text-[10px] uppercase tracking-wider shrink-0 mt-0.5">Primary Fix:</span>
+                    <span className="text-gray-300 text-[11px] leading-snug">{siteFeedback.primaryFix}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pillar-by-Pillar Diagnostic Feedback */}
+              <div>
+                <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
+                  Pillar-by-Pillar Qualitative Feedback
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5">
+                  {siteFeedback.layers.map((layer) => (
+                    <div
+                      key={layer.name}
+                      className="bg-gray-900/70 p-3 rounded-xl border border-gray-800 hover:border-gray-700 transition flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-1 mb-1.5">
+                          <span className="text-xs font-bold text-white">{layer.name}</span>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${
+                            layer.status === 'EXCELLENT'
+                              ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                              : layer.status === 'GOOD'
+                              ? 'bg-blue-500/15 text-blue-400 border-blue-500/30'
+                              : layer.status === 'NEEDS_WORK'
+                              ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                              : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+                          }`}>
+                            {layer.score}
+                          </span>
+                        </div>
+
+                        <p className="text-[11px] text-gray-400 leading-snug mb-2">
+                          {layer.summary}
+                        </p>
+                      </div>
+
+                      <div className="mt-auto pt-2 border-t border-gray-800/60">
+                        <div className="flex items-center justify-between text-[10px] mb-1">
+                          <span className="text-gray-500 font-medium">{layer.statusLabel}</span>
+                          <span className={layer.issueCount === 0 ? 'text-emerald-400 font-medium' : 'text-amber-400 font-semibold'}>
+                            {layer.issueCount === 0 ? '0 issues' : `${layer.issueCount} ${layer.issueCount === 1 ? 'issue' : 'issues'}`}
+                          </span>
+                        </div>
+                        <div className="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full ${
+                              layer.score >= 90 ? 'bg-emerald-400' : layer.score >= 70 ? 'bg-blue-400' : 'bg-amber-400'
+                            }`}
+                            style={{ width: `${layer.score}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          ))}
-        </div>
+          );
+        })()}
       </div>
 
       {/* 200-Check Standard Quality Catalog Drawer */}
