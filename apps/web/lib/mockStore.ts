@@ -106,10 +106,31 @@ const demoBase: StoredScan = {
       acceptance_check: "Text must not render 'undefined'.",
       fix_prompt: "### AI FIX PROMPT: [PROD-UNDEF-01]\nGuard username interpolation with ?? 'Guest'.",
     },
+    {
+      id: 'iss_demo_05',
+      check_id: 'PERF-PROP-01',
+      layer: 'Polish',
+      severity: 'MAJOR',
+      confidence: 'HIGH',
+      tier: 'A',
+      title: 'Layout-Triggering Animation on Width Property',
+      problem: 'Element transitions width property causing continuous layout recalculation and frame drops.',
+      evidence: {
+        measured_values: { animated_property: 'width', duration: '0.3s', easing: 'ease', value: '100%' },
+        expected_values: { use_composite: true },
+      },
+      location: { selector: '.animated-box' },
+      fix_goal: 'Refactor width transition to transform: scaleX() or composite property with will-change.',
+      constraints: ['Preserve animation timing', 'Avoid layout thrashing'],
+      acceptance_check: 'Element animates exclusively using CSS transform / opacity.',
+      fix_prompt: '### AI FIX PROMPT: [PERF-PROP-01]\nReplace width transition with transform: scaleX().\n\n#### 4. Verified Working CSS Patch\n```css\n.animated-box {\n  transition: transform 0.3s ease 0s !important;\n  will-change: transform !important;\n  transform-origin: left center !important;\n  transform: scaleX(var(--target-scale-x, 1)) !important;\n}\n```',
+      patchable: true,
+      verified_patch_css: `.animated-box {\n  transition: transform 0.3s ease 0s !important;\n  will-change: transform !important;\n  transform-origin: left center !important;\n  transform: scaleX(var(--target-scale-x, 1)) !important;\n}`,
+    },
   ],
   master_prompt: `# MASTER ARCHITECTURAL REMEDIATION PLAN
 Target: https://vibe-saas-example.dev
-Total Issues: 3 (Critical: 3, Major: 0, Minor: 0)
+Total Issues: 4 (Critical: 3, Major: 1, Minor: 0)
 
 1. [MOBI-TAP-01] Undersized Mobile Tap Target (<44x44px)
    - Target Selector: button.tiny-btn
@@ -119,7 +140,10 @@ Total Issues: 3 (Critical: 3, Major: 0, Minor: 0)
    - Goal: Replace hardcoded localhost URL with process.env.NEXT_PUBLIC_PORTAL_URL.
 3. [PROD-UNDEF-01] Literal 'undefined' Rendered to User
    - Target Selector: div.user-info span
-   - Goal: Add nullish coalescing: user?.username ?? 'Guest'.`,
+   - Goal: Add nullish coalescing: user?.username ?? 'Guest'.
+4. [PERF-PROP-01] Layout-Triggering Animation on Width Property
+   - Target Selector: .animated-box
+   - Goal: Refactor width transition to transform: scaleX() with will-change.`,
   share_token: 'demo-share-token-12345',
   created_at: new Date().toISOString(),
   completed_at: new Date().toISOString(),

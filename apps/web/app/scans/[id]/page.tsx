@@ -30,6 +30,9 @@ import {
   Laptop,
   Columns,
   RotateCcw,
+  Download,
+  Activity,
+  FileCode,
 } from 'lucide-react';
 import { AUDIT_CATALOG_200, CatalogCheck } from '@/lib/catalogData';
 import { generateWebsiteFeedback } from '@/lib/feedback';
@@ -59,6 +62,8 @@ interface Issue {
   constraints: string[];
   acceptance_check: string;
   fix_prompt?: string;
+  patchable?: boolean;
+  verified_patch_css?: string;
 }
 
 interface ScanReport {
@@ -144,6 +149,34 @@ export default function ReportPage() {
     navigator.clipboard.writeText(report.master_prompt);
     setCopiedMaster(true);
     setTimeout(() => setCopiedMaster(false), 2000);
+  };
+
+  // Live Patch Preview states per issue
+  const [patchLoading, setPatchLoading] = useState<Record<string, boolean>>({});
+  const [patchResults, setPatchResults] = useState<Record<string, any>>({});
+  const [copiedCssId, setCopiedCssId] = useState<string | null>(null);
+
+  const handlePreviewPatch = async (issueId: string) => {
+    setPatchLoading((prev) => ({ ...prev, [issueId]: true }));
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/scans/${scanId}/issues/${issueId}/preview-patch`, {
+        method: 'POST',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPatchResults((prev) => ({ ...prev, [issueId]: data }));
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setPatchLoading((prev) => ({ ...prev, [issueId]: false }));
+    }
+  };
+
+  const copyCssPatch = (css: string, id: string) => {
+    navigator.clipboard.writeText(css);
+    setCopiedCssId(id);
+    setTimeout(() => setCopiedCssId(null), 2000);
   };
 
   const handleRescan = async () => {
@@ -895,6 +928,108 @@ export default function ReportPage() {
                     </button>
                   )}
                 </div>
+
+                {/* Live Patch Preview / Verified Optimization Section */}
+                {(() => {
+                  const pResult = patchResults[issue.id];
+                  const isPatching = patchLoading[issue.id];
+
+                  return (
+                    <div className="mt-4 pt-4 border-t border-gray-800/80">
+                      {pResult ? (
+                        pResult.applied ? (
+                          <div className="bg-emerald-950/20 border border-emerald-500/40 rounded-xl p-4 space-y-3">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <span className="p-1 rounded-md bg-emerald-500/20 text-emerald-400">
+                                  <CheckCircle2 className="w-4 h-4" />
+                                </span>
+                                <span className="text-xs font-bold text-emerald-300">
+                                  Live Browser Patch Verified: +{pResult.delta_fps} FPS Improvement
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[11px] font-mono">
+                                <span className="bg-gray-900 px-2 py-0.5 rounded text-gray-400 border border-gray-800">
+                                  {pResult.before_metrics?.avg_fps} FPS → <strong className="text-emerald-400">{pResult.after_metrics?.avg_fps} FPS</strong>
+                                </span>
+                                <span className="bg-gray-900 px-2 py-0.5 rounded text-gray-400 border border-gray-800">
+                                  Drops: {pResult.before_metrics?.dropped_frames} → <strong className="text-emerald-400">{pResult.after_metrics?.dropped_frames}</strong>
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="text-xs text-gray-300 leading-relaxed">
+                              Injected isolated CSS patch into the scanner&apos;s browser session. Real scrolling probe confirms layout thrashing is eliminated and animations now execute on the GPU compositor thread.
+                            </div>
+
+                            {pResult.patch_css && (
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between text-[11px] text-gray-400">
+                                  <span className="font-semibold flex items-center gap-1">
+                                    <FileCode className="w-3.5 h-3.5 text-emerald-400" />
+                                    Verified CSS Patch (Zero Source Code Modified)
+                                  </span>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => copyCssPatch(pResult.patch_css, issue.id)}
+                                      className="text-xs px-2.5 py-1 rounded-md bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 transition flex items-center gap-1 font-medium"
+                                    >
+                                      {copiedCssId === issue.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                                      <span>{copiedCssId === issue.id ? 'Copied' : 'Copy CSS'}</span>
+                                    </button>
+                                    <a
+                                      href={`${API_BASE}/api/v1/scans/${scanId}/patches/${issue.id}/export`}
+                                      download={`patch_${issue.id}.css`}
+                                      className="text-xs px-2.5 py-1 rounded-md bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 transition flex items-center gap-1 font-medium"
+                                    >
+                                      <Download className="w-3.5 h-3.5" />
+                                      <span>Download .css</span>
+                                    </a>
+                                  </div>
+                                </div>
+                                <pre className="bg-black/60 p-3 rounded-lg border border-emerald-500/20 font-mono text-xs text-emerald-200 overflow-x-auto">
+                                  {pResult.patch_css}
+                                </pre>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="bg-amber-950/20 border border-amber-500/30 rounded-xl p-3.5 flex items-start gap-2.5 text-xs">
+                            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                            <div>
+                              <span className="font-bold text-amber-300">Live Patch Refused / Skipped: </span>
+                              <span className="text-gray-300">{pResult.reason_if_skipped}</span>
+                              <p className="text-gray-400 text-[11px] mt-1">
+                                This issue cannot be safely hot-patched via pure CSS injection without risking sibling element layout shifts or overriding JavaScript state. Use the AI Fix Prompt above in your IDE.
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      ) : (
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+                            <span>Prove and measure performance improvement in live browser session:</span>
+                          </div>
+                          <button
+                            type="button"
+                            disabled={isPatching}
+                            onClick={() => handlePreviewPatch(issue.id)}
+                            className="px-3 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 disabled:opacity-50"
+                          >
+                            {isPatching ? (
+                              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Activity className="w-3.5 h-3.5 text-emerald-400" />
+                            )}
+                            <span>{isPatching ? 'Measuring in Live Browser...' : 'Preview Live Fix & Measure'}</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             ))
           )}

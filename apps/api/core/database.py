@@ -78,6 +78,8 @@ class IssueModel(Base):
     constraints: Mapped[List[str]] = mapped_column(JSON, default=list)
     acceptance_check: Mapped[str] = mapped_column(Text, nullable=False)
     fix_prompt: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    patchable: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    verified_patch_css: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     scan = relationship("ScanModel", back_populates="issues")

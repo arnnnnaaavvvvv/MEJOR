@@ -48,6 +48,8 @@ class Issue(BaseModel):
     constraints: List[str] = Field(default_factory=list)
     acceptance_check: str
     fix_prompt: Optional[str] = None
+    patchable: Optional[bool] = None
+    verified_patch_css: Optional[str] = None
 
 class ManualCheckItem(BaseModel):
     id: str
@@ -118,3 +120,33 @@ class DiffReport(BaseModel):
     resolved_issues: List[Issue]
     persistent_issues: List[Issue]
     new_issues: List[Issue]
+
+class PatchSet(BaseModel):
+    css: str
+    target_selectors: List[str] = Field(default_factory=list)
+    patch_type: str = "animation-transform-rewrite"
+    reversible: bool = True
+    patchable: bool = True
+    reason: Optional[str] = None
+
+class PerformanceMetrics(BaseModel):
+    avg_fps: float
+    p95_frame_time_ms: float
+    dropped_frames: int
+    longtask_total_ms: float
+
+class PatchResult(BaseModel):
+    issue_id: str
+    scan_id: str
+    patchable: bool = True
+    applied: bool = False
+    reason_if_skipped: Optional[str] = None
+    patch_css: str = ""
+    target_selectors: List[str] = Field(default_factory=list)
+    before_metrics: Optional[PerformanceMetrics] = None
+    after_metrics: Optional[PerformanceMetrics] = None
+    before_clip_url: Optional[str] = None
+    after_clip_url: Optional[str] = None
+    delta_fps: Optional[float] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+

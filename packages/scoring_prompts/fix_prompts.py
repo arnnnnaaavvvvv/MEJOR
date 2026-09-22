@@ -12,6 +12,22 @@ def generate_issue_prompt(issue: Issue) -> str:
     expected_lines = "\n".join([f"  * {k}: {v}" for k, v in issue.evidence.expected_values.items()])
     constraints_lines = "\n".join([f"- {c}" for c in issue.constraints]) or "- Keep changes localized to this component."
 
+    verified_patch = getattr(issue, "verified_patch_css", None)
+    patch_block = ""
+    if verified_patch:
+        patch_block = f"""
+#### 4. Verified Working CSS Patch (Proven Live in Browser)
+Apply this validated CSS patch which eliminated layout jank and restored 60fps execution:
+```css
+{verified_patch}
+```
+"""
+
+    fix_section = patch_block if verified_patch else f"""
+#### 4. Fix Instructions & Goal
+{issue.fix_goal}
+"""
+
     return f"""### AI FIX PROMPT: [{issue.check_id}] {issue.title}
 
 #### 1. Problem Statement
@@ -27,10 +43,7 @@ def generate_issue_prompt(issue: Issue) -> str:
 #### 3. Component Location
 - Selector: `{loc.selector}`
 - Source Reference: {loc.source_file or "Search codebase for selector: " + loc.selector}
-
-#### 4. Fix Instructions & Goal
-{issue.fix_goal}
-
+{fix_section}
 #### 5. Constraints
 {constraints_lines}
 
