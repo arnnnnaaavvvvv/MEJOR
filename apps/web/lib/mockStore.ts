@@ -57,93 +57,99 @@ const demoBase: StoredScan = {
       confidence: 'HIGH',
       tier: 'A',
       title: 'Undersized Mobile Tap Target (<44x44px)',
-      problem: 'CTA button has a touch bounding box of 24x24px, failing mobile touch target ergonomics.',
+      problem: 'Interactive action controls on vibe-saas-example.dev measure below the 44×44px minimum touch boundary on viewport width 390px.',
       evidence: {
-        measured_values: { width: 24, height: 24 },
+        measured_values: { width: 32, height: 32, viewport_tested: '390x844' },
         expected_values: { min_width: 44, min_height: 44 },
       },
-      location: { selector: 'button.tiny-btn', bounding_box: { x: 20, y: 140, width: 24, height: 24 } },
-      fix_goal: 'Expand button padding or minimum hit dimension to 44px x 44px.',
-      constraints: ['Preserve visual font size'],
-      acceptance_check: 'Bounding box width and height must be >= 44px on viewports <= 768px.',
-      fix_prompt: '### AI FIX PROMPT: [MOBI-TAP-01]\nExpand button.tiny-btn padding to at least 44x44px.',
+      location: { selector: 'header button, nav a.cta-action, div.action-group button', bounding_box: { x: 280, y: 16, width: 32, height: 32 } },
+      fix_goal: 'Increase interactive padding or set minimum hit dimension to min-h-[44px] min-w-[44px].',
+      constraints: ['Preserve existing font size and layout alignment.'],
+      acceptance_check: 'Bounding box width and height must evaluate >= 44px on viewports <= 768px.',
+      fix_prompt: '### AI FIX PROMPT: [MOBI-TAP-01]\nAdd minimum touch target dimensions or increase padding: min-h-[44px] min-w-[44px].',
+      patchable: true,
+      verified_patch_css: `button, [role="button"], a.btn, .cta-action {\n  min-width: 44px !important;\n  min-height: 44px !important;\n  padding: 10px 18px !important;\n}`,
     },
     {
       id: 'iss_demo_02',
-      check_id: 'PROD-LEAK-01',
-      layer: 'Production',
-      severity: 'CRITICAL',
-      confidence: 'HIGH',
-      tier: 'A',
-      title: "Localhost URL Leaked in Production DOM",
-      problem: "Found hardcoded 'http://localhost:8080' in header dev portal link.",
-      evidence: {
-        measured_values: { leaked_url: 'http://localhost:8080/dev' },
-        expected_values: { relative_url: true },
-      },
-      location: { selector: 'header nav a[href*="localhost"]' },
-      fix_goal: 'Replace hardcoded localhost URL with process.env.NEXT_PUBLIC_PORTAL_URL.',
-      constraints: ['Keep anchor text intact'],
-      acceptance_check: 'No localhost strings in production markup.',
-      fix_prompt: '### AI FIX PROMPT: [PROD-LEAK-01]\nReplace http://localhost:8080 with environment variable.',
-    },
-    {
-      id: 'iss_demo_03',
-      check_id: 'PROD-UNDEF-01',
-      layer: 'Production',
-      severity: 'CRITICAL',
-      confidence: 'HIGH',
-      tier: 'A',
-      title: "Literal 'undefined' Rendered to User",
-      problem: "User status node displays unhandled 'undefined' string.",
-      evidence: {
-        measured_values: { rendered_literal: 'undefined' },
-        expected_values: { fallback: true },
-      },
-      location: { selector: 'div.user-info span' },
-      fix_goal: "Add nullish coalescing: user?.username ?? 'Guest'.",
-      constraints: ['Do not hide profile container'],
-      acceptance_check: "Text must not render 'undefined'.",
-      fix_prompt: "### AI FIX PROMPT: [PROD-UNDEF-01]\nGuard username interpolation with ?? 'Guest'.",
-    },
-    {
-      id: 'iss_demo_05',
-      check_id: 'PERF-PROP-01',
-      layer: 'Polish',
+      check_id: 'UI-CONTRAST-01',
+      layer: 'UI',
       severity: 'MAJOR',
       confidence: 'HIGH',
       tier: 'A',
-      title: 'Layout-Triggering Animation on Width Property',
-      problem: 'Element transitions width property causing continuous layout recalculation and frame drops.',
+      title: 'Low Subtitle & Badge Contrast Ratio (<4.5:1)',
+      problem: 'Secondary description copy and subtle badges on vibe-saas-example.dev have a calculated contrast ratio of 3.2:1 against light background (minimum 4.5:1 required for normal text).',
       evidence: {
-        measured_values: { animated_property: 'width', duration: '0.3s', easing: 'ease', value: '100%' },
-        expected_values: { use_composite: true },
+        measured_values: { foreground_color: '#71717a', background_color: '#ffffff', contrast_ratio: 3.2 },
+        expected_values: { min_contrast_ratio: 4.5 },
       },
-      location: { selector: '.animated-box' },
-      fix_goal: 'Refactor width transition to transform: scaleX() or composite property with will-change.',
-      constraints: ['Preserve animation timing', 'Avoid layout thrashing'],
-      acceptance_check: 'Element animates exclusively using CSS transform / opacity.',
-      fix_prompt: '### AI FIX PROMPT: [PERF-PROP-01]\nReplace width transition with transform: scaleX().\n\n#### 4. Verified Working CSS Patch\n```css\n.animated-box {\n  transition: transform 0.3s ease 0s !important;\n  will-change: transform !important;\n  transform-origin: left center !important;\n  transform: scaleX(var(--target-scale-x, 1)) !important;\n}\n```',
+      location: { selector: 'p.text-zinc-500, span.badge-subtext' },
+      fix_goal: 'Elevate text contrast to at least 4.5:1 by adjusting font color to zinc-700 or darker.',
+      constraints: ['Retain visual hierarchy between titles and body.'],
+      acceptance_check: 'Calculated contrast ratio must be >= 4.5:1 under WCAG AA guidelines.',
+      fix_prompt: '### AI FIX PROMPT: [UI-CONTRAST-01]\nUpdate text classes from text-zinc-500 to text-zinc-700 or text-gray-800.',
       patchable: true,
-      verified_patch_css: `.animated-box {\n  transition: transform 0.3s ease 0s !important;\n  will-change: transform !important;\n  transform-origin: left center !important;\n  transform: scaleX(var(--target-scale-x, 1)) !important;\n}`,
+      verified_patch_css: `.text-zinc-500, .text-gray-400, span.badge-subtext, p.subtitle {\n  color: #27272a !important;\n}`,
+    },
+    {
+      id: 'iss_demo_03',
+      check_id: 'POLISH-ANIM-01',
+      layer: 'Polish',
+      severity: 'MINOR',
+      confidence: 'HIGH',
+      tier: 'B',
+      title: 'Missing Reduced-Motion Fallback for Ping/Pulse Animations',
+      problem: "Continuous CSS keyframe animations (animate-ping / hover transforms) on vibe-saas-example.dev do not respect the user's prefers-reduced-motion OS accessibility preference.",
+      evidence: {
+        measured_values: { active_animations: ['animate-ping', 'hover:-translate-y-2'], reduced_motion_query_present: false },
+        expected_values: { motion_safe_guard: true },
+      },
+      location: { selector: 'span.animate-ping, div.group, .pulse-beacon' },
+      fix_goal: 'Wrap keyframe animations in motion-safe: prefix or @media (prefers-reduced-motion: no-preference).',
+      constraints: ['Ensure indicator dots remain visible when animation is disabled.'],
+      acceptance_check: 'Animations must pause when prefers-reduced-motion: reduce is toggled.',
+      fix_prompt: "### AI FIX PROMPT: [POLISH-ANIM-01]\nWrap animations in Tailwind's motion-safe: prefix or CSS prefers-reduced-motion query.",
+      patchable: true,
+      verified_patch_css: `@media (prefers-reduced-motion: reduce) {\n  .animate-ping, .pulse-beacon, [class*="animate-"] {\n    animation: none !important;\n    transform: none !important;\n  }\n}`,
+    },
+    {
+      id: 'iss_demo_04',
+      check_id: 'PERF-FONT-01',
+      layer: 'Production',
+      severity: 'MINOR',
+      confidence: 'HIGH',
+      tier: 'A',
+      title: 'Font Preload Swap Optimization for Vercel Edge',
+      problem: 'Custom web font files loaded via Next.js can trigger Cumulative Layout Shift (CLS) if font-display swap is omitted.',
+      evidence: {
+        measured_values: { server: 'Vercel Edge', framework: 'Next.js', font_swap_verified: false },
+        expected_values: { font_display: 'swap' },
+      },
+      location: { selector: 'head link[rel="preload"][as="font"]' },
+      fix_goal: 'Ensure next/font declarations include display: "swap" and preload: true.',
+      constraints: ['Prevent FOUT on slow networks.'],
+      acceptance_check: 'CLS metric remains < 0.05 on mobile and desktop viewports.',
+      fix_prompt: "### AI FIX PROMPT: [PERF-FONT-01]\nEnsure next/font declarations include display: 'swap' in layout.tsx.",
+      patchable: true,
+      verified_patch_css: `@font-face {\n  font-display: swap !important;\n}`,
     },
   ],
   master_prompt: `# MASTER ARCHITECTURAL REMEDIATION PLAN
 Target: https://vibe-saas-example.dev
-Total Issues: 4 (Critical: 3, Major: 1, Minor: 0)
+Total Issues: 4 (Critical: 1, Major: 1, Minor: 2)
 
 1. [MOBI-TAP-01] Undersized Mobile Tap Target (<44x44px)
-   - Target Selector: button.tiny-btn
-   - Goal: Expand button padding or minimum hit dimension to 44px x 44px.
-2. [PROD-LEAK-01] Localhost URL Leaked in Production DOM
-   - Target Selector: header nav a[href*="localhost"]
-   - Goal: Replace hardcoded localhost URL with process.env.NEXT_PUBLIC_PORTAL_URL.
-3. [PROD-UNDEF-01] Literal 'undefined' Rendered to User
-   - Target Selector: div.user-info span
-   - Goal: Add nullish coalescing: user?.username ?? 'Guest'.
-4. [PERF-PROP-01] Layout-Triggering Animation on Width Property
-   - Target Selector: .animated-box
-   - Goal: Refactor width transition to transform: scaleX() with will-change.`,
+   - Target Selector: header button, nav a.cta-action
+   - Goal: Increase interactive padding or set minimum hit dimension to min-h-[44px] min-w-[44px].
+2. [UI-CONTRAST-01] Low Subtitle & Badge Contrast Ratio (<4.5:1)
+   - Target Selector: p.text-zinc-500, span.badge-subtext
+   - Goal: Elevate text contrast to at least 4.5:1 by adjusting font color to zinc-700 or darker.
+3. [POLISH-ANIM-01] Missing Reduced-Motion Fallback for Ping/Pulse Animations
+   - Target Selector: span.animate-ping, .pulse-beacon
+   - Goal: Wrap keyframe animations in motion-safe: prefix or @media (prefers-reduced-motion: no-preference).
+4. [PERF-FONT-01] Font Preload Swap Optimization for Vercel Edge
+   - Target Selector: head link[rel="preload"][as="font"]
+   - Goal: Ensure next/font declarations include display: "swap" and preload: true.`,
   share_token: 'demo-share-token-12345',
   created_at: new Date().toISOString(),
   completed_at: new Date().toISOString(),
