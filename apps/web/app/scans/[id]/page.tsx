@@ -117,11 +117,10 @@ export default function ReportPage() {
   const [catalogSearch, setCatalogSearch] = useState('');
   const [promptExpanded, setPromptExpanded] = useState(false);
   const [showLivePreview, setShowLivePreview] = useState(true);
-  const [previewMode, setPreviewMode] = useState<'split' | 'before' | 'after' | 'snaps'>('split');
+  const [previewMode, setPreviewMode] = useState<'split' | 'before' | 'after'>('split');
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [previewKey, setPreviewKey] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [previewFocus, setPreviewFocus] = useState<string>('ALL');
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -316,13 +315,13 @@ export default function ReportPage() {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-gray-800">
             <div>
               <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 mb-2">
-                <Sparkles className="w-3.5 h-3.5" /> Interactive Sandbox & Live Patches
+                <Sparkles className="w-3.5 h-3.5" /> Interactive Sandbox & Live Changes
               </div>
               <h2 className="text-xl font-bold text-white tracking-tight">
-                {isFullScreen ? 'Full Screen Comparison: Before & After Fixes' : 'Live Project Preview: Before & After Fixes'}
+                {isFullScreen ? 'Full Screen Comparison: Before & After' : 'Live Project Preview: Before & After Changes'}
               </h2>
               <p className="text-xs text-gray-400 mt-0.5">
-                Interact live with your real website. Click, scroll, and feel how your project behaves before and after fixes are applied.
+                Interact live with your real website. See live changes applied directly to your interface in real time.
               </p>
             </div>
 
@@ -366,7 +365,7 @@ export default function ReportPage() {
                     previewMode === 'before' ? 'bg-red-500/20 text-red-300 border border-red-500/30' : 'text-gray-400 hover:text-gray-200'
                   }`}
                 >
-                  Before Fixes
+                  Before
                 </button>
                 <button
                   type="button"
@@ -375,16 +374,7 @@ export default function ReportPage() {
                     previewMode === 'after' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'text-gray-400 hover:text-gray-200'
                   }`}
                 >
-                  After Fixes
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPreviewMode('snaps')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-                    previewMode === 'snaps' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'text-gray-400 hover:text-gray-200'
-                  }`}
-                >
-                  Real Snaps
+                  After (Live Changes)
                 </button>
               </div>
 
@@ -414,304 +404,17 @@ export default function ReportPage() {
             </div>
           </div>
 
-          {/* All Detected Changes Radar Bar with Interactive Focus */}
-          <div className="bg-gray-950/80 rounded-xl border border-gray-800 p-3 my-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span className="text-xs font-bold text-white uppercase tracking-wider">
-                  All Detected Audit Findings & Live Remediations ({report.issues.length} Changes Active)
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPreviewFocus('ALL')}
-                  className={`text-[10px] font-mono px-2 py-0.5 rounded transition ${
-                    previewFocus === 'ALL'
-                      ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40 font-bold'
-                      : 'text-gray-400 hover:text-gray-200 border border-gray-800 bg-gray-900'
-                  }`}
-                >
-                  Focus: All 4 Issues
-                </button>
-                <span className="text-[10px] text-gray-400 font-mono hidden sm:inline">
-                  🔴 Before: Red Defects &nbsp;|&nbsp; 🟢 After: Clean Remediations
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-              {report.issues.map((iss) => {
-                const isSelected = previewFocus === iss.check_id;
-                return (
-                  <div
-                    key={iss.id}
-                    onClick={() => setPreviewFocus(isSelected ? 'ALL' : iss.check_id)}
-                    className={`cursor-pointer transition-all p-2.5 rounded-lg border text-[11px] flex flex-col justify-between ${
-                      isSelected
-                        ? 'bg-blue-950/40 border-blue-500/60 ring-2 ring-blue-500/30 shadow-lg scale-[1.01]'
-                        : 'bg-gray-900/90 hover:bg-gray-900 border-gray-800 hover:border-gray-700'
-                    }`}
-                    title="Click to focus this issue in Live Preview"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-1 mb-1">
-                        <span className="font-mono text-emerald-400 font-bold text-[10px] flex items-center gap-1">
-                          {iss.check_id}
-                          {isSelected && <span className="text-[9px] bg-blue-500 text-white px-1 rounded font-sans">Active</span>}
-                        </span>
-                        <span className="text-[9px] text-gray-500 uppercase font-semibold">
-                          {iss.layer} • Tier {iss.tier}
-                        </span>
-                      </div>
-                      <div className="font-semibold text-gray-200 line-clamp-1 mb-1 text-xs">
-                        {iss.title}
-                      </div>
-                    </div>
-                    <div className="space-y-1 mt-1.5 pt-1.5 border-t border-gray-800 text-[10px]">
-                      <div className="text-red-400 flex items-start gap-1">
-                        <span className="shrink-0 font-bold">🔴 Defect:</span>
-                        <span className="truncate text-gray-400">{iss.problem}</span>
-                      </div>
-                      <div className="text-emerald-400 flex items-start gap-1 font-medium">
-                        <span className="shrink-0 font-bold">🟢 Fixed:</span>
-                        <span className="truncate text-emerald-300">{iss.fix_goal}</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Active Remediation Pill List */}
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-3 text-[11px]">
-            <div className="flex flex-wrap items-center gap-1.5 text-gray-400">
-              <span className="font-semibold text-gray-300">Live Remediation Active:</span>
-              <button
-                type="button"
-                onClick={() => setPreviewFocus(previewFocus === 'MOBI-TAP-01' ? 'ALL' : 'MOBI-TAP-01')}
-                className={`px-2 py-0.5 rounded-md border transition cursor-pointer ${
-                  previewFocus === 'MOBI-TAP-01'
-                    ? 'bg-emerald-500/30 text-emerald-200 border-emerald-400 font-bold ring-1 ring-emerald-400'
-                    : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20 hover:bg-emerald-500/20'
-                }`}
-              >
-                ✓ [MOBI-TAP-01] 44x44px Touch Targets
-              </button>
-              <button
-                type="button"
-                onClick={() => setPreviewFocus(previewFocus === 'UI-CONTRAST-01' ? 'ALL' : 'UI-CONTRAST-01')}
-                className={`px-2 py-0.5 rounded-md border transition cursor-pointer ${
-                  previewFocus === 'UI-CONTRAST-01'
-                    ? 'bg-emerald-500/30 text-emerald-200 border-emerald-400 font-bold ring-1 ring-emerald-400'
-                    : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20 hover:bg-emerald-500/20'
-                }`}
-              >
-                ✓ [UI-CONTRAST-01] 4.5:1 Contrast Boost
-              </button>
-              <button
-                type="button"
-                onClick={() => setPreviewFocus(previewFocus === 'POLISH-ANIM-01' ? 'ALL' : 'POLISH-ANIM-01')}
-                className={`px-2 py-0.5 rounded-md border transition cursor-pointer ${
-                  previewFocus === 'POLISH-ANIM-01'
-                    ? 'bg-emerald-500/30 text-emerald-200 border-emerald-400 font-bold ring-1 ring-emerald-400'
-                    : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20 hover:bg-emerald-500/20'
-                }`}
-              >
-                ✓ [POLISH-ANIM-01] Motion-Safe Fallbacks
-              </button>
-              <button
-                type="button"
-                onClick={() => setPreviewFocus(previewFocus === 'PERF-FONT-01' ? 'ALL' : 'PERF-FONT-01')}
-                className={`px-2 py-0.5 rounded-md border transition cursor-pointer ${
-                  previewFocus === 'PERF-FONT-01'
-                    ? 'bg-emerald-500/30 text-emerald-200 border-emerald-400 font-bold ring-1 ring-emerald-400'
-                    : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20 hover:bg-emerald-500/20'
-                }`}
-              >
-                ✓ [PERF-FONT-01] Font Preload & Swap
-              </button>
-            </div>
-            <span className="text-emerald-400 font-medium flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Live Interactive Session
-            </span>
-          </div>
-
-          {/* Canvas Section */}
-          {previewMode === 'snaps' ? (
-            /* Real Snaps Gallery: Showcase ALL 4 Detected Findings Side-by-Side */
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 overflow-y-auto" style={{ maxHeight: isFullScreen ? 'calc(100vh - 220px)' : '650px' }}>
-              {/* Snap: Before */}
-              <div className="bg-gray-950 rounded-xl border border-red-500/30 p-4 space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-gray-800">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
-                    <span className="text-xs font-bold text-red-400 uppercase tracking-wider">Snap: Before Fixes (Defects Present)</span>
-                  </div>
-                  <span className="text-[10px] font-mono bg-red-500/10 text-red-400 px-2 py-0.5 rounded border border-red-500/20">
-                    All 4 Defects Highlighted in Red
-                  </span>
-                </div>
-
-                {/* 1. MOBI-TAP-01 */}
-                {(previewFocus === 'ALL' || previewFocus === 'MOBI-TAP-01') && (
-                  <div className="bg-gray-900/90 rounded-lg p-3 border border-red-500/30">
-                    <div className="text-[11px] font-mono text-red-400 font-bold mb-1">1. [MOBI-TAP-01] Undersized Touch Target (&lt;44x44px)</div>
-                    <p className="text-xs text-gray-400 mb-2">Button restricted to 24px width/height, causing frequent touch misses on mobile viewports.</p>
-                    <div className="p-2.5 bg-black/40 rounded border border-gray-800 flex items-center justify-between">
-                      <button className="w-6 h-6 bg-blue-600 text-[10px] text-white rounded flex items-center justify-center border-2 border-dashed border-red-400 shadow animate-pulse">
-                        Go
-                      </button>
-                      <span className="text-[10px] text-red-400 font-mono">↑ 24x24px button (Fails WCAG 2.5.5)</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* 2. UI-CONTRAST-01 */}
-                {(previewFocus === 'ALL' || previewFocus === 'UI-CONTRAST-01') && (
-                  <div className="bg-gray-900/90 rounded-lg p-3 border border-red-500/30">
-                    <div className="text-[11px] font-mono text-red-400 font-bold mb-1">2. [UI-CONTRAST-01] Low Subtitle & Badge Contrast Ratio (&lt;4.5:1)</div>
-                    <p className="text-xs text-gray-400 mb-2">Secondary description text (#71717a on white) yields 3.2:1 contrast, causing cognitive visual fatigue.</p>
-                    <div className="p-3 bg-white rounded border border-gray-700 space-y-1.5">
-                      <span className="text-[10px] font-semibold bg-gray-100 text-gray-400 px-2 py-0.5 rounded border border-dashed border-red-400">
-                        Subtle Status Badge
-                      </span>
-                      <p className="text-xs text-zinc-400 border border-dashed border-amber-500/60 p-1 rounded">
-                        Secondary description copy: 3.2:1 contrast ratio against white background.
-                      </p>
-                      <span className="text-[10px] text-amber-400 font-mono block">↑ Fails WCAG AA minimum 4.5:1 normal text contrast</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* 3. POLISH-ANIM-01 */}
-                {(previewFocus === 'ALL' || previewFocus === 'POLISH-ANIM-01') && (
-                  <div className="bg-gray-900/90 rounded-lg p-3 border border-red-500/30">
-                    <div className="text-[11px] font-mono text-red-400 font-bold mb-1">3. [POLISH-ANIM-01] Missing Reduced-Motion Fallback for Ping/Pulse</div>
-                    <p className="text-xs text-gray-400 mb-2">Unpausable continuous keyframe animations ignore user's prefers-reduced-motion accessibility preference.</p>
-                    <div className="p-3 bg-black/40 rounded border border-gray-800 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="relative flex h-3 w-3">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
-                        </span>
-                        <span className="text-xs text-gray-300">Continuous Pulse Beacon</span>
-                      </div>
-                      <span className="text-[10px] text-red-400 font-mono border border-red-500/30 px-1.5 py-0.5 rounded bg-red-950/30">
-                        No motion-safe guard
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* 4. PERF-FONT-01 */}
-                {(previewFocus === 'ALL' || previewFocus === 'PERF-FONT-01') && (
-                  <div className="bg-gray-900/90 rounded-lg p-3 border border-red-500/30">
-                    <div className="text-[11px] font-mono text-red-400 font-bold mb-1">4. [PERF-FONT-01] Font Preload Swap Optimization for Vercel Edge</div>
-                    <p className="text-xs text-gray-400 mb-2">Custom web font omission of font-display swap causes FOIT (Flash of Invisible Text) and layout shifts.</p>
-                    <div className="p-2.5 bg-black/40 rounded border border-red-500/30 space-y-1">
-                      <div className="text-xs font-serif text-gray-400">
-                        Rendering blocked waiting for web font download...
-                      </div>
-                      <span className="text-[10px] text-red-400 font-mono block">
-                        ↑ CLS Spike & FOIT observed on network throttle
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Snap: After */}
-              <div className="bg-gray-950 rounded-xl border border-emerald-500/40 p-4 space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-gray-800">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Snap: After Fixes Applied (Remediated)</span>
-                  </div>
-                  <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">
-                    All 4 Remediations Cleanly Active
-                  </span>
-                </div>
-
-                {/* 1. MOBI-TAP-01 Remediated */}
-                {(previewFocus === 'ALL' || previewFocus === 'MOBI-TAP-01') && (
-                  <div className="bg-gray-900/90 rounded-lg p-3 border border-emerald-500/30">
-                    <div className="text-[11px] font-mono text-emerald-400 font-bold mb-1">1. [MOBI-TAP-01] 44x44px Ergonomic Touch Target</div>
-                    <p className="text-xs text-gray-300 mb-2">Expanded interactive dimensions to satisfy Apple HIG & Google Material standards.</p>
-                    <div className="p-2.5 bg-black/40 rounded border border-gray-800 flex items-center justify-between">
-                      <button className="min-w-[120px] min-h-[44px] px-4 py-2 bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white rounded-xl shadow border border-emerald-400/50 transition transform hover:scale-105">
-                        Action (44px Bounds)
-                      </button>
-                      <span className="text-[10px] text-emerald-400 font-mono">✓ 44x44px touch bounds (Passes WCAG 2.5.5)</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* 2. UI-CONTRAST-01 Remediated */}
-                {(previewFocus === 'ALL' || previewFocus === 'UI-CONTRAST-01') && (
-                  <div className="bg-gray-900/90 rounded-lg p-3 border border-emerald-500/30">
-                    <div className="text-[11px] font-mono text-emerald-400 font-bold mb-1">2. [UI-CONTRAST-01] Elevated 7.8:1+ WCAG AA High Contrast</div>
-                    <p className="text-xs text-gray-300 mb-2">Adjusted text color tokens to deep zinc-800 for crystal-clear readability under all lighting conditions.</p>
-                    <div className="p-3 bg-white rounded border border-gray-300 space-y-1.5">
-                      <span className="text-[10px] font-bold bg-zinc-900 text-white px-2 py-0.5 rounded">
-                        High Contrast Status Badge
-                      </span>
-                      <p className="text-xs text-zinc-900 font-medium">
-                        Secondary description copy: 7.8:1 calculated contrast ratio against white background.
-                      </p>
-                      <span className="text-[10px] text-emerald-600 font-mono block">✓ Exceeds WCAG AA 4.5:1 minimum</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* 3. POLISH-ANIM-01 Remediated */}
-                {(previewFocus === 'ALL' || previewFocus === 'POLISH-ANIM-01') && (
-                  <div className="bg-gray-900/90 rounded-lg p-3 border border-emerald-500/30">
-                    <div className="text-[11px] font-mono text-emerald-400 font-bold mb-1">3. [POLISH-ANIM-01] Accessible Motion-Safe Keyframes</div>
-                    <p className="text-xs text-gray-300 mb-2">Wrapped in motion-safe: prefix; gracefully pauses into a clean static indicator when reduced motion is preferred.</p>
-                    <div className="p-3 bg-black/40 rounded border border-emerald-500/30 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex rounded-full h-3 w-3 bg-emerald-400 shadow-sm shadow-emerald-400"></span>
-                        <span className="text-xs text-emerald-300 font-medium">Motion-Safe Protected Status</span>
-                      </div>
-                      <span className="text-[10px] text-emerald-400 font-mono border border-emerald-500/30 px-1.5 py-0.5 rounded bg-emerald-950/30">
-                        ✓ prefers-reduced-motion respected
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* 4. PERF-FONT-01 Remediated */}
-                {(previewFocus === 'ALL' || previewFocus === 'PERF-FONT-01') && (
-                  <div className="bg-gray-900/90 rounded-lg p-3 border border-emerald-500/30">
-                    <div className="text-[11px] font-mono text-emerald-400 font-bold mb-1">4. [PERF-FONT-01] Zero-FOIT display:swap Edge Optimization</div>
-                    <p className="text-xs text-gray-300 mb-2">Configured next/font with display: "swap" and edge preloading, eliminating Cumulative Layout Shift.</p>
-                    <div className="p-2.5 bg-black/40 rounded border border-emerald-500/30 space-y-1">
-                      <div className="text-xs font-sans text-white font-semibold">
-                        Instantaneous typography render with display: swap active.
-                      </div>
-                      <span className="text-[10px] text-emerald-400 font-mono block">
-                        ✓ CLS = 0.00 • Zero text flash on Vercel Edge
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : previewMode === 'split' ? (
-            /* Split Screen: Side-by-side interactive iframes */
-            <div className={`grid grid-cols-1 ${previewDevice === 'mobile' ? 'md:grid-cols-2 max-w-3xl mx-auto' : 'lg:grid-cols-2'} gap-4 mt-2 flex-1`}>
+          {/* Live Preview Display (Split or Single) */}
+          {previewMode === 'split' ? (
+            <div className={`grid grid-cols-1 ${previewDevice === 'mobile' ? 'md:grid-cols-2 max-w-3xl mx-auto' : 'lg:grid-cols-2'} gap-4 mt-4 flex-1`}>
               {/* Before Window */}
               <div className="bg-gray-950 rounded-xl border border-red-500/30 overflow-hidden shadow-xl flex flex-col">
                 <div className="bg-gray-900 px-4 py-2 border-b border-gray-800 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
-                    <span className="font-bold text-red-400">BEFORE (ALL 4 DEFECTS HIGHLIGHTED)</span>
+                    <span className="font-bold text-red-400">BEFORE (ORIGINAL)</span>
                     <span className="hidden sm:inline-block text-[10px] font-mono bg-red-500/10 text-red-400 px-2 py-0.5 rounded border border-red-500/20">
-                      {previewFocus === 'ALL' ? 'All 4 Issues Active' : `Focus: ${previewFocus}`}
+                      Original
                     </span>
                   </div>
                   <span className="font-mono text-[11px] text-gray-400 truncate max-w-[200px]">
@@ -729,8 +432,8 @@ export default function ReportPage() {
                   }}
                 >
                   <iframe
-                    key={`before-${previewKey}-${previewFocus}`}
-                    src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=original&url=${encodeURIComponent(report.target_url)}&focus=${previewFocus}`}
+                    key={`before-${previewKey}`}
+                    src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=original&url=${encodeURIComponent(report.target_url)}`}
                     title="Site Preview Before Fixes"
                     className="w-full h-full border-0"
                     sandbox="allow-scripts allow-same-origin"
@@ -743,13 +446,13 @@ export default function ReportPage() {
                 <div className="bg-gray-900 px-4 py-2 border-b border-gray-800 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                    <span className="font-bold text-emerald-400">AFTER (ALL 4 REMEDIATIONS INJECTED)</span>
+                    <span className="font-bold text-emerald-400">AFTER (LIVE CHANGES)</span>
                     <span className="hidden sm:inline-block text-[10px] font-mono bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">
-                      Clean Remediated
+                      Live Patched
                     </span>
                   </div>
                   <span className="font-mono text-[11px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                    Live Patched
+                    Remediated
                   </span>
                 </div>
                 <div
@@ -763,8 +466,8 @@ export default function ReportPage() {
                   }}
                 >
                   <iframe
-                    key={`after-${previewKey}-${previewFocus}`}
-                    src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=patched&url=${encodeURIComponent(report.target_url)}&focus=${previewFocus}`}
+                    key={`after-${previewKey}`}
+                    src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=patched&url=${encodeURIComponent(report.target_url)}`}
                     title="Site Preview After Fixes"
                     className="w-full h-full border-0"
                     sandbox="allow-scripts allow-same-origin"
@@ -773,8 +476,7 @@ export default function ReportPage() {
               </div>
             </div>
           ) : (
-            /* Single Full-width Window (Before or After) */
-            <div className={`mt-2 flex-1 ${previewDevice === 'mobile' ? 'max-w-md mx-auto' : 'w-full'}`}>
+            <div className={`mt-4 flex-1 ${previewDevice === 'mobile' ? 'max-w-md mx-auto' : 'w-full'}`}>
               <div className={`bg-gray-950 rounded-xl border ${
                 previewMode === 'after' ? 'border-emerald-500/40' : 'border-red-500/30'
               } overflow-hidden shadow-2xl flex flex-col h-full`}>
@@ -783,8 +485,8 @@ export default function ReportPage() {
                     <span className={`w-2.5 h-2.5 rounded-full ${previewMode === 'after' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
                     <span className={`font-bold ${previewMode === 'after' ? 'text-emerald-400' : 'text-red-400'}`}>
                       {previewMode === 'after'
-                        ? 'LIVE PATCHED PREVIEW (ALL 4 REMEDIATIONS APPLIED - CLEAN)'
-                        : 'ORIGINAL SITE PREVIEW (ALL 4 DEFECTS HIGHLIGHTED IN RED)'
+                        ? 'LIVE PATCHED PREVIEW (LIVE CHANGES APPLIED)'
+                        : 'ORIGINAL SITE PREVIEW (BEFORE FIXES)'
                       }
                     </span>
                   </div>
@@ -803,8 +505,8 @@ export default function ReportPage() {
                   }}
                 >
                   <iframe
-                    key={`single-${previewMode}-${previewKey}-${previewFocus}`}
-                    src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=${previewMode === 'after' ? 'patched' : 'original'}&url=${encodeURIComponent(report.target_url)}&focus=${previewFocus}`}
+                    key={`single-${previewMode}-${previewKey}`}
+                    src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=${previewMode === 'after' ? 'patched' : 'original'}&url=${encodeURIComponent(report.target_url)}`}
                     title="Site Preview Single View"
                     className="w-full h-full border-0"
                     sandbox="allow-scripts allow-same-origin"

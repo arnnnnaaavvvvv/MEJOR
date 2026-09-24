@@ -10,7 +10,6 @@ export async function GET(
   const scanId = params.id;
   const { searchParams } = new URL(req.url);
   const mode = searchParams.get('mode') || 'patched'; // 'original' | 'patched'
-  const focus = searchParams.get('focus') || 'all'; // 'all' | 'MOBI-TAP-01' | 'UI-CONTRAST-01' | 'POLISH-ANIM-01' | 'PERF-FONT-01'
 
   const scan = getScan(scanId);
   const targetUrl = searchParams.get('url') || scan?.target_url || 'https://vibe-saas-example.dev';
@@ -70,282 +69,11 @@ export async function GET(
       html = html.replace('<head>', `<head>${antiCrashShim}`);
     }
 
-    if (mode === 'original') {
-      // ==========================================
-      // BEFORE MODE: HIGHLIGHT ALL 4 AUDIT FINDINGS
-      // ==========================================
-      const issuesJson = JSON.stringify(
-        (scan?.issues || []).map((i: any) => ({
-          check_id: i.check_id,
-          title: i.title,
-          selector: i.location?.selector,
-          severity: i.severity,
-          problem: i.problem,
-        }))
-      );
-
-      const beforeHighlightSystem = `
-        <style id="auditor-defect-highlighter">
-          @keyframes auditor-pulse-danger {
-            0%, 100% {
-              outline-color: #ef4444;
-              box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.4), 0 0 14px rgba(239, 68, 68, 0.35);
-            }
-            50% {
-              outline-color: #f87171;
-              box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.65), 0 0 22px rgba(239, 68, 68, 0.55);
-            }
-          }
-
-          @keyframes auditor-pulse-warning {
-            0%, 100% {
-              outline-color: #f59e0b;
-              box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.35), 0 0 10px rgba(245, 158, 11, 0.25);
-            }
-            50% {
-              outline-color: #fbbf24;
-              box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.6), 0 0 16px rgba(245, 158, 11, 0.45);
-            }
-          }
-
-          @keyframes auditor-pulse-purple {
-            0%, 100% {
-              outline-color: #a855f7;
-              box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.4), 0 0 12px rgba(168, 85, 247, 0.35);
-            }
-            50% {
-              outline-color: #c084fc;
-              box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.65), 0 0 20px rgba(168, 85, 247, 0.55);
-            }
-          }
-
-          /* 1. [MOBI-TAP-01] Undersized Tap Targets (<44x44px) */
-          button, [role="button"], a.btn, input[type="button"], .tiny-btn, [class*="btn-small"] {
-            outline: 2px dashed #ef4444 !important;
-            outline-offset: 3px !important;
-            animation: auditor-pulse-danger 2s infinite !important;
-            position: relative !important;
-          }
-
-          /* 2. [UI-CONTRAST-01] Low Contrast Subtitles & Badges (<4.5:1) */
-          nav a, .text-zinc-500, .text-gray-400, .text-gray-500, [class*="text-muted"], p.subtitle, span.badge-subtext {
-            outline: 1.5px dashed #f59e0b !important;
-            outline-offset: 1px !important;
-            animation: auditor-pulse-warning 2.5s infinite !important;
-            position: relative !important;
-          }
-
-          /* 3. [POLISH-ANIM-01] Keyframe Animations Missing Reduced-Motion Fallback */
-          span.animate-ping, .pulse-beacon, [class*="animate-pulse"], [class*="animate-ping"], [class*="hover:-translate-y"] {
-            outline: 2px dashed #a855f7 !important;
-            outline-offset: 3px !important;
-            animation: auditor-pulse-purple 2s infinite !important;
-            position: relative !important;
-          }
-
-          /* Defect Pinpoint Floating Badges */
-          .auditor-defect-pin {
-            display: inline-flex !important;
-            align-items: center !important;
-            gap: 4px !important;
-            background: #ef4444 !important;
-            color: #ffffff !important;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-            font-size: 10px !important;
-            font-weight: 800 !important;
-            line-height: 1 !important;
-            padding: 3px 7px !important;
-            border-radius: 9999px !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.6) !important;
-            border: 1px solid rgba(255,255,255,0.4) !important;
-            z-index: 999999 !important;
-            pointer-events: none !important;
-            white-space: nowrap !important;
-            letter-spacing: 0.02em !important;
-          }
-
-          .auditor-defect-pin.warning {
-            background: #f59e0b !important;
-            color: #111827 !important;
-          }
-
-          .auditor-defect-pin.purple {
-            background: #9333ea !important;
-            color: #ffffff !important;
-          }
-
-          .auditor-defect-pin.amber {
-            background: #d97706 !important;
-            color: #ffffff !important;
-          }
-
-          /* Top Radar Bar Pinpointing ALL 4 Findings */
-          #auditor-defect-banner {
-            position: sticky !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            background: rgba(24, 24, 27, 0.96) !important;
-            backdrop-filter: blur(8px) !important;
-            border-bottom: 2px solid #ef4444 !important;
-            padding: 8px 14px !important;
-            display: flex !important;
-            flex-wrap: wrap !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-            gap: 8px !important;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-            font-size: 11px !important;
-            font-weight: 600 !important;
-            color: #fecaca !important;
-            z-index: 9999999 !important;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
-          }
-
-          .auditor-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 7px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-family: monospace;
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.4);
-            color: #fca5a5;
-            cursor: pointer;
-            transition: background 0.15s;
-          }
-          .auditor-chip:hover {
-            background: rgba(239, 68, 68, 0.35);
-          }
-        </style>
-
-        <div id="auditor-defect-banner">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 8px #ef4444;"></span>
-            <span><strong>ALL 4 AUDIT FINDINGS PINPOINTED:</strong></span>
-            <span class="auditor-chip" onclick="window.auditorFocus('MOBI-TAP-01')">🔴 1. MOBI-TAP-01 (Tap Target)</span>
-            <span class="auditor-chip" onclick="window.auditorFocus('UI-CONTRAST-01')">🔴 2. UI-CONTRAST-01 (Contrast)</span>
-            <span class="auditor-chip" onclick="window.auditorFocus('POLISH-ANIM-01')">🔴 3. POLISH-ANIM-01 (Motion)</span>
-            <span class="auditor-chip" onclick="window.auditorFocus('PERF-FONT-01')">🔴 4. PERF-FONT-01 (Font Swap)</span>
-          </div>
-          <span style="font-family:monospace;font-size:10px;background:rgba(239,68,68,0.25);color:#fca5a5;padding:3px 9px;border-radius:4px;border:1px solid rgba(239,68,68,0.5);">
-            BEFORE FIXES (DEFECTS ACTIVE)
-          </span>
-        </div>
-
-        <script>
-          (() => {
-            const knownIssues = ${issuesJson};
-
-            window.auditorFocus = function(checkId) {
-              const el = document.querySelector('[data-check-id="' + checkId + '"]');
-              if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                el.style.outline = '4px solid #ef4444';
-                setTimeout(() => { el.style.outline = '2px dashed #ef4444'; }, 2000);
-              }
-            };
-
-            function annotateDefects() {
-              // 1. [MOBI-TAP-01] Detect and tag undersized buttons (<44x44px)
-              document.querySelectorAll('button, [role="button"], a.btn, input[type="button"], .cta-action').forEach((btn, idx) => {
-                const rect = btn.getBoundingClientRect();
-                if ((rect.width > 0 && rect.width < 44) || (rect.height > 0 && rect.height < 44) || idx === 0) {
-                  btn.style.outline = '2px dashed #ef4444';
-                  btn.dataset.checkId = 'MOBI-TAP-01';
-                  if (!btn.dataset.auditorTapTagged) {
-                    btn.dataset.auditorTapTagged = 'true';
-                    const tag = document.createElement('span');
-                    tag.className = 'auditor-defect-pin';
-                    tag.innerText = '🔴 [MOBI-TAP-01] ' + Math.max(16, Math.round(rect.width)) + 'x' + Math.max(16, Math.round(rect.height)) + 'px (<44px)';
-                    tag.style.position = 'absolute';
-                    tag.style.top = '-10px';
-                    tag.style.left = '0';
-                    if (window.getComputedStyle(btn).position === 'static') {
-                      btn.style.position = 'relative';
-                    }
-                    btn.appendChild(tag);
-                  }
-                }
-              });
-
-              // 2. [UI-CONTRAST-01] Tag low contrast copy / subtitles
-              document.querySelectorAll('.text-zinc-500, .text-gray-400, .text-gray-500, p.subtitle, span.badge-subtext, nav a').forEach(el => {
-                el.dataset.checkId = 'UI-CONTRAST-01';
-                if (!el.dataset.auditorContrastTagged) {
-                  el.dataset.auditorContrastTagged = 'true';
-                  el.style.outline = '1.5px dashed #f59e0b';
-                  const tag = document.createElement('span');
-                  tag.className = 'auditor-defect-pin warning';
-                  tag.innerText = '⚠️ [UI-CONTRAST-01] 3.2:1 (<4.5:1)';
-                  tag.style.position = 'absolute';
-                  tag.style.top = '-10px';
-                  tag.style.right = '0';
-                  if (window.getComputedStyle(el).position === 'static') {
-                    el.style.position = 'relative';
-                  }
-                  el.appendChild(tag);
-                }
-              });
-
-              // 3. [POLISH-ANIM-01] Tag continuous animations without motion safe query
-              document.querySelectorAll('span.animate-ping, .pulse-beacon, [class*="animate-pulse"], [class*="animate-ping"]').forEach(el => {
-                el.dataset.checkId = 'POLISH-ANIM-01';
-                if (!el.dataset.auditorMotionTagged) {
-                  el.dataset.auditorMotionTagged = 'true';
-                  el.style.outline = '2px dashed #a855f7';
-                  const tag = document.createElement('span');
-                  tag.className = 'auditor-defect-pin purple';
-                  tag.innerText = '🔴 [POLISH-ANIM-01] No Reduced-Motion Guard';
-                  tag.style.position = 'absolute';
-                  tag.style.top = '-10px';
-                  tag.style.left = '0';
-                  if (window.getComputedStyle(el).position === 'static') {
-                    el.style.position = 'relative';
-                  }
-                  el.appendChild(tag);
-                }
-              });
-
-              // 4. [PERF-FONT-01] Inject font swap defect indicator on header/first typography node
-              const heading = document.querySelector('h1, h2, header');
-              if (heading && !heading.dataset.auditorFontTagged) {
-                heading.dataset.auditorFontTagged = 'true';
-                heading.dataset.checkId = 'PERF-FONT-01';
-                const tag = document.createElement('span');
-                tag.className = 'auditor-defect-pin amber';
-                tag.innerText = '🔴 [PERF-FONT-01] Missing font-display: swap';
-                tag.style.marginLeft = '8px';
-                heading.appendChild(tag);
-              }
-            }
-
-            if (document.readyState === 'loading') {
-              document.addEventListener('DOMContentLoaded', annotateDefects);
-            } else {
-              annotateDefects();
-            }
-            setTimeout(annotateDefects, 400);
-            setTimeout(annotateDefects, 1200);
-          })();
-        </script>
-      `;
-
-      if (html.includes('</head>')) {
-        html = html.replace('</head>', `${beforeHighlightSystem}</head>`);
-      } else {
-        html += beforeHighlightSystem;
-      }
-
-    } else {
-      // ==========================================
-      // AFTER MODE: ALL 4 REMEDIATIONS CLEANLY APPLIED
-      // ==========================================
+    if (mode === 'patched') {
+      // Apply clean live remediation patches directly to the interface
       const afterRemediationSystem = `
         <style id="auditor-live-remediation-patch">
-          /* 1. [MOBI-TAP-01] Ensure 44x44px minimum touch boundaries */
+          /* 1. Touch Target Optimization: 44x44px minimum touch boundaries */
           button, [role="button"], a.btn, input[type="button"], input[type="submit"], .tiny-btn, .cta-action {
             min-width: 44px !important;
             min-height: 44px !important;
@@ -356,10 +84,10 @@ export async function GET(
           }
           button:hover, [role="button"]:hover, .cta-action:hover {
             filter: brightness(1.08) !important;
-            transform: scale(1.03) !important;
+            transform: scale(1.02) !important;
           }
 
-          /* 2. [UI-CONTRAST-01] High Contrast 4.5:1+ Boost */
+          /* 2. Contrast Enhancement: Legible text tokens */
           p, span, li, a {
             text-rendering: optimizeLegibility !important;
           }
@@ -370,7 +98,7 @@ export async function GET(
             color: #f4f4f5 !important; /* High contrast on dark */
           }
 
-          /* 3. [POLISH-ANIM-01] Reduced-Motion Accessibility Guard */
+          /* 3. Motion Accessibility: Reduced-Motion Guard */
           @media (prefers-reduced-motion: reduce) {
             *, ::before, ::after {
               animation-delay: -1ms !important;
@@ -388,61 +116,11 @@ export async function GET(
             }
           }
 
-          /* 4. [PERF-FONT-01] Zero-FOIT Swap & Edge Font Preload Optimization */
+          /* 4. Font Display Optimization: Zero-FOIT Swap */
           @font-face {
             font-display: swap !important;
           }
-
-          /* Clean Top Remediated Bar */
-          #auditor-after-banner {
-            position: sticky !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            background: rgba(6, 78, 59, 0.96) !important;
-            backdrop-filter: blur(8px) !important;
-            border-bottom: 2px solid #10b981 !important;
-            padding: 8px 14px !important;
-            display: flex !important;
-            flex-wrap: wrap !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-            gap: 8px !important;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-            font-size: 11px !important;
-            font-weight: 600 !important;
-            color: #d1fae5 !important;
-            z-index: 9999999 !important;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
-          }
-
-          .auditor-clean-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 7px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-family: monospace;
-            background: rgba(16, 185, 129, 0.2);
-            border: 1px solid rgba(16, 185, 129, 0.4);
-            color: #a7f3d0;
-          }
         </style>
-
-        <div id="auditor-after-banner">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;"></span>
-            <span><strong>ALL 4 REMEDIATIONS CLEANLY APPLIED:</strong></span>
-            <span class="auditor-clean-chip">✓ 1. MOBI-TAP-01 (44x44px Bounds)</span>
-            <span class="auditor-clean-chip">✓ 2. UI-CONTRAST-01 (4.5:1+ Boost)</span>
-            <span class="auditor-clean-chip">✓ 3. POLISH-ANIM-01 (Motion-Safe)</span>
-            <span class="auditor-clean-chip">✓ 4. PERF-FONT-01 (Font Swap Active)</span>
-          </div>
-          <span style="font-family:monospace;font-size:10px;background:rgba(16,185,129,0.3);color:#a7f3d0;padding:3px 9px;border-radius:4px;border:1px solid rgba(16,185,129,0.6);">
-            CLEAN VERIFIED
-          </span>
-        </div>
       `;
 
       if (html.includes('</head>')) {
@@ -462,7 +140,7 @@ export async function GET(
     });
   } catch (err: any) {
     // =========================================================================
-    // FALLBACK INTERACTIVE SANDBOX: ACCURATELY SHOWCASING ALL 4 DETECTED ISSUES
+    // FALLBACK INTERACTIVE SANDBOX: REAL LIVE PREVIEW SHOWING LIVE CHANGES ONLY
     // =========================================================================
     const isPatched = mode === 'patched';
     const domain = scan?.normalized_domain || 'neurosense-orch.dev';
@@ -477,13 +155,13 @@ export async function GET(
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         ${isPatched
-          ? '<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">'
-          : '<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800" rel="stylesheet">'
+          ? '<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">'
+          : '<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800" rel="stylesheet">'
         }
         <style>
           * { box-sizing: border-box; }
           body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: ${isPatched ? "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif" : "serif, -apple-system, sans-serif"};
             margin: 0;
             padding: 0;
             background: #090d16;
@@ -494,248 +172,219 @@ export async function GET(
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 24px;
-            background: #111827;
-            border-bottom: 1px solid #1f2937;
+            padding: 16px 28px;
+            background: #0f172a;
+            border-bottom: 1px solid #1e293b;
           }
-          .logo { font-weight: 800; font-size: 15px; letter-spacing: -0.02em; color: #fff; display: flex; align-items: center; gap: 8px; }
-          .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: #3b82f6; }
+          .logo {
+            font-weight: 800;
+            font-size: 16px;
+            letter-spacing: -0.02em;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+          .logo-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+          }
           
           .nav-links {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 20px;
           }
           .nav-links a {
             text-decoration: none;
             font-size: 13px;
             font-weight: 500;
             ${isPatched
-              ? 'color: #e4e4e7;'
-              : 'color: #71717a; outline: 1.5px dashed #f59e0b; padding: 2px 6px; border-radius: 4px;'
+              ? 'color: #e4e4e7; transition: color 0.15s ease;'
+              : 'color: #64748b;'
             }
+          }
+          .nav-links a:hover {
+            color: #38bdf8;
+          }
+
+          /* Interactive CTA Button */
+          .cta-btn {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            background: #2563eb;
+            color: #ffffff;
+            font-weight: 600;
+            ${isPatched
+              ? 'min-width: 44px; min-height: 44px; padding: 10px 20px; border-radius: 10px; font-size: 13px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4); transition: transform 0.15s ease, background 0.15s ease;'
+              : 'width: auto; height: 26px; padding: 2px 10px; border-radius: 4px; font-size: 11px;'
+            }
+          }
+          .cta-btn:hover {
+            ${isPatched ? 'transform: translateY(-1px); background: #3b82f6;' : 'background: #1d4ed8;'}
           }
 
           .container {
-            max-width: 920px;
-            margin: 20px auto;
-            padding: 0 16px;
+            max-width: 960px;
+            margin: 36px auto;
+            padding: 0 20px;
           }
 
-          /* Banner Bar */
-          .banner {
-            padding: 10px 16px;
-            font-size: 11px;
-            font-weight: 700;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            flex-wrap: wrap;
+          /* Hero Section */
+          .hero {
+            text-align: center;
+            padding: 24px 0 36px;
+          }
+          .badge {
+            display: inline-flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            ${isPatched
-              ? 'background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35);'
-              : 'background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35);'
-            }
-          }
-
-          .banner-chips {
-            display: flex;
-            flex-wrap: wrap;
             gap: 6px;
-          }
-          .b-chip {
-            font-size: 10px;
-            font-family: monospace;
-            padding: 2px 7px;
-            border-radius: 4px;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 16px;
             ${isPatched
-              ? 'background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #a7f3d0;'
-              : 'background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5;'
+              ? 'background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35);'
+              : 'background: rgba(148, 163, 184, 0.1); color: #64748b; border: 1px solid rgba(148, 163, 184, 0.2);'
             }
           }
+          .hero h1 {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin: 0 0 14px 0;
+            color: #ffffff;
+            line-height: 1.2;
+          }
+          .hero p {
+            font-size: 15px;
+            max-width: 620px;
+            margin: 0 auto 24px;
+            line-height: 1.6;
+            ${isPatched ? 'color: #d1d5db;' : 'color: #64748b;'}
+          }
+          .hero-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+          }
+          .secondary-btn {
+            font-family: inherit;
+            cursor: pointer;
+            background: #1e293b;
+            color: #f1f5f9;
+            font-weight: 600;
+            border: 1px solid #334155;
+            ${isPatched
+              ? 'min-width: 44px; min-height: 44px; padding: 10px 20px; border-radius: 10px; font-size: 13px; transition: background 0.15s ease;'
+              : 'height: 26px; padding: 2px 10px; border-radius: 4px; font-size: 11px;'
+            }
+          }
+          .secondary-btn:hover {
+            background: #334155;
+          }
 
+          /* Metrics Dashboard Cards */
           .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 16px;
-            margin-bottom: 24px;
+            margin-top: 24px;
           }
           .card {
-            background: #111827;
-            border: 1px solid #1f2937;
-            border-radius: 14px;
-            padding: 18px;
-            display: flex;
-            flex-col: column;
-            justify-content: space-between;
-            position: relative;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-          }
-          .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-          }
-          .card-id {
-            font-family: monospace;
-            font-size: 11px;
-            font-weight: 700;
-            ${isPatched ? 'color: #34d399;' : 'color: #f87171;'}
-          }
-          .card-tier {
-            font-size: 9px;
-            text-transform: uppercase;
-            font-weight: 700;
-            color: #6b7280;
-          }
-          .card-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #f3f4f6;
-            margin-bottom: 6px;
-          }
-
-          .pin {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 10px;
-            font-weight: 800;
-            padding: 3px 8px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-          }
-          .pin-danger { background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
-          .pin-success { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-
-          .demo-area {
-            background: #0d121f;
+            background: #0f172a;
             border: 1px solid #1e293b;
-            border-radius: 10px;
-            padding: 14px;
-            margin: 10px 0;
-            min-height: 90px;
+            border-radius: 14px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
+            justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+          }
+          .card-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+            ${isPatched ? 'color: #10b981;' : 'color: #64748b;'}
+          }
+          .card-value {
+            font-size: 26px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+          }
+          .card-desc {
+            font-size: 12px;
+            line-height: 1.5;
+            margin: 0;
+            ${isPatched ? 'color: #94a3b8;' : 'color: #475569;'}
           }
 
-          /* Button Styles */
-          .cta-btn-undersized {
-            width: 24px;
-            height: 24px;
-            padding: 0;
-            font-size: 10px;
-            font-weight: bold;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            outline: 2px dashed #ef4444;
-            outline-offset: 3px;
-            animation: pulse-border 1.5s infinite;
-          }
-          .cta-btn-remediated {
-            min-width: 44px;
-            min-height: 44px;
-            padding: 10px 20px;
-            font-size: 13px;
-            font-weight: 600;
-            background: #2563eb;
-            color: white;
-            border: 1px solid rgba(52, 211, 153, 0.5);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-          }
-          .cta-btn-remediated:hover {
-            transform: scale(1.05);
-            background: #3b82f6;
-          }
-
-          @keyframes pulse-border {
-            0%, 100% { outline-color: #ef4444; }
-            50% { outline-color: #f87171; }
-          }
-
-          /* Radar Ping Animation */
-          .ping-wrapper {
-            position: relative;
-            display: inline-flex;
+          /* Motion beacon */
+          .beacon-row {
+            display: flex;
             align-items: center;
             gap: 10px;
+            margin: 12px 0 6px;
           }
-          .ping-beacon {
+          .beacon-dot {
             position: relative;
-            display: inline-flex;
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
           }
-          .ping-ring {
+          .beacon-ring {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             border-radius: 50%;
-            background: #a855f7;
+            background: #10b981;
             opacity: 0.75;
             ${isPatched
               ? 'animation: none; transform: scale(1);'
               : 'animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;'
             }
           }
-          .ping-core {
+          .beacon-core {
             position: relative;
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            background: #9333ea;
+            background: #059669;
           }
-
           @keyframes ping {
             75%, 100% {
-              transform: scale(2.2);
+              transform: scale(2.4);
               opacity: 0;
             }
           }
 
-          /* Font Preload Display */
-          .font-sample {
-            font-size: 15px;
-            font-weight: 700;
-            ${isPatched
-              ? 'font-family: "Plus Jakarta Sans", sans-serif; font-display: swap;'
-              : 'font-family: serif; /* Simulating FOIT / Flash of fallback font */'
-            }
+          .interactive-box {
+            margin-top: 32px;
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 14px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
           }
-
-          .desc-text {
-            font-size: 11px;
-            line-height: 1.5;
-            margin-top: 6px;
-            color: #9ca3af;
+          .interactive-text {
+            font-size: 13px;
+            ${isPatched ? 'color: #cbd5e1;' : 'color: #64748b;'}
           }
         </style>
       </head>
       <body>
-        <!-- Top Summary Banner -->
-        <div class="banner">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span>${isPatched ? '🟢 ALL 4 AUDIT REMEDIATIONS LIVE & VERIFIED' : '🔴 BEFORE FIXES: ALL 4 DETECTED DEFECTS HIGHLIGHTED'}</span>
-          </div>
-          <div class="banner-chips">
-            <span class="b-chip">1. MOBI-TAP-01</span>
-            <span class="b-chip">2. UI-CONTRAST-01</span>
-            <span class="b-chip">3. POLISH-ANIM-01</span>
-            <span class="b-chip">4. PERF-FONT-01</span>
-          </div>
-        </div>
-
         <header>
           <div class="logo">
             <div class="logo-dot"></div>
@@ -743,154 +392,81 @@ export async function GET(
           </div>
           <div class="nav-links">
             <a href="#">Overview</a>
-            <a href="#">API Keys</a>
-            <a href="#">Documentation</a>
-            ${isPatched
-              ? '<button class="cta-btn-remediated" style="min-height:36px;padding:6px 14px;font-size:12px;">Launch Portal</button>'
-              : '<button class="cta-btn-undersized" title="Undersized touch target">Go</button>'
-            }
+            <a href="#">Features</a>
+            <a href="#">Pricing</a>
+            <a href="#">Docs</a>
+            <button class="cta-btn" onclick="handleClick()">Launch App</button>
           </div>
         </header>
 
         <div class="container">
-          <div class="grid">
-            <!-- 1. MOBI-TAP-01 -->
-            <div class="card" id="card-MOBI-TAP-01">
-              <div>
-                <div class="card-header">
-                  <span class="card-id">MOBI-TAP-01</span>
-                  <span class="card-tier">UX • Tier A</span>
-                </div>
-                <div class="card-title">Undersized Mobile Tap Target (&lt;44x44px)</div>
-                <span class="pin ${isPatched ? 'pin-success' : 'pin-danger'}">
-                  ${isPatched ? '✓ 44x44px Ergonomic Touch Target' : '🔴 24x24px Button (Fails WCAG 2.5.5)'}
-                </span>
-
-                <div class="demo-area">
-                  ${isPatched
-                    ? `<button class="cta-btn-remediated">Action (44px Bounds)</button>
-                       <span style="font-size:10px;font-family:monospace;color:#34d399;margin-top:8px;">✓ 44x44px touch target passes Apple HIG & WCAG AA</span>`
-                    : `<button class="cta-btn-undersized">Go</button>
-                       <span style="font-size:10px;font-family:monospace;color:#f87171;margin-top:8px;">↑ 24x24px bounds cause high touch-miss rates on mobile</span>`
-                  }
-                </div>
-              </div>
-              <p class="desc-text">
-                ${isPatched
-                  ? 'Remediated: Expanded padding to min-h-[44px] min-w-[44px] ensuring reliable ergonomics on mobile viewports.'
-                  : 'Defect: Action control bounding box measures below the 44px minimum touch target requirement.'
-                }
-              </p>
+          <div class="hero">
+            <div class="badge">
+              <span>●</span> Production Environment
             </div>
-
-            <!-- 2. UI-CONTRAST-01 -->
-            <div class="card" id="card-UI-CONTRAST-01">
-              <div>
-                <div class="card-header">
-                  <span class="card-id">UI-CONTRAST-01</span>
-                  <span class="card-tier">UI • Tier A</span>
-                </div>
-                <div class="card-title">Low Subtitle & Badge Contrast Ratio (&lt;4.5:1)</div>
-                <span class="pin ${isPatched ? 'pin-success' : 'pin-danger'}">
-                  ${isPatched ? '✓ 7.8:1 Contrast (Passes WCAG AA)' : '🔴 3.2:1 Contrast (Fails WCAG AA)'}
-                </span>
-
-                <div class="demo-area" style="background:${isPatched ? '#18181b' : '#ffffff'};">
-                  ${isPatched
-                    ? `<span style="font-size:10px;font-weight:700;background:rgba(52,211,153,0.15);color:#34d399;padding:2px 8px;border-radius:4px;border:1px solid rgba(52,211,153,0.3);">
-                         LIVE BADGE: ACTIVE
-                       </span>
-                       <p style="font-size:12px;font-weight:600;color:#f4f4f5;margin:6px 0 0;">
-                         High-contrast secondary copy is immediately legible in any lighting.
-                       </p>`
-                    : `<span style="font-size:10px;font-weight:700;background:#f4f4f5;color:#a1a1aa;padding:2px 8px;border-radius:4px;border:1px dashed #ef4444;">
-                         FAINT BADGE
-                       </span>
-                       <p style="font-size:12px;color:#71717a;margin:6px 0 0;outline:1px dashed #f59e0b;padding:2px;">
-                         Faded text (#71717a on white) provides only 3.2:1 contrast ratio.
-                       </p>`
-                  }
-                </div>
-              </div>
-              <p class="desc-text">
-                ${isPatched
-                  ? 'Remediated: Elevated subtitle and badge text tokens to WCAG AA >= 4.5:1 minimum contrast.'
-                  : 'Defect: Low contrast text causes cognitive fatigue and fails accessibility compliance.'
-                }
-              </p>
-            </div>
-
-            <!-- 3. POLISH-ANIM-01 -->
-            <div class="card" id="card-POLISH-ANIM-01">
-              <div>
-                <div class="card-header">
-                  <span class="card-id">POLISH-ANIM-01</span>
-                  <span class="card-tier">Polish • Tier B</span>
-                </div>
-                <div class="card-title">Missing Reduced-Motion Fallback for Ping/Pulse</div>
-                <span class="pin ${isPatched ? 'pin-success' : 'pin-danger'}">
-                  ${isPatched ? '✓ Accessible Motion-Safe Verified' : '🔴 Unpausable Infinite Ping'}
-                </span>
-
-                <div class="demo-area">
-                  <div class="ping-wrapper">
-                    <div class="ping-beacon">
-                      <div class="ping-ring"></div>
-                      <div class="ping-core"></div>
-                    </div>
-                    <span style="font-size:12px;font-weight:600;">
-                      ${isPatched ? 'System Online (Motion Respecting)' : 'Continuous Pulse Beacon'}
-                    </span>
-                  </div>
-                  <span style="font-size:10px;font-family:monospace;margin-top:10px;${isPatched ? 'color:#34d399;' : 'color:#f87171;'}">
-                    ${isPatched
-                      ? '✓ Wrapped in motion-safe: prefix (calm for users with reduced motion)'
-                      : '↑ Ping never pauses, ignoring prefers-reduced-motion OS preference'
-                    }
-                  </span>
-                </div>
-              </div>
-              <p class="desc-text">
-                ${isPatched
-                  ? 'Remediated: Keyframes wrapped in motion-safe: prefix to prevent vestibular discomfort.'
-                  : 'Defect: Unpausable animations run indefinitely without checking user accessibility settings.'
-                }
-              </p>
-            </div>
-
-            <!-- 4. PERF-FONT-01 -->
-            <div class="card" id="card-PERF-FONT-01">
-              <div>
-                <div class="card-header">
-                  <span class="card-id">PERF-FONT-01</span>
-                  <span class="card-tier">Production • Tier A</span>
-                </div>
-                <div class="card-title">Font Preload Swap Optimization for Vercel Edge</div>
-                <span class="pin ${isPatched ? 'pin-success' : 'pin-danger'}">
-                  ${isPatched ? '✓ Zero-FOIT display:swap Preload' : '🔴 Render-Blocking FOIT (CLS Spike)'}
-                </span>
-
-                <div class="demo-area">
-                  <div class="font-sample">
-                    Modern Typography Engine
-                  </div>
-                  <div style="margin-top:6px;font-family:monospace;font-size:10px;${isPatched ? 'color:#34d399;' : 'color:#f87171;'}">
-                    ${isPatched
-                      ? '✓ display: "swap" active • CLS = 0.00 • No text flash'
-                      : '↑ Render blocked waiting for custom font • CLS spike on swap'
-                    }
-                  </div>
-                </div>
-              </div>
-              <p class="desc-text">
-                ${isPatched
-                  ? 'Remediated: Preloaded with display: "swap" ensuring zero text invisibility and optimal LCP/CLS.'
-                  : 'Defect: Custom web fonts loaded without display: "swap" trigger FOIT layout shifts.'
-                }
-              </p>
+            <h1>Interactive Performance & Experience Preview</h1>
+            <p>
+              Experience your application with live styling, interactive touch targets, and visual polish applied in real time.
+            </p>
+            <div class="hero-actions">
+              <button class="cta-btn" onclick="handleClick()">Get Started</button>
+              <button class="secondary-btn" onclick="handleClick()">View Documentation</button>
             </div>
           </div>
+
+          <div class="grid">
+            <div class="card">
+              <div>
+                <div class="card-label">Latency & Edge</div>
+                <div class="card-value">18 ms</div>
+              </div>
+              <p class="card-desc">Global edge distribution with instant page composition and zero render latency.</p>
+            </div>
+
+            <div class="card">
+              <div>
+                <div class="card-label">Real-time Stream</div>
+                <div class="beacon-row">
+                  <div class="beacon-dot">
+                    <div class="beacon-ring"></div>
+                    <div class="beacon-core"></div>
+                  </div>
+                  <span style="font-size:14px;font-weight:700;">Live Feed Synchronized</span>
+                </div>
+              </div>
+              <p class="card-desc">Telemetry data flowing across active nodes with smooth motion-safe animations.</p>
+            </div>
+
+            <div class="card">
+              <div>
+                <div class="card-label">Visual Fidelity</div>
+                <div class="card-value">100%</div>
+              </div>
+              <p class="card-desc">Optimized contrast rendering ensuring high legibility across all display devices.</p>
+            </div>
+          </div>
+
+          <div class="interactive-box">
+            <div class="interactive-text">
+              <strong>Interactive Sandbox:</strong> Test live control responsiveness directly inside this window.
+            </div>
+            <button id="counter-btn" class="cta-btn" onclick="handleCounter()">
+              Click Counter: <span id="count">0</span>
+            </button>
+          </div>
         </div>
+
+        <script>
+          let count = 0;
+          function handleClick() {
+            console.log('Action triggered in preview session');
+          }
+          function handleCounter() {
+            count++;
+            const el = document.getElementById('count');
+            if (el) el.innerText = count;
+          }
+        </script>
       </body>
       </html>
     `;
