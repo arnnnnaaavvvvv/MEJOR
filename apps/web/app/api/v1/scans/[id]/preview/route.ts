@@ -69,6 +69,141 @@ export async function GET(
       html = html.replace('<head>', `<head>${antiCrashShim}`);
     }
 
+    // Scroll Reveal & Synchronized Scrolling Engine for Preview Sandbox
+    const scrollAndSyncEngine = `
+      <style id="auditor-scroll-reveal-styles">
+        html {
+          scroll-behavior: smooth !important;
+        }
+        /* Ensure elements with scroll-reveal animations animate into view smoothly */
+        [data-reveal] {
+          opacity: 0;
+          transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          will-change: opacity, transform;
+        }
+        [data-reveal="fade-up"] {
+          transform: translateY(22px) !important;
+        }
+        [data-reveal="fade-down"] {
+          transform: translateY(-22px) !important;
+        }
+        [data-reveal="fade-left"] {
+          transform: translateX(22px) !important;
+        }
+        [data-reveal="fade-right"] {
+          transform: translateX(-22px) !important;
+        }
+        [data-reveal="zoom-in"] {
+          transform: scale(0.96) !important;
+        }
+        [data-reveal="blur-in"] {
+          transform: translateY(16px) !important;
+          filter: blur(4px);
+        }
+        [data-reveal].is-visible {
+          opacity: 1 !important;
+          transform: none !important;
+          filter: none !important;
+        }
+      </style>
+
+      <script id="auditor-scroll-reveal-sync">
+        (() => {
+          // 1. SCROLL REVEAL ANIMATION ENGINE
+          function activateScrollReveal() {
+            const targets = document.querySelectorAll('[data-reveal], [data-aos], .reveal-on-scroll, [class*="fade-up"]');
+            if (!targets.length) return;
+
+            const observer = new IntersectionObserver((entries) => {
+              entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add('is-visible', 'aos-animate');
+                }
+              });
+            }, {
+              threshold: 0.05,
+              rootMargin: '20px 0px 40px 0px'
+            });
+
+            targets.forEach(el => {
+              observer.observe(el);
+              // Reveal elements immediately if they are in or near initial viewport
+              const rect = el.getBoundingClientRect();
+              if (rect.top < window.innerHeight + 200) {
+                el.classList.add('is-visible', 'aos-animate');
+              }
+            });
+
+            // Fallback on scroll
+            window.addEventListener('scroll', () => {
+              targets.forEach(el => {
+                if (!el.classList.contains('is-visible')) {
+                  const rect = el.getBoundingClientRect();
+                  if (rect.top < window.innerHeight + 200) {
+                    el.classList.add('is-visible', 'aos-animate');
+                  }
+                }
+              });
+            }, { passive: true });
+          }
+
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', activateScrollReveal);
+          } else {
+            activateScrollReveal();
+          }
+          setTimeout(activateScrollReveal, 50);
+          setTimeout(activateScrollReveal, 250);
+          setTimeout(activateScrollReveal, 800);
+
+          // 2. SYNCHRONIZED BIDIRECTIONAL SCROLLING
+          let isRemoteScroll = false;
+          let scrollTimeout = null;
+
+          window.addEventListener('scroll', () => {
+            if (isRemoteScroll) return;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const ratio = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+            try {
+              window.parent.postMessage({
+                type: 'AUDITOR_SYNC_SCROLL',
+                scrollY: window.scrollY,
+                scrollRatio: ratio,
+                mode: '${mode}'
+              }, '*');
+            } catch(e) {}
+          }, { passive: true });
+
+          window.addEventListener('message', (event) => {
+            if (!event.data || event.data.type !== 'AUDITOR_SCROLL_TO') return;
+            if (event.data.mode === '${mode}') return; // Don't echo to self
+
+            isRemoteScroll = true;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const targetY = (event.data.scrollRatio !== undefined && maxScroll > 0)
+              ? event.data.scrollRatio * maxScroll
+              : event.data.scrollY;
+
+            window.scrollTo({
+              top: targetY,
+              behavior: event.data.smooth ? 'smooth' : 'auto'
+            });
+
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+              isRemoteScroll = false;
+            }, 80);
+          });
+        })();
+      </script>
+    `;
+
+    if (html.includes('<head>')) {
+      html = html.replace('<head>', `<head>${scrollAndSyncEngine}`);
+    } else {
+      html += scrollAndSyncEngine;
+    }
+
     if (mode === 'patched') {
       // Apply clean live remediation patches directly to the interface
       const afterRemediationSystem = `
@@ -98,18 +233,9 @@ export async function GET(
             color: #f4f4f5 !important; /* High contrast on dark */
           }
 
-          /* 3. Motion Accessibility: Reduced-Motion Guard */
+          /* 3. Motion Accessibility: Calm Continuous Animations */
           @media (prefers-reduced-motion: reduce) {
-            *, ::before, ::after {
-              animation-delay: -1ms !important;
-              animation-duration: 1ms !important;
-              animation-iteration-count: 1 !important;
-              background-attachment: initial !important;
-              scroll-behavior: auto !important;
-              transition-duration: 0s !important;
-              transition-delay: 0s !important;
-            }
-            .animate-ping, .pulse-beacon, [class*="animate-"] {
+            .animate-ping, .pulse-beacon {
               animation: none !important;
               transform: none !important;
               opacity: 1 !important;

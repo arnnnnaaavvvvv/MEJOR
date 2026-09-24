@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   AlertTriangle,
@@ -33,6 +33,8 @@ import {
   Download,
   Activity,
   FileCode,
+  Play,
+  Pause,
 } from 'lucide-react';
 import { AUDIT_CATALOG_200, CatalogCheck } from '@/lib/catalogData';
 import { generateWebsiteFeedback } from '@/lib/feedback';
@@ -121,6 +123,76 @@ export default function ReportPage() {
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [previewKey, setPreviewKey] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isAutoScrolling, setIsAutoScrolling] = useState(false);
+  const autoScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const handleSyncScroll = (e: MessageEvent) => {
+      if (e.data && e.data.type === 'AUDITOR_SYNC_SCROLL') {
+        const iframes = document.querySelectorAll<HTMLIFrameElement>('#preview-comparison-section iframe');
+        iframes.forEach((iframe) => {
+          if (iframe.contentWindow && iframe.contentWindow !== e.source) {
+            iframe.contentWindow.postMessage({
+              type: 'AUDITOR_SCROLL_TO',
+              scrollY: e.data.scrollY,
+              scrollRatio: e.data.scrollRatio,
+              mode: e.data.mode,
+              smooth: false,
+            }, '*');
+          }
+        });
+      }
+    };
+
+    window.addEventListener('message', handleSyncScroll);
+    return () => window.removeEventListener('message', handleSyncScroll);
+  }, []);
+
+  const toggleAutoScroll = () => {
+    if (isAutoScrolling) {
+      setIsAutoScrolling(false);
+      if (autoScrollTimerRef.current) {
+        clearInterval(autoScrollTimerRef.current);
+        autoScrollTimerRef.current = null;
+      }
+      return;
+    }
+
+    setIsAutoScrolling(true);
+    let progress = 0;
+    let direction = 1;
+
+    const interval = setInterval(() => {
+      progress += direction * 0.007;
+      if (progress >= 1) {
+        progress = 1;
+        direction = -1;
+      } else if (progress <= 0) {
+        progress = 0;
+        direction = 1;
+      }
+
+      const iframes = document.querySelectorAll<HTMLIFrameElement>('#preview-comparison-section iframe');
+      iframes.forEach((iframe) => {
+        iframe.contentWindow?.postMessage({
+          type: 'AUDITOR_SCROLL_TO',
+          scrollRatio: progress,
+          mode: 'PARENT_CONTROLLER',
+          smooth: false,
+        }, '*');
+      });
+    }, 25);
+
+    autoScrollTimerRef.current = interval;
+  };
+
+  useEffect(() => {
+    return () => {
+      if (autoScrollTimerRef.current) {
+        clearInterval(autoScrollTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -385,6 +457,21 @@ export default function ReportPage() {
                 title="Reload Sandbox"
               >
                 <RotateCcw className="w-4 h-4" />
+              </button>
+
+              {/* Auto-Scroll Animation Toggle Button */}
+              <button
+                type="button"
+                onClick={toggleAutoScroll}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow ${
+                  isAutoScrolling
+                    ? 'bg-emerald-500 text-black border border-emerald-400 font-bold'
+                    : 'bg-gray-900 text-gray-300 hover:text-white border border-gray-800'
+                }`}
+                title="Play smooth continuous auto-scrolling animation"
+              >
+                {isAutoScrolling ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-400" />}
+                <span>{isAutoScrolling ? 'Pause Scroll' : 'Auto-Scroll Preview'}</span>
               </button>
 
               {/* Full Screen Comparison Toggle Button */}
