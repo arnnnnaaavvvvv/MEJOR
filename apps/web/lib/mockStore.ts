@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 export interface StoredScan {
   id: string;
   target_url: string;
@@ -209,14 +212,51 @@ All critical issues resolved! Score: 94 (Grade A).`,
 globalScans.set(demoBase.id, demoBase);
 globalScans.set(demoRescan.id, demoRescan);
 
+const CACHE_FILE = process.platform === 'win32'
+  ? path.join(process.cwd(), '.next', 'cache', 'mejor_scans.json')
+  : '/tmp/mejor_scans.json';
+
+function readDiskCache(): Record<string, StoredScan> {
+  try {
+    if (fs.existsSync(CACHE_FILE)) {
+      const data = fs.readFileSync(CACHE_FILE, 'utf-8');
+      return JSON.parse(data);
+    }
+  } catch(e) {}
+  return {};
+}
+
+function writeDiskCache(data: Record<string, StoredScan>) {
+  try {
+    const dir = path.dirname(CACHE_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(CACHE_FILE, JSON.stringify(data), 'utf-8');
+  } catch(e) {}
+}
+
 export function getScan(id: string): StoredScan | undefined {
-  return globalScans.get(id);
+  if (globalScans.has(id)) {
+    return globalScans.get(id);
+  }
+  const disk = readDiskCache();
+  if (disk[id]) {
+    globalScans.set(id, disk[id]);
+    return disk[id];
+  }
+  return undefined;
 }
 
 export function saveScan(scan: StoredScan): void {
   globalScans.set(scan.id, scan);
+  const disk = readDiskCache();
+  disk[scan.id] = scan;
+  writeDiskCache(disk);
 }
 
 export function getAllScans(): StoredScan[] {
+  const disk = readDiskCache();
+  Object.values(disk).forEach((s) => {
+    if (!globalScans.has(s.id)) globalScans.set(s.id, s);
+  });
   return Array.from(globalScans.values());
 }

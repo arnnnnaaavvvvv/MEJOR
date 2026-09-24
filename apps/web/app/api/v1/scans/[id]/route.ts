@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getScan } from '@/lib/mockStore';
+import { auditWebsite, extractUrlFromScanId } from '@/lib/auditor';
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const scan = getScan(params.id);
+  let scan = getScan(params.id);
+  if (!scan) {
+    const fallbackUrl = extractUrlFromScanId(params.id);
+    if (fallbackUrl) {
+      scan = await auditWebsite(fallbackUrl);
+    }
+  }
   if (!scan) {
     return NextResponse.json({ detail: 'Scan not found' }, { status: 404 });
   }

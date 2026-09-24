@@ -123,6 +123,7 @@ export default function ReportPage() {
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [previewKey, setPreviewKey] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [highlightsEnabled, setHighlightsEnabled] = useState(true);
   const [isAutoScrolling, setIsAutoScrolling] = useState(false);
   const autoScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -459,6 +460,21 @@ export default function ReportPage() {
                 <RotateCcw className="w-4 h-4" />
               </button>
 
+              {/* Highlight Issues on Interface Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setHighlightsEnabled(!highlightsEnabled)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow ${
+                  highlightsEnabled
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30'
+                    : 'bg-gray-900 text-gray-400 hover:text-white border border-gray-800'
+                }`}
+                title="Highlight fixed issues directly on the website interface"
+              >
+                <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{highlightsEnabled ? 'Highlights on Interface: ON' : 'Highlights: OFF'}</span>
+              </button>
+
               {/* Auto-Scroll Animation Toggle Button */}
               <button
                 type="button"
@@ -519,8 +535,8 @@ export default function ReportPage() {
                   }}
                 >
                   <iframe
-                    key={`before-${previewKey}`}
-                    src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=original&url=${encodeURIComponent(report.target_url)}`}
+                    key={`before-${previewKey}-${highlightsEnabled}`}
+                    src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=original&url=${encodeURIComponent(report.target_url)}&highlight=${highlightsEnabled ? '1' : '0'}`}
                     title="Site Preview Before Fixes"
                     className="w-full h-full border-0"
                     sandbox="allow-scripts allow-same-origin"
@@ -553,8 +569,8 @@ export default function ReportPage() {
                   }}
                 >
                   <iframe
-                    key={`after-${previewKey}`}
-                    src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=patched&url=${encodeURIComponent(report.target_url)}`}
+                    key={`after-${previewKey}-${highlightsEnabled}`}
+                    src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=patched&url=${encodeURIComponent(report.target_url)}&highlight=${highlightsEnabled ? '1' : '0'}`}
                     title="Site Preview After Fixes"
                     className="w-full h-full border-0"
                     sandbox="allow-scripts allow-same-origin"
@@ -592,8 +608,8 @@ export default function ReportPage() {
                   }}
                 >
                   <iframe
-                    key={`single-${previewMode}-${previewKey}`}
-                    src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=${previewMode === 'after' ? 'patched' : 'original'}&url=${encodeURIComponent(report.target_url)}`}
+                    key={`single-${previewMode}-${previewKey}-${highlightsEnabled}`}
+                    src={`${API_BASE}/api/v1/scans/${scanId}/preview?mode=${previewMode === 'after' ? 'patched' : 'original'}&url=${encodeURIComponent(report.target_url)}&highlight=${highlightsEnabled ? '1' : '0'}`}
                     title="Site Preview Single View"
                     className="w-full h-full border-0"
                     sandbox="allow-scripts allow-same-origin"
