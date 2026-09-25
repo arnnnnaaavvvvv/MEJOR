@@ -50,11 +50,11 @@ export async function GET(
       html = baseTag + html;
     }
 
-    // Anti-crash shim for sandboxed preview:
-    // Prevents Next.js / Vite / SPA client routers from crashing when location pathname doesn't match target routes
+    // Anti-crash and Anti-Scroll-Hijack shim for sandboxed preview:
+    // Prevents target site scripts (Squarespace, Next.js, Webflow, etc.) from scrolling or navigating the parent window
     const antiCrashShim = `
       <script id="auditor-sandbox-shim">
-        // Suppress client-side routing exceptions inside sandbox iframe
+        // 1. Suppress client-side routing exceptions inside sandbox iframe
         window.addEventListener('error', function(e) {
           e.stopImmediatePropagation();
           e.preventDefault();
@@ -65,9 +65,41 @@ export async function GET(
           e.preventDefault();
           return true;
         }, true);
+
+        // 2. Lock parent and top window from being scrolled or navigated by embedded scripts
+        try {
+          const noop = function() {};
+          if (window.parent && window.parent !== window) {
+            window.parent.scrollTo = noop;
+            window.parent.scroll = noop;
+            window.parent.scrollBy = noop;
+          }
+          if (window.top && window.top !== window) {
+            window.top.scrollTo = noop;
+            window.top.scroll = noop;
+            window.top.scrollBy = noop;
+          }
+        } catch(e) {}
+
+        // 3. Prevent focus() calls on iframe elements from auto-scrolling parent window to top
+        try {
+          const origFocus = HTMLElement.prototype.focus;
+          HTMLElement.prototype.focus = function(options) {
+            options = options || {};
+            options.preventScroll = true;
+            try {
+              return origFocus.call(this, options);
+            } catch(err) {}
+          };
+        } catch(e) {}
+
+        // 4. Neutralize SPA history path tampering while preserving internal session
         try {
           if (window.history && window.history.replaceState) {
-            window.history.replaceState(null, '', '/');
+            const origReplace = window.history.replaceState.bind(window.history);
+            window.history.replaceState = function(state, unused, url) {
+              try { return origReplace(state, unused, window.location.pathname); } catch(err) {}
+            };
           }
         } catch(e) {}
       </script>
@@ -82,13 +114,10 @@ export async function GET(
       html = html.replace('<head>', `<head>${antiCrashShim}`);
     }
 
-    // Scroll Reveal & Synchronized Scrolling Engine for Preview Sandbox
+    // Scroll Reveal & User-Intended Synchronized Scrolling Engine for Preview Sandbox
     const scrollAndSyncEngine = `
       <style id="auditor-scroll-reveal-styles">
-        html {
-          scroll-behavior: smooth !important;
-        }
-        /* Ensure elements with scroll-reveal animations animate into view smoothly */
+        /* Elements with scroll-reveal animations animate into view smoothly without global smooth scroll lock */
         [data-reveal] {
           opacity: 0;
           transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1) !important;
@@ -145,17 +174,6 @@ export async function GET(
                 el.classList.add('is-visible', 'aos-animate');
               }
             });
-
-            window.addEventListener('scroll', () => {
-              targets.forEach(el => {
-                if (!el.classList.contains('is-visible')) {
-                  const rect = el.getBoundingClientRect();
-                  if (rect.top < window.innerHeight + 200) {
-                    el.classList.add('is-visible', 'aos-animate');
-                  }
-                }
-              });
-            }, { passive: true });
           }
 
           if (document.readyState === 'loading') {
@@ -163,16 +181,38 @@ export async function GET(
           } else {
             activateScrollReveal();
           }
-          setTimeout(activateScrollReveal, 50);
-          setTimeout(activateScrollReveal, 250);
-          setTimeout(activateScrollReveal, 800);
+          setTimeout(activateScrollReveal, 100);
 
-          // 2. SYNCHRONIZED BIDIRECTIONAL SCROLLING
+          // 2. USER-INTENDED SYNCHRONIZED SCROLLING (Zero automatic scroll resets)
+          let userHasInteracted = false;
           let isRemoteScroll = false;
           let scrollTimeout = null;
 
+          // Track physical user scroll intent (wheel, touch, or keydown)
+          window.addEventListener('wheel', () => { userHasInteracted = true; }, { passive: true });
+          window.addEventListener('touchstart', () => { userHasInteracted = true; }, { passive: true });
+          window.addEventListener('touchmove', () => { userHasInteracted = true; }, { passive: true });
+          window.addEventListener('keydown', (e) => {
+            if (['PageDown', 'PageUp', 'ArrowDown', 'ArrowUp', 'Space', 'Home', 'End'].includes(e.key)) {
+              userHasInteracted = true;
+            }
+          }, { passive: true });
+
+          // Intercept programmatic window.scrollTo(0,0) from third-party router hydration
+          const origScrollTo = window.scrollTo.bind(window);
+          window.scrollTo = function(...args) {
+            const first = args[0];
+            const targetY = typeof first === 'object' && first !== null ? first.top : args[1];
+            // If user has already scrolled down, ignore third-party hydration scripts trying to yank back to top (0)
+            if ((targetY === 0 || (args[0] === 0 && args[1] === 0)) && userHasInteracted && window.scrollY > 30) {
+              return;
+            }
+            return origScrollTo(...args);
+          };
+
+          // Broadcast scroll ONLY when triggered by real user interaction
           window.addEventListener('scroll', () => {
-            if (isRemoteScroll) return;
+            if (isRemoteScroll || !userHasInteracted) return;
             const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
             const ratio = maxScroll > 0 ? window.scrollY / maxScroll : 0;
             try {
@@ -185,6 +225,7 @@ export async function GET(
             } catch(e) {}
           }, { passive: true });
 
+          // Receive synced scroll from sibling frame
           window.addEventListener('message', (event) => {
             if (!event.data || event.data.type !== 'AUDITOR_SCROLL_TO') return;
             if (event.data.mode === '${mode}') return;
@@ -195,15 +236,15 @@ export async function GET(
               ? event.data.scrollRatio * maxScroll
               : event.data.scrollY;
 
-            window.scrollTo({
+            origScrollTo({
               top: targetY,
-              behavior: event.data.smooth ? 'smooth' : 'auto'
+              behavior: 'auto'
             });
 
             clearTimeout(scrollTimeout);
             scrollTimeout = setTimeout(() => {
               isRemoteScroll = false;
-            }, 80);
+            }, 100);
           });
         })();
       </script>

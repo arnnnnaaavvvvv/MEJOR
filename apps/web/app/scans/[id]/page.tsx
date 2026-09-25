@@ -127,6 +127,7 @@ export default function ReportPage() {
   const [isAutoScrolling, setIsAutoScrolling] = useState(false);
   const autoScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Synchronized scrolling engine between preview iframes
   useEffect(() => {
     const handleSyncScroll = (e: MessageEvent) => {
       if (e.data && e.data.type === 'AUDITOR_SYNC_SCROLL') {
@@ -147,6 +148,55 @@ export default function ReportPage() {
 
     window.addEventListener('message', handleSyncScroll);
     return () => window.removeEventListener('message', handleSyncScroll);
+  }, []);
+
+  // Guard against rogue programmatic scroll-to-top resets (e.g. from iframe hydration or router events)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    let isUserIntentionalScroll = false;
+    const markUserScroll = () => {
+      isUserIntentionalScroll = true;
+    };
+
+    window.addEventListener('wheel', markUserScroll, { passive: true });
+    window.addEventListener('touchstart', markUserScroll, { passive: true });
+    window.addEventListener('touchmove', markUserScroll, { passive: true });
+
+    const origScrollTo = window.scrollTo.bind(window);
+    const origScroll = window.scroll.bind(window);
+
+    // Override window.scrollTo to prevent sudden unprompted jumps to top (0, 0)
+    window.scrollTo = function(...args: any[]) {
+      const first = args[0];
+      const targetY = typeof first === 'object' && first !== null ? first.top : args[1];
+      // If something attempts to reset parent window to y=0 while user is already scrolled down
+      if ((targetY === 0 || (args[0] === 0 && args[1] === 0)) && window.scrollY > 80) {
+        if (!isUserIntentionalScroll) {
+          return; // Suppress rogue jump-to-top
+        }
+      }
+      return origScrollTo(...(args as [any, any]));
+    };
+
+    window.scroll = function(...args: any[]) {
+      const first = args[0];
+      const targetY = typeof first === 'object' && first !== null ? first.top : args[1];
+      if ((targetY === 0 || (args[0] === 0 && args[1] === 0)) && window.scrollY > 80) {
+        if (!isUserIntentionalScroll) {
+          return;
+        }
+      }
+      return origScroll(...(args as [any, any]));
+    };
+
+    return () => {
+      window.scrollTo = origScrollTo;
+      window.scroll = origScroll;
+      window.removeEventListener('wheel', markUserScroll);
+      window.removeEventListener('touchstart', markUserScroll);
+      window.removeEventListener('touchmove', markUserScroll);
+    };
   }, []);
 
   const toggleAutoScroll = () => {
@@ -205,6 +255,7 @@ export default function ReportPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isFullScreen]);
 
+  // Fetch report data and preserve scroll position across loading state switch
   useEffect(() => {
     if (!scanId) return;
     const fetchReport = async () => {
@@ -212,10 +263,19 @@ export default function ReportPage() {
         const res = await fetch(`${API_BASE}/api/v1/scans/${scanId}/report`);
         if (!res.ok) throw new Error('Report not found or scan is still in progress.');
         const data = await res.json();
+        
+        // Preserve user scroll position so switching from skeleton to loaded state never jumps to top
+        const savedScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
         setReport(data);
+        setLoading(false);
+
+        if (savedScrollY > 0) {
+          requestAnimationFrame(() => {
+            window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+          });
+        }
       } catch (err: any) {
         setError(err.message || 'Error loading report.');
-      } finally {
         setLoading(false);
       }
     };
