@@ -57,26 +57,6 @@ export default function RootLayout({
                       if (opts.preventScroll === undefined) opts.preventScroll = true;
                       return origFocus.call(this, opts);
                     };
-                    var origScrollTo = window.scrollTo.bind(window);
-                    var origScroll = window.scroll.bind(window);
-                    window.scrollTo = function() {
-                      var args = arguments;
-                      var first = args[0];
-                      var targetY = (typeof first === 'object' && first !== null) ? first.top : args[1];
-                      if ((targetY === 0 || (args[0] === 0 && args[1] === 0)) && window.scrollY > 40) {
-                        return;
-                      }
-                      return origScrollTo.apply(window, args);
-                    };
-                    window.scroll = function() {
-                      var args = arguments;
-                      var first = args[0];
-                      var targetY = (typeof first === 'object' && first !== null) ? first.top : args[1];
-                      if ((targetY === 0 || (args[0] === 0 && args[1] === 0)) && window.scrollY > 40) {
-                        return;
-                      }
-                      return origScroll.apply(window, args);
-                    };
                   }
                 } catch(e) {}
               })();

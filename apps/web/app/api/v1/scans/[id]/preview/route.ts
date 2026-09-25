@@ -66,20 +66,7 @@ export async function GET(
           return true;
         }, true);
 
-        // 2. Lock parent and top window from being scrolled or navigated by embedded scripts
-        try {
-          const noop = function() {};
-          if (window.parent && window.parent !== window) {
-            window.parent.scrollTo = noop;
-            window.parent.scroll = noop;
-            window.parent.scrollBy = noop;
-          }
-          if (window.top && window.top !== window) {
-            window.top.scrollTo = noop;
-            window.top.scroll = noop;
-            window.top.scrollBy = noop;
-          }
-        } catch(e) {}
+
 
         // 3. Prevent focus() calls on iframe elements from auto-scrolling parent window to top
         try {

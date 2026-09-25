@@ -145,16 +145,8 @@ export default function ReportPage() {
         if (!res.ok) throw new Error('Report not found or scan is still in progress.');
         const data = await res.json();
         
-        // Preserve user scroll position so switching from skeleton to loaded state never jumps to top
-        const savedScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
         setReport(data);
         setLoading(false);
-
-        if (savedScrollY > 0) {
-          requestAnimationFrame(() => {
-            window.scrollTo({ top: savedScrollY, behavior: 'instant' });
-          });
-        }
       } catch (err: any) {
         setError(err.message || 'Error loading report.');
         setLoading(false);
@@ -853,13 +845,11 @@ export default function ReportPage() {
         <div className="relative">
           <div
             id="master-prompt-codebox"
-            tabIndex={0}
-            className={`bg-[#050811] p-4.5 rounded-xl font-mono text-xs text-slate-300 border border-white/[0.07] select-all whitespace-pre-wrap transition-all duration-300 focus:outline-none focus:border-emerald-500/50 shadow-inner ${
+            className={`bg-[#050811] p-4.5 rounded-xl font-mono text-xs text-slate-300 border border-white/[0.07] whitespace-pre-wrap shadow-inner ${
               promptExpanded
                 ? 'max-h-[750px] overflow-y-auto'
-                : 'max-h-56 overflow-y-auto overscroll-contain'
+                : 'max-h-56 overflow-y-auto'
             }`}
-            style={{ overscrollBehavior: 'auto' }}
           >
             {report.master_prompt}
           </div>
