@@ -322,34 +322,68 @@ export async function GET(
         }
 
         ${isPatched ? `
-          /* Live Remediation CSS overrides in Patched Mode */
-          button, [role="button"], a.btn, input[type="button"], input[type="submit"], .tiny-btn, .cta-action {
-            min-width: 44px !important;
-            min-height: 44px !important;
-            padding-left: max(16px, 1rem) !important;
-            padding-right: max(16px, 1rem) !important;
-            border-radius: 10px !important;
-            transition: transform 0.15s ease, filter 0.15s ease !important;
-          }
-          button:hover, [role="button"]:hover, .cta-action:hover {
-            filter: brightness(1.08) !important;
-            transform: scale(1.02) !important;
-          }
-          .text-gray-400, .text-gray-500, [class*="text-zinc-500"], [class*="text-slate-400"], nav a, p.subtitle, span.badge-subtext {
-            color: #27272a !important;
-          }
-          .dark .text-gray-400, .dark .text-gray-500, .dark [class*="text-zinc-500"], .dark nav a {
-            color: #f4f4f5 !important;
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .animate-ping, .pulse-beacon {
-              animation: none !important;
-              transform: none !important;
-              opacity: 1 !important;
+          /* Live Remediation CSS overrides in Patched Mode for Invisible Interface Flaws */
+          /* 1. iOS Safari Auto-Zoom Viewport Guard (<16px font triggers aggressive zoom) */
+          @media (max-width: 768px) {
+            input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+              font-size: 16px !important;
             }
           }
-          @font-face {
-            font-display: swap !important;
+
+          /* 2. Zero-Delay Touch Response (Eliminates 300ms double-tap deferral) */
+          button, a, [role="button"], input[type="button"], input[type="submit"], .cta-btn, .action-btn {
+            touch-action: manipulation !important;
+            -webkit-tap-highlight-color: transparent !important;
+          }
+
+          /* 3. Keyboard Tab Focus Indicator Restoration */
+          :focus-visible {
+            outline: 2.5px solid #3b82f6 !important;
+            outline-offset: 2.5px !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25) !important;
+          }
+
+          /* 4. Flexbox Icon & Badge Micro-Crush Elimination */
+          [class*="flex"] > svg, [class*="flex"] > .badge, .status-indicator, button svg, .avatar-icon {
+            flex-shrink: 0 !important;
+          }
+
+          /* 5. Hover Micro-Shift Jitter Elimination (Reserves border box model) */
+          button, [role="button"], a.btn, .tab-item {
+            border: 1.5px solid transparent !important;
+            box-sizing: border-box !important;
+            transition: transform 0.15s ease, border-color 0.15s ease !important;
+          }
+          button:hover, [role="button"]:hover, a.btn:hover {
+            border-color: currentColor !important;
+          }
+
+          /* 6. 100vw Viewport Bleed & Horizontal Scrollbar Lockout */
+          html, body {
+            max-width: 100vw !important;
+            overflow-x: clip !important;
+          }
+
+          /* 7. Mobile Safe Area Notch & Home-Indicator Cushioning */
+          header, nav, [class*="fixed top-0"], [class*="fixed bottom-0"], .fixed-bottom-bar {
+            padding-top: max(12px, env(safe-area-inset-top)) !important;
+            padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+          }
+
+          /* 8. Ghost Click Interception & Dropdown Clipping Defense */
+          .overlay, [class*="gradient-to-"]:not(button):not(a), .ambient-glow {
+            pointer-events: none !important;
+          }
+          header, nav, .navbar {
+            overflow: visible !important;
+          }
+
+          /* 9. Dark Mode Form Control Color-Scheme Synchronization */
+          html {
+            color-scheme: dark light !important;
+          }
+          select, input, textarea {
+            color-scheme: inherit !important;
           }
         ` : ''}
       </style>
@@ -362,69 +396,120 @@ export async function GET(
             const highlightClass = isPatched ? 'auditor-fix-highlight' : 'auditor-defect-highlight';
             const badgeClass = isPatched ? 'auditor-fix-badge' : 'auditor-defect-badge';
 
-            // 1. HIGHLIGHT BUTTONS & TOUCH TARGETS
-            const buttons = Array.from(document.querySelectorAll('button, [role="button"], a.btn, .cta-action, .cta-btn, header a[href*="login"], header a[href*="signup"], header button'));
-            let buttonTagged = 0;
-            buttons.forEach(btn => {
-              if (buttonTagged >= 4) return;
-              if (btn.closest('#auditor-floating-hud') || btn.classList.contains(highlightClass)) return;
-              const rect = btn.getBoundingClientRect();
-              if (rect.width > 0 && rect.height > 0) {
-                btn.classList.add(highlightClass);
-                if (!btn.querySelector('.' + badgeClass) && !btn.parentElement?.querySelector('.' + badgeClass)) {
-                  const badge = document.createElement('span');
-                  badge.className = badgeClass;
-                  badge.style.position = 'absolute';
-                  badge.style.top = '-24px';
-                  badge.style.left = '0';
-                  badge.innerHTML = isPatched ? '✓ Fixed: 44×44px Target' : '⚠️ Defect: &lt;44px Hitbox';
-                  if (getComputedStyle(btn).position === 'static') {
-                    btn.style.position = 'relative';
-                  }
-                  btn.appendChild(badge);
-                }
-                buttonTagged++;
-              }
-            });
-
-            // 2. HIGHLIGHT SUBTITLES & TEXT CONTRAST
-            const paragraphs = Array.from(document.querySelectorAll('p, .text-gray-400, .text-zinc-500, p.subtitle, span.badge-subtext'));
-            let textTagged = 0;
-            paragraphs.forEach(p => {
-              if (textTagged >= 2) return;
-              if (p.closest('#auditor-floating-hud') || p.classList.contains(highlightClass) || p.innerText.length < 25) return;
-              p.classList.add(highlightClass);
-              if (!p.querySelector('.' + badgeClass)) {
-                const badge = document.createElement('span');
-                badge.className = badgeClass;
+            function attachBadge(el, text, isBlock) {
+              if (el.querySelector('.' + badgeClass) || el.parentElement?.querySelector('.' + badgeClass)) return;
+              el.classList.add(highlightClass);
+              const badge = document.createElement('span');
+              badge.className = badgeClass;
+              badge.innerHTML = text;
+              if (isBlock) {
                 badge.style.display = 'block';
                 badge.style.width = 'fit-content';
                 badge.style.marginBottom = '6px';
-                badge.innerHTML = isPatched ? '✓ Fixed: 4.5:1+ Contrast Boosted' : '⚠️ Defect: Low Contrast (3.2:1)';
-                p.insertBefore(badge, p.firstChild);
+                el.parentElement?.insertBefore(badge, el);
+              } else {
+                badge.style.position = 'absolute';
+                badge.style.top = '-24px';
+                badge.style.left = '0';
+                if (getComputedStyle(el).position === 'static') {
+                  el.style.position = 'relative';
+                }
+                el.appendChild(badge);
               }
-              textTagged++;
+            }
+
+            // 1. HIGHLIGHT FORM INPUTS (iOS Auto-Zoom Trap)
+            const inputs = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), select, textarea'));
+            let inputTagged = 0;
+            inputs.forEach(input => {
+              if (inputTagged >= 2) return;
+              if (input.closest('#auditor-floating-hud')) return;
+              const cs = getComputedStyle(input);
+              const fontSize = parseFloat(cs.fontSize) || 14;
+              if (fontSize < 16 || isPatched) {
+                attachBadge(
+                  input,
+                  isPatched ? '✓ Fixed: 16px iOS Zoom Guard' : '⚠️ Defect: iOS Auto-Zoom (&lt;16px Font)',
+                  true
+                );
+                inputTagged++;
+              }
             });
 
-            // 3. HIGHLIGHT CONTINUOUS ANIMATIONS
-            const anims = Array.from(document.querySelectorAll('.animate-ping, .pulse-beacon, [class*="animate-"], [data-animated]'));
-            anims.forEach(anim => {
-              if (anim.classList.contains(highlightClass)) return;
-              anim.classList.add(highlightClass);
-              const badge = document.createElement('span');
-              badge.className = badgeClass;
-              badge.innerHTML = isPatched ? '✓ Fixed: Motion-Safe Guard' : '⚠️ Defect: Continuous Animation';
-              anim.parentElement?.insertBefore(badge, anim);
+            // 2. HIGHLIGHT ICON-ONLY BUTTONS (Unannounced Action Blindness)
+            const allButtons = Array.from(document.querySelectorAll('button, a[role="button"], a.btn'));
+            let iconBtnTagged = 0;
+            allButtons.forEach(btn => {
+              if (iconBtnTagged >= 2) return;
+              if (btn.closest('#auditor-floating-hud') || btn.classList.contains(highlightClass)) return;
+              const hasSvg = btn.querySelector('svg');
+              const hasText = btn.innerText.trim().length > 0;
+              const hasAria = btn.hasAttribute('aria-label') || btn.hasAttribute('title');
+              if (hasSvg && !hasText && (!hasAria || isPatched)) {
+                attachBadge(
+                  btn,
+                  isPatched ? '✓ Fixed: Screen-Reader ARIA Label' : '⚠️ Defect: Unannounced Icon Action',
+                  false
+                );
+                iconBtnTagged++;
+              }
             });
 
-            // 4. FLOATING SUMMARY HUD
+            // 3. HIGHLIGHT FAST-TAP TOUCH CONTROLS (300ms Latency Lag)
+            let tapTagged = 0;
+            allButtons.forEach(btn => {
+              if (tapTagged >= 2) return;
+              if (btn.closest('#auditor-floating-hud') || btn.classList.contains(highlightClass)) return;
+              const rect = btn.getBoundingClientRect();
+              if (rect.width > 20 && rect.height > 20) {
+                attachBadge(
+                  btn,
+                  isPatched ? '✓ Fixed: Zero-Delay Fast Tap' : '⚠️ Defect: 300ms Touch Latency Lag',
+                  false
+                );
+                tapTagged++;
+              }
+            });
+
+            // 4. HIGHLIGHT FLEX SQUISH ICONS (Missing flex-shrink: 0)
+            const flexIcons = Array.from(document.querySelectorAll('[class*="flex"] > svg, header svg, nav svg'));
+            let flexTagged = 0;
+            flexIcons.forEach(icon => {
+              if (flexTagged >= 2) return;
+              if (icon.closest('#auditor-floating-hud') || icon.classList.contains(highlightClass)) return;
+              const parent = icon.parentElement;
+              if (parent && !parent.classList.contains(highlightClass)) {
+                attachBadge(
+                  parent,
+                  isPatched ? '✓ Fixed: flex-shrink: 0 Locked' : '⚠️ Defect: Flex Shrink Distortion',
+                  true
+                );
+                flexTagged++;
+              }
+            });
+
+            // 5. HIGHLIGHT HOVER MICRO-SHIFT JITTER (Dynamic Border Jump)
+            const interactiveCards = Array.from(document.querySelectorAll('.card, [class*="card"], .tab-item, header nav a'));
+            let cardTagged = 0;
+            interactiveCards.forEach(card => {
+              if (cardTagged >= 1) return;
+              if (card.closest('#auditor-floating-hud') || card.classList.contains(highlightClass)) return;
+              attachBadge(
+                card,
+                isPatched ? '✓ Fixed: Zero-Shift Inset Border' : '⚠️ Defect: Hover Layout Jitter',
+                true
+              );
+              cardTagged++;
+            });
+
+            // 6. FLOATING SUMMARY HUD
             if (!document.getElementById('auditor-floating-hud')) {
               const hud = document.createElement('div');
               hud.id = 'auditor-floating-hud';
               hud.className = 'auditor-floating-hud ' + (isPatched ? 'auditor-hud-green' : 'auditor-hud-rose');
               hud.innerHTML = isPatched
-                ? '<span class="auditor-hud-dot"></span><span>✨ Live Fixes Highlighted On Interface</span>'
-                : '<span class="auditor-hud-dot-rose"></span><span>⚠️ Defects Highlighted On Interface</span>';
+                ? '<span class="auditor-hud-dot"></span><span>✨ Live Invisible Interface Fixes Active</span>'
+                : '<span class="auditor-hud-dot-rose"></span><span>⚠️ Invisible Interface Defects Highlighted</span>';
               document.body.appendChild(hud);
             }
           }
@@ -817,21 +902,50 @@ export async function GET(
       </head>
       <body>
         <header>
-          <div class="logo">
-            <div class="logo-dot"></div>
+          <div class="logo" style="display: flex; align-items: center; gap: 8px;">
+            <div class="logo-dot ${isPatched ? 'auditor-fix-highlight' : 'auditor-defect-highlight'}" style="flex-shrink: ${isPatched ? '0' : '1'};"></div>
             <span>${domain}</span>
+            <span class="${isPatched ? 'auditor-fix-badge' : 'auditor-defect-badge'}" style="margin-left: 4px;">
+              ${isPatched ? '✓ Fixed: flex-shrink: 0 Locked' : '⚠️ Defect: Flex Shrink Distortion'}
+            </span>
           </div>
           <div class="nav-links">
             <a href="#">Overview</a>
             <a href="#">Features</a>
-            <a href="#">Pricing</a>
             <a href="#">Docs</a>
+            <!-- Icon-only action button with Screen-Reader Accessibility defect / fix -->
             <div style="position: relative; display: inline-block;">
-              <button class="cta-btn ${isPatched ? 'auditor-fix-highlight' : 'auditor-defect-highlight'}" onclick="handleClick()">Launch App</button>
-              <div style="position: absolute; top: -22px; right: 0;">
+              <button
+                class="cta-btn ${isPatched ? 'auditor-fix-highlight' : 'auditor-defect-highlight'}"
+                ${isPatched ? 'aria-label="Global Search"' : ''}
+                style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; padding: 0; border-radius: 8px;"
+                title="Search"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ${isPatched ? 'aria-hidden="true"' : ''}>
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </button>
+              <div style="position: absolute; top: -24px; right: 0;">
                 ${isPatched
-                  ? '<span class="auditor-fix-badge">✓ Fixed: 44×44px Target</span>'
-                  : '<span class="auditor-defect-badge">⚠️ Defect: 26px Touch Target</span>'
+                  ? '<span class="auditor-fix-badge">✓ Fixed: ARIA Label Added</span>'
+                  : '<span class="auditor-defect-badge">⚠️ Defect: Unannounced Icon Action</span>'
+                }
+              </div>
+            </div>
+            <!-- Fast Tap button with 0ms vs 300ms latency -->
+            <div style="position: relative; display: inline-block;">
+              <button
+                class="cta-btn ${isPatched ? 'auditor-fix-highlight' : 'auditor-defect-highlight'}"
+                style="${isPatched ? 'touch-action: manipulation; -webkit-tap-highlight-color: transparent;' : ''}"
+                onclick="handleClick()"
+              >
+                Launch App
+              </button>
+              <div style="position: absolute; top: -24px; right: 0;">
+                ${isPatched
+                  ? '<span class="auditor-fix-badge">✓ Fixed: Zero-Delay Fast Tap</span>'
+                  : '<span class="auditor-defect-badge">⚠️ Defect: 300ms Touch Latency</span>'
                 }
               </div>
             </div>
@@ -842,85 +956,109 @@ export async function GET(
           <div class="hero">
             <div class="badge">
               <span>●</span> Production Environment
-              ${isPatched
-                ? '<span class="auditor-fix-badge" style="margin-left: 8px;">✓ Fixed: font-display: swap</span>'
-                : '<span class="auditor-defect-badge" style="margin-left: 8px;">⚠️ Defect: FOIT Risk</span>'
-              }
+              <span class="${isPatched ? 'auditor-fix-badge' : 'auditor-defect-badge'}" style="margin-left: 8px;">
+                ${isPatched ? '✓ Fixed: Viewport 100vw Bleed Clipped' : '⚠️ Defect: 100vw Scrollbar Bleed'}
+              </span>
             </div>
-            <h1>Interactive Performance & Experience Preview</h1>
+            <h1>Invisible Interface Defects Diagnostic Sandbox</h1>
+            <p style="color: #94a3b8; max-width: 640px; margin: 0 auto 24px; font-size: 14px; line-height: 1.6;">
+              Detecting subtle, elusive interface flaws that developers and vibe coders miss: iOS Safari auto-zooming, 300ms touch delay, icon crushing, and unannounced screen-reader triggers.
+            </p>
 
-            <!-- Subtitle with Contrast Highlighting -->
-            <div style="margin: 0 auto 24px; max-width: 640px;">
+            <!-- Form Input with iOS Auto-Zoom Highlighting -->
+            <div style="max-width: 440px; margin: 0 auto 28px; text-align: left;">
               <div style="margin-bottom: 6px;">
                 ${isPatched
-                  ? '<span class="auditor-fix-badge">✓ Fixed: 4.5:1+ Contrast Boosted</span>'
-                  : '<span class="auditor-defect-badge">⚠️ Defect: 3.2:1 Low Contrast</span>'
+                  ? '<span class="auditor-fix-badge">✓ Fixed: 16px iOS Safari Zoom Guard</span>'
+                  : '<span class="auditor-defect-badge">⚠️ Defect: iOS Auto-Zoom (13px Font Triggers Viewport Zoom)</span>'
                 }
               </div>
-              <p class="${isPatched ? 'auditor-fix-highlight' : 'auditor-defect-highlight'}">
-                Experience your application with live styling, interactive touch targets, and visual polish applied in real time.
-              </p>
+              <input
+                type="text"
+                placeholder="Tap to test iOS auto-zoom behavior..."
+                class="${isPatched ? 'auditor-fix-highlight' : 'auditor-defect-highlight'}"
+                style="width: 100%; padding: 12px 16px; border-radius: 10px; background: #0f172a; border: 1.5px solid ${isPatched ? '#10b981' : '#f43f5e'}; color: #fff; font-size: ${isPatched ? '16px' : '13px'}; outline: none; transition: border-color 0.2s;"
+              />
+              <span style="font-size: 11px; color: #64748b; margin-top: 4px; display: block;">
+                ${isPatched ? 'Evaluates at 16px font-size: iOS will not zoom or distort the page layout on focus.' : 'Evaluates at 13px font-size: Mobile Safari will forcibly zoom the screen on tap.'}
+              </span>
             </div>
 
-            <!-- Hero Buttons with Touch Target Highlighting -->
+            <!-- Zero-Shift Hover Button -->
             <div class="hero-actions">
               <div style="position: relative; display: inline-block;">
-                <button class="cta-btn ${isPatched ? 'auditor-fix-highlight' : 'auditor-defect-highlight'}" onclick="handleClick()">Get Started</button>
-                <div style="position: absolute; top: -22px; left: 0;">
+                <button
+                  class="cta-btn ${isPatched ? 'auditor-fix-highlight' : 'auditor-defect-highlight'}"
+                  style="border: 1.5px solid ${isPatched ? 'transparent' : 'transparent'}; box-sizing: border-box; touch-action: manipulation;"
+                  onclick="handleClick()"
+                >
+                  Interactive Action Button
+                </button>
+                <div style="position: absolute; top: -24px; left: 0;">
                   ${isPatched
-                    ? '<span class="auditor-fix-badge">✓ Fixed: 44×44px Target</span>'
-                    : '<span class="auditor-defect-badge">⚠️ Defect: Sub-44px Hitbox</span>'
+                    ? '<span class="auditor-fix-badge">✓ Fixed: Zero-Shift Inset Border</span>'
+                    : '<span class="auditor-defect-badge">⚠️ Defect: Hover Layout Jitter</span>'
                   }
                 </div>
               </div>
-              <button class="secondary-btn ${isPatched ? 'auditor-fix-highlight' : 'auditor-defect-highlight'}" onclick="handleClick()">View Documentation</button>
             </div>
           </div>
 
           <div class="grid">
-            <div class="card">
-              <div>
-                <div class="card-label">Latency & Edge</div>
-                <div class="card-value">18 ms</div>
-              </div>
-              <p class="card-desc">Global edge distribution with instant page composition and zero render latency.</p>
-            </div>
-
-            <!-- Motion Card with Animation Highlighting -->
             <div class="card ${isPatched ? 'auditor-fix-highlight' : 'auditor-defect-highlight'}">
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                  <div class="card-label">Real-time Stream</div>
+                  <div class="card-label">Keyboard Tab Navigation</div>
                   ${isPatched
-                    ? '<span class="auditor-fix-badge">✓ Fixed: Motion-Safe Guard</span>'
-                    : '<span class="auditor-defect-badge">⚠️ Defect: Infinite Ping</span>'
+                    ? '<span class="auditor-fix-badge">✓ Fixed: :focus-visible Restored</span>'
+                    : '<span class="auditor-defect-badge">⚠️ Defect: Focus Obliterated</span>'
                   }
                 </div>
-                <div class="beacon-row">
-                  <div class="beacon-dot">
-                    <div class="beacon-ring"></div>
-                    <div class="beacon-core"></div>
-                  </div>
-                  <span style="font-size:14px;font-weight:700;">Live Feed Synchronized</span>
+                <div class="card-value" style="font-size: 16px; font-weight: 600; color: #e2e8f0; margin-top: 6px;">
+                  ${isPatched ? '2.5px High-Contrast Ring' : 'outline: none (Zero Visual Indicator)'}
                 </div>
               </div>
-              <p class="card-desc">Telemetry data flowing across active nodes with smooth motion-safe animations.</p>
+              <p class="card-desc">Power users pressing Tab receive clear feedback without unsightly mouse borders.</p>
             </div>
 
-            <div class="card">
+            <div class="card ${isPatched ? 'auditor-fix-highlight' : 'auditor-defect-highlight'}">
               <div>
-                <div class="card-label">Visual Fidelity</div>
-                <div class="card-value">100%</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <div class="card-label">Safe-Area Notch Inset</div>
+                  ${isPatched
+                    ? '<span class="auditor-fix-badge">✓ Fixed: Notch Safe</span>'
+                    : '<span class="auditor-defect-badge">⚠️ Defect: Home Bar Collision</span>'
+                  }
+                </div>
+                <div class="card-value" style="font-size: 16px; font-weight: 600; color: #e2e8f0; margin-top: 6px;">
+                  ${isPatched ? 'env(safe-area-inset-bottom)' : 'bottom: 0px (Under Home Bar)'}
+                </div>
               </div>
-              <p class="card-desc">Optimized contrast rendering ensuring high legibility across all display devices.</p>
+              <p class="card-desc">Bottom action sheets and floating triggers clear modern phone gesture bars.</p>
+            </div>
+
+            <div class="card ${isPatched ? 'auditor-fix-highlight' : 'auditor-defect-highlight'}">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <div class="card-label">Stacking Context & Overlays</div>
+                  ${isPatched
+                    ? '<span class="auditor-fix-badge">✓ Fixed: pointer-events: none</span>'
+                    : '<span class="auditor-defect-badge">⚠️ Defect: Ghost Pointer Intercept</span>'
+                  }
+                </div>
+                <div class="card-value" style="font-size: 16px; font-weight: 600; color: #e2e8f0; margin-top: 6px;">
+                  ${isPatched ? 'Clicks Pass Directly to Buttons' : 'Backdrop Swallows Clicks'}
+                </div>
+              </div>
+              <p class="card-desc">Ambient gradient filters allow mouse and touch events to pass cleanly to controls.</p>
             </div>
           </div>
 
           <div class="interactive-box">
             <div class="interactive-text">
-              <strong>Interactive Sandbox:</strong> Test live control responsiveness directly inside this window.
+              <strong>Interactive Sandbox:</strong> Test live control responsiveness and zero-latency click dispatch directly inside this window.
             </div>
-            <button id="counter-btn" class="cta-btn ${isPatched ? 'auditor-fix-highlight' : ''}" onclick="handleCounter()">
+            <button id="counter-btn" class="cta-btn ${isPatched ? 'auditor-fix-highlight' : ''}" style="touch-action: manipulation;" onclick="handleCounter()">
               Click Counter: <span id="count">0</span>
             </button>
           </div>
@@ -929,7 +1067,7 @@ export async function GET(
         <!-- Floating HUD Indicator on Interface -->
         <div class="auditor-floating-hud ${isPatched ? 'auditor-hud-green' : 'auditor-hud-rose'}">
           <span class="${isPatched ? 'auditor-hud-dot' : 'auditor-hud-dot-rose'}"></span>
-          <span>${isPatched ? '✨ Live Fixes Highlighted On Interface' : '⚠️ Defects Highlighted On Interface'}</span>
+          <span>${isPatched ? '✨ Live Invisible Interface Fixes Active' : '⚠️ Invisible Interface Defects Highlighted'}</span>
         </div>
 
         <script>

@@ -93,31 +93,31 @@ export function generateWebsiteFeedback(
     switch (layerName) {
       case 'Production':
         if (score >= 90) {
-          summary = 'Hardened for production: Clean server headers, no environment leaks, and fast TTFB.';
+          summary = 'Hardened architecture: Zero CLS shifts, clean server transport, and resilient edge delivery.';
         } else if (score >= 75) {
-          summary = 'Reliable hosting with minor font preload or edge cache swap optimizations recommended.';
+          summary = 'Stable foundation, with minor media aspect-ratio reservations recommended to prevent CLS.';
         } else {
-          summary = 'Production risk: Leaked localhost/dev URLs or unhandled environment variables detected.';
+          summary = 'Production hazard: Unsized dynamic media triggering Cumulative Layout Shifts (CLS) on network loads.';
         }
         break;
 
       case 'UX':
         if (score >= 90) {
-          summary = 'Ergonomic & accessible: All interactive controls meet 44px WCAG touch criteria.';
+          summary = 'Ergonomic & invisible defect immune: Zero 300ms tap delay, iOS zoom immune, and accessible keyboard focus.';
         } else if (score >= 75) {
-          summary = 'Intuitive desktop flow, but several mobile controls fail the 44x44px minimum touch boundary.';
+          summary = 'Solid flow, but form inputs (<16px) risk iOS auto-zoom and buttons lack touch-action: manipulation.';
         } else {
-          summary = 'High interaction friction: Undersized mobile buttons or missing landmark navigation tags.';
+          summary = 'High interaction friction: Obliterated focus rings, iOS auto-zoom traps, or unannounced icon buttons.';
         }
         break;
 
       case 'UI':
         if (score >= 90) {
-          summary = 'Harmonious hierarchy: Strict typography scale adherence and compliant 4.5:1 contrast.';
+          summary = 'Rock-solid layout geometry: Zero hover micro-shift jitter, safe-area protected, and squish-free flex icons.';
         } else if (score >= 75) {
-          summary = 'Clean layout typography, with minor contrast or heading hierarchy adjustments required.';
+          summary = 'Clean aesthetics, but flex icons lack flex-shrink: 0 and dynamic borders cause hover micro-shifts.';
         } else {
-          summary = 'Visual hierarchy breakdown: Low-contrast text elements or unbounded paragraph widths.';
+          summary = 'Layout instability: 100vw viewport scrollbar leaks, flex icon crushing, or parent dropdown clipping.';
         }
         break;
 
@@ -133,11 +133,11 @@ export function generateWebsiteFeedback(
 
       case 'Polish':
         if (score >= 90) {
-          summary = 'Silky 60fps animations: GPU-composited transforms with prefers-reduced-motion active.';
+          summary = 'Flawless optical rendering: Integer pixel snapping, subpixel blur immune, and motion-safe guards.';
         } else if (score >= 75) {
-          summary = 'Fluid micro-interactions, but layout-inducing properties (width/height/top) cause minor jank.';
+          summary = 'Refined micro-interactions, with minor subpixel transform centering refactors recommended.';
         } else {
-          summary = 'Visible animation stutter: CSS transitions force browser reflows; reduced-motion omitted.';
+          summary = 'Optical degradation: Blurry typography from fractional transforms and continuous unthrottled keyframes.';
         }
         break;
 

@@ -54,105 +54,153 @@ const demoBase: StoredScan = {
   issues: [
     {
       id: 'iss_demo_01',
-      check_id: 'MOBI-TAP-01',
+      check_id: 'UX-IOS-AUTOZOOM',
       layer: 'UX',
       severity: 'CRITICAL',
       confidence: 'HIGH',
       tier: 'A',
-      title: 'Undersized Mobile Tap Target (<44x44px)',
-      problem: 'Interactive action controls on vibe-saas-example.dev measure below the 44×44px minimum touch boundary on viewport width 390px.',
+      title: 'iOS Safari Auto-Zoom Viewport Trap on Form Inputs (<16px Font)',
+      problem: 'Form inputs on vibe-saas-example.dev evaluate to 13px/14px. On iOS Safari devices, tapping any input under 16px forces the browser to aggressively zoom in, disorienting mobile users.',
       evidence: {
-        measured_values: { width: 32, height: 32, viewport_tested: '390x844' },
-        expected_values: { min_width: 44, min_height: 44 },
+        measured_values: { detected_font_size: '13.5px', os_trigger_threshold: '16px', platform: 'iOS Mobile Safari' },
+        expected_values: { min_font_size_mobile: '16px' },
       },
-      location: { selector: 'header button, nav a.cta-action, div.action-group button', bounding_box: { x: 280, y: 16, width: 32, height: 32 } },
-      fix_goal: 'Increase interactive padding or set minimum hit dimension to min-h-[44px] min-w-[44px].',
-      constraints: ['Preserve existing font size and layout alignment.'],
-      acceptance_check: 'Bounding box width and height must evaluate >= 44px on viewports <= 768px.',
-      fix_prompt: '### AI FIX PROMPT: [MOBI-TAP-01]\nAdd minimum touch target dimensions or increase padding: min-h-[44px] min-w-[44px].',
+      location: { selector: 'input:not([type="checkbox"]):not([type="radio"]), select, textarea' },
+      fix_goal: 'Enforce minimum 16px font-size on mobile viewports while preserving compact desktop layout.',
+      constraints: ['Preserve existing input border and padding geometry.'],
+      acceptance_check: 'All text inputs compute to font-size >= 16px on viewport widths <= 768px.',
+      fix_prompt: '### AI FIX PROMPT: [UX-IOS-AUTOZOOM]\n@media (max-width: 768px) {\n  input:not([type="checkbox"]):not([type="radio"]),\n  select,\n  textarea {\n    font-size: 16px !important;\n  }\n}',
       patchable: true,
-      verified_patch_css: `button, [role="button"], a.btn, .cta-action {\n  min-width: 44px !important;\n  min-height: 44px !important;\n  padding: 10px 18px !important;\n}`,
+      verified_patch_css: `@media (max-width: 768px) {\n  input:not([type="checkbox"]):not([type="radio"]),\n  select,\n  textarea {\n    font-size: 16px !important;\n  }\n}`,
     },
     {
       id: 'iss_demo_02',
-      check_id: 'UI-CONTRAST-01',
+      check_id: 'UX-TAP-LATENCY',
+      layer: 'UX',
+      severity: 'MAJOR',
+      confidence: 'HIGH',
+      tier: 'A',
+      title: '300ms Mobile Tap Latency Lag (Missing touch-action: manipulation)',
+      problem: 'Interactive buttons and links lack touch-action: manipulation. Mobile browsers enforce a 300ms delay after every touch to detect potential double-tap gestures.',
+      evidence: {
+        measured_values: { touch_action_declared: false, tap_delay_ms: 300 },
+        expected_values: { touch_action: 'manipulation' },
+      },
+      location: { selector: 'button, [role="button"], a.btn, .cta-btn' },
+      fix_goal: 'Eliminate the 300ms touch delay by declaring touch-action: manipulation on all interactive controls.',
+      constraints: ['Retain single-tap accessibility and pinch-to-zoom.'],
+      acceptance_check: 'Taps trigger instant click event dispatch with zero synthetic latency.',
+      fix_prompt: '### AI FIX PROMPT: [UX-TAP-LATENCY]\nbutton, a, [role="button"] {\n  touch-action: manipulation !important;\n  -webkit-tap-highlight-color: transparent !important;\n}',
+      patchable: true,
+      verified_patch_css: `button, a, [role="button"], input[type="button"] {\n  touch-action: manipulation !important;\n  -webkit-tap-highlight-color: transparent !important;\n}`,
+    },
+    {
+      id: 'iss_demo_03',
+      check_id: 'A11Y-FOCUS-OBLITERATED',
+      layer: 'UX',
+      severity: 'CRITICAL',
+      confidence: 'HIGH',
+      tier: 'A',
+      title: 'Keyboard Focus Indicator Obliterated (outline: none Without :focus-visible)',
+      problem: 'Styles suppress outline with outline: none without providing an alternative :focus-visible ring. Keyboard navigators pressing Tab receive zero visual feedback.',
+      evidence: {
+        measured_values: { outline_suppressed: true, focus_visible_ring_present: false },
+        expected_values: { focus_visible_ring: '>= 2px high-contrast outline' },
+      },
+      location: { selector: 'button:focus-visible, a:focus-visible, input:focus-visible' },
+      fix_goal: 'Restore high-contrast focus rings specifically for keyboard tab navigation using :focus-visible.',
+      constraints: ['Do not show focus rings on mouse click events.'],
+      acceptance_check: 'Pressing Tab illuminates the focused element with a 2.5px distinct indicator.',
+      fix_prompt: '### AI FIX PROMPT: [A11Y-FOCUS-OBLITERATED]\n:focus-visible {\n  outline: 2.5px solid #3b82f6 !important;\n  outline-offset: 2.5px !important;\n  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25) !important;\n}',
+      patchable: true,
+      verified_patch_css: `:focus-visible {\n  outline: 2.5px solid #3b82f6 !important;\n  outline-offset: 2.5px !important;\n  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25) !important;\n}`,
+    },
+    {
+      id: 'iss_demo_04',
+      check_id: 'UI-FLEX-SQUISH',
       layer: 'UI',
       severity: 'MAJOR',
       confidence: 'HIGH',
       tier: 'A',
-      title: 'Low Subtitle & Badge Contrast Ratio (<4.5:1)',
-      problem: 'Secondary description copy and subtle badges on vibe-saas-example.dev have a calculated contrast ratio of 3.2:1 against light background (minimum 4.5:1 required for normal text).',
+      title: 'Flexbox Icon & Badge Micro-Crush Distortion (Missing flex-shrink: 0)',
+      problem: 'Inline SVG icons and notification chips inside flex containers omit flex-shrink: 0. When container width constricts, icons are crushed into non-proportional ovals.',
       evidence: {
-        measured_values: { foreground_color: '#71717a', background_color: '#ffffff', contrast_ratio: 3.2 },
-        expected_values: { min_contrast_ratio: 4.5 },
+        measured_values: { flex_shrink_specified: false, default_flex_shrink: 1 },
+        expected_values: { flex_shrink: 0 },
       },
-      location: { selector: 'p.text-zinc-500, span.badge-subtext' },
-      fix_goal: 'Elevate text contrast to at least 4.5:1 by adjusting font color to zinc-700 or darker.',
-      constraints: ['Retain visual hierarchy between titles and body.'],
-      acceptance_check: 'Calculated contrast ratio must be >= 4.5:1 under WCAG AA guidelines.',
-      fix_prompt: '### AI FIX PROMPT: [UI-CONTRAST-01]\nUpdate text classes from text-zinc-500 to text-zinc-700 or text-gray-800.',
+      location: { selector: '[class*="flex"] > svg, .badge, .status-indicator' },
+      fix_goal: 'Prevent icon aspect-ratio distortion by locking flex-shrink to 0 across all inline media.',
+      constraints: ['Allow adjacent text labels to wrap gracefully.'],
+      acceptance_check: 'Icons maintain exact 1:1 aspect-ratio under narrow container constraints.',
+      fix_prompt: '### AI FIX PROMPT: [UI-FLEX-SQUISH]\n[class*="flex"] > svg, .badge, .status-indicator {\n  flex-shrink: 0 !important;\n}',
       patchable: true,
-      verified_patch_css: `.text-zinc-500, .text-gray-400, span.badge-subtext, p.subtitle {\n  color: #27272a !important;\n}`,
+      verified_patch_css: `[class*="flex"] > svg, .badge, .status-indicator {\n  flex-shrink: 0 !important;\n}`,
     },
     {
-      id: 'iss_demo_03',
-      check_id: 'POLISH-ANIM-01',
-      layer: 'Polish',
-      severity: 'MINOR',
+      id: 'iss_demo_05',
+      check_id: 'UI-HOVER-JITTER',
+      layer: 'UI',
+      severity: 'MAJOR',
       confidence: 'HIGH',
       tier: 'B',
-      title: 'Missing Reduced-Motion Fallback for Ping/Pulse Animations',
-      problem: "Continuous CSS keyframe animations (animate-ping / hover transforms) on vibe-saas-example.dev do not respect the user's prefers-reduced-motion OS accessibility preference.",
+      title: 'Hover Micro-Shift Layout Jitter (Dynamic Border Displacement)',
+      problem: 'Interactive buttons add a border dynamically on :hover without reserving border geometry in the idle state, shifting adjacent siblings by 1-2px.',
       evidence: {
-        measured_values: { active_animations: ['animate-ping', 'hover:-translate-y-2'], reduced_motion_query_present: false },
-        expected_values: { motion_safe_guard: true },
+        measured_values: { border_change_on_hover: true, layout_shift_detected: '1.5px sibling displacement' },
+        expected_values: { idle_border: 'transparent border or inset box-shadow' },
       },
-      location: { selector: 'span.animate-ping, div.group, .pulse-beacon' },
-      fix_goal: 'Wrap keyframe animations in motion-safe: prefix or @media (prefers-reduced-motion: no-preference).',
-      constraints: ['Ensure indicator dots remain visible when animation is disabled.'],
-      acceptance_check: 'Animations must pause when prefers-reduced-motion: reduce is toggled.',
-      fix_prompt: "### AI FIX PROMPT: [POLISH-ANIM-01]\nWrap animations in Tailwind's motion-safe: prefix or CSS prefers-reduced-motion query.",
+      location: { selector: 'button, [role="button"], a.btn' },
+      fix_goal: 'Reserve transparent border in the idle state to eliminate layout jitter on hover.',
+      constraints: ['Maintain existing background and font color transitions.'],
+      acceptance_check: 'Hovering over buttons causes zero bounding box displacement of adjacent siblings.',
+      fix_prompt: '### AI FIX PROMPT: [UI-HOVER-JITTER]\nbutton, [role="button"], a.btn {\n  border: 1.5px solid transparent !important;\n  box-sizing: border-box !important;\n}\nbutton:hover, [role="button"]:hover, a.btn:hover {\n  border-color: currentColor !important;\n}',
       patchable: true,
-      verified_patch_css: `@media (prefers-reduced-motion: reduce) {\n  .animate-ping, .pulse-beacon, [class*="animate-"] {\n    animation: none !important;\n    transform: none !important;\n  }\n}`,
+      verified_patch_css: `button, [role="button"], a.btn {\n  border: 1.5px solid transparent !important;\n  box-sizing: border-box !important;\n}\nbutton:hover, [role="button"]:hover, a.btn:hover {\n  border-color: currentColor !important;\n}`,
     },
     {
-      id: 'iss_demo_04',
-      check_id: 'PERF-FONT-01',
-      layer: 'Production',
-      severity: 'MINOR',
+      id: 'iss_demo_06',
+      check_id: 'UX-VIEWPORT-BLEED',
+      layer: 'UX',
+      severity: 'CRITICAL',
       confidence: 'HIGH',
       tier: 'A',
-      title: 'Font Preload Swap Optimization for Vercel Edge',
-      problem: 'Custom web font files loaded via Next.js can trigger Cumulative Layout Shift (CLS) if font-display swap is omitted.',
+      title: '100vw Horizontal Scrollbar Bleed & Viewport Width Leak',
+      problem: 'Elements use width: 100vw without container clipping. On systems with persistent vertical scrollbars (Windows, Android), this causes an unwanted horizontal scrollbar.',
       evidence: {
-        measured_values: { server: 'Vercel Edge', framework: 'Next.js', font_swap_verified: false },
-        expected_values: { font_display: 'swap' },
+        measured_values: { full_bleed_unit: '100vw', client_width_delta_px: 17 },
+        expected_values: { full_bleed_rule: 'width: 100% or overflow-x: clip' },
       },
-      location: { selector: 'head link[rel="preload"][as="font"]' },
-      fix_goal: 'Ensure next/font declarations include display: "swap" and preload: true.',
-      constraints: ['Prevent FOUT on slow networks.'],
-      acceptance_check: 'CLS metric remains < 0.05 on mobile and desktop viewports.',
-      fix_prompt: "### AI FIX PROMPT: [PERF-FONT-01]\nEnsure next/font declarations include display: 'swap' in layout.tsx.",
+      location: { selector: 'body, [class*="w-screen"], [style*="100vw"]' },
+      fix_goal: 'Contain horizontal bleed by setting overflow-x: clip on html and body.',
+      constraints: ['Preserve full desktop bleed without horizontal scrollbars.'],
+      acceptance_check: 'Page has zero horizontal scrollbar on devices with persistent vertical scrollbars.',
+      fix_prompt: '### AI FIX PROMPT: [UX-VIEWPORT-BLEED]\nhtml, body {\n  max-width: 100vw !important;\n  overflow-x: clip !important;\n}',
       patchable: true,
-      verified_patch_css: `@font-face {\n  font-display: swap !important;\n}`,
+      verified_patch_css: `html, body {\n  max-width: 100vw !important;\n  overflow-x: clip !important;\n}`,
     },
   ],
-  master_prompt: `# MASTER ARCHITECTURAL REMEDIATION PLAN
+  master_prompt: `# MASTER ARCHITECTURAL REMEDIATION PLAN: INVISIBLE INTERFACE DEFECTS
 Target: https://vibe-saas-example.dev
-Total Issues: 4 (Critical: 1, Major: 1, Minor: 2)
+Total Issues: 6 Critical & Major Hidden Interface Defects
 
-1. [MOBI-TAP-01] Undersized Mobile Tap Target (<44x44px)
-   - Target Selector: header button, nav a.cta-action
-   - Goal: Increase interactive padding or set minimum hit dimension to min-h-[44px] min-w-[44px].
-2. [UI-CONTRAST-01] Low Subtitle & Badge Contrast Ratio (<4.5:1)
-   - Target Selector: p.text-zinc-500, span.badge-subtext
-   - Goal: Elevate text contrast to at least 4.5:1 by adjusting font color to zinc-700 or darker.
-3. [POLISH-ANIM-01] Missing Reduced-Motion Fallback for Ping/Pulse Animations
-   - Target Selector: span.animate-ping, .pulse-beacon
-   - Goal: Wrap keyframe animations in motion-safe: prefix or @media (prefers-reduced-motion: no-preference).
-4. [PERF-FONT-01] Font Preload Swap Optimization for Vercel Edge
-   - Target Selector: head link[rel="preload"][as="font"]
-   - Goal: Ensure next/font declarations include display: "swap" and preload: true.`,
+1. [UX-IOS-AUTOZOOM] iOS Safari Auto-Zoom Viewport Trap on Form Inputs (<16px Font)
+   - Target Selector: input:not([type="checkbox"]):not([type="radio"]), select, textarea
+   - Goal: Enforce minimum 16px font-size on mobile viewports while preserving compact desktop layout.
+2. [UX-TAP-LATENCY] 300ms Mobile Tap Latency Lag (Missing touch-action: manipulation)
+   - Target Selector: button, [role="button"], a.btn, .cta-btn
+   - Goal: Eliminate the 300ms touch delay by declaring touch-action: manipulation on all interactive controls.
+3. [A11Y-FOCUS-OBLITERATED] Keyboard Focus Indicator Obliterated (outline: none Without :focus-visible)
+   - Target Selector: button:focus-visible, a:focus-visible, input:focus-visible
+   - Goal: Restore high-contrast focus rings specifically for keyboard tab navigation using :focus-visible.
+4. [UI-FLEX-SQUISH] Flexbox Icon & Badge Micro-Crush Distortion (Missing flex-shrink: 0)
+   - Target Selector: [class*="flex"] > svg, .badge, .status-indicator
+   - Goal: Prevent icon aspect-ratio distortion by locking flex-shrink to 0 across all inline media.
+5. [UI-HOVER-JITTER] Hover Micro-Shift Layout Jitter (Dynamic Border Displacement)
+   - Target Selector: button, [role="button"], a.btn
+   - Goal: Reserve transparent border in the idle state to eliminate layout jitter on hover.
+6. [UX-VIEWPORT-BLEED] 100vw Horizontal Scrollbar Bleed & Viewport Width Leak
+   - Target Selector: body, [class*="w-screen"], [style*="100vw"]
+   - Goal: Contain horizontal bleed by setting overflow-x: clip on html and body.`,
   share_token: 'demo-share-token-12345',
   created_at: new Date().toISOString(),
   completed_at: new Date().toISOString(),
