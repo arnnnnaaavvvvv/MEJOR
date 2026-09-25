@@ -183,69 +183,6 @@ export async function GET(
           }
           setTimeout(activateScrollReveal, 100);
 
-          // 2. USER-INTENDED SYNCHRONIZED SCROLLING (Zero automatic scroll resets)
-          let userHasInteracted = false;
-          let isRemoteScroll = false;
-          let scrollTimeout = null;
-
-          // Track physical user scroll intent (wheel, touch, or keydown)
-          window.addEventListener('wheel', () => { userHasInteracted = true; }, { passive: true });
-          window.addEventListener('touchstart', () => { userHasInteracted = true; }, { passive: true });
-          window.addEventListener('touchmove', () => { userHasInteracted = true; }, { passive: true });
-          window.addEventListener('keydown', (e) => {
-            if (['PageDown', 'PageUp', 'ArrowDown', 'ArrowUp', 'Space', 'Home', 'End'].includes(e.key)) {
-              userHasInteracted = true;
-            }
-          }, { passive: true });
-
-          // Intercept programmatic window.scrollTo(0,0) from third-party router hydration
-          const origScrollTo = window.scrollTo.bind(window);
-          window.scrollTo = function(...args) {
-            const first = args[0];
-            const targetY = typeof first === 'object' && first !== null ? first.top : args[1];
-            // If user has already scrolled down, ignore third-party hydration scripts trying to yank back to top (0)
-            if ((targetY === 0 || (args[0] === 0 && args[1] === 0)) && userHasInteracted && window.scrollY > 30) {
-              return;
-            }
-            return origScrollTo(...args);
-          };
-
-          // Broadcast scroll ONLY when triggered by real user interaction
-          window.addEventListener('scroll', () => {
-            if (isRemoteScroll || !userHasInteracted) return;
-            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-            const ratio = maxScroll > 0 ? window.scrollY / maxScroll : 0;
-            try {
-              window.parent.postMessage({
-                type: 'AUDITOR_SYNC_SCROLL',
-                scrollY: window.scrollY,
-                scrollRatio: ratio,
-                mode: '${mode}'
-              }, '*');
-            } catch(e) {}
-          }, { passive: true });
-
-          // Receive synced scroll from sibling frame
-          window.addEventListener('message', (event) => {
-            if (!event.data || event.data.type !== 'AUDITOR_SCROLL_TO') return;
-            if (event.data.mode === '${mode}') return;
-
-            isRemoteScroll = true;
-            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-            const targetY = (event.data.scrollRatio !== undefined && maxScroll > 0)
-              ? event.data.scrollRatio * maxScroll
-              : event.data.scrollY;
-
-            origScrollTo({
-              top: targetY,
-              behavior: 'auto'
-            });
-
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-              isRemoteScroll = false;
-            }, 100);
-          });
         })();
       </script>
     `;
