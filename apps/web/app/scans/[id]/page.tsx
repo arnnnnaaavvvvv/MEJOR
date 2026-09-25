@@ -150,54 +150,7 @@ export default function ReportPage() {
     return () => window.removeEventListener('message', handleSyncScroll);
   }, []);
 
-  // Guard against rogue programmatic scroll-to-top resets (e.g. from iframe hydration or router events)
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
 
-    let isUserIntentionalScroll = false;
-    const markUserScroll = () => {
-      isUserIntentionalScroll = true;
-    };
-
-    window.addEventListener('wheel', markUserScroll, { passive: true });
-    window.addEventListener('touchstart', markUserScroll, { passive: true });
-    window.addEventListener('touchmove', markUserScroll, { passive: true });
-
-    const origScrollTo = window.scrollTo.bind(window);
-    const origScroll = window.scroll.bind(window);
-
-    // Override window.scrollTo to prevent sudden unprompted jumps to top (0, 0)
-    window.scrollTo = function(...args: any[]) {
-      const first = args[0];
-      const targetY = typeof first === 'object' && first !== null ? first.top : args[1];
-      // If something attempts to reset parent window to y=0 while user is already scrolled down
-      if ((targetY === 0 || (args[0] === 0 && args[1] === 0)) && window.scrollY > 80) {
-        if (!isUserIntentionalScroll) {
-          return; // Suppress rogue jump-to-top
-        }
-      }
-      return origScrollTo(...(args as [any, any]));
-    };
-
-    window.scroll = function(...args: any[]) {
-      const first = args[0];
-      const targetY = typeof first === 'object' && first !== null ? first.top : args[1];
-      if ((targetY === 0 || (args[0] === 0 && args[1] === 0)) && window.scrollY > 80) {
-        if (!isUserIntentionalScroll) {
-          return;
-        }
-      }
-      return origScroll(...(args as [any, any]));
-    };
-
-    return () => {
-      window.scrollTo = origScrollTo;
-      window.scroll = origScroll;
-      window.removeEventListener('wheel', markUserScroll);
-      window.removeEventListener('touchstart', markUserScroll);
-      window.removeEventListener('touchmove', markUserScroll);
-    };
-  }, []);
 
   const toggleAutoScroll = () => {
     if (isAutoScrolling) {

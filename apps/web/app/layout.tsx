@@ -41,6 +41,48 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Anti-Scroll-Jumping & Manual History Restoration Guard */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  if (typeof window !== 'undefined') {
+                    if ('scrollRestoration' in history) {
+                      history.scrollRestoration = 'manual';
+                    }
+                    var origFocus = HTMLElement.prototype.focus;
+                    HTMLElement.prototype.focus = function(opts) {
+                      opts = opts || {};
+                      if (opts.preventScroll === undefined) opts.preventScroll = true;
+                      return origFocus.call(this, opts);
+                    };
+                    var origScrollTo = window.scrollTo.bind(window);
+                    var origScroll = window.scroll.bind(window);
+                    window.scrollTo = function() {
+                      var args = arguments;
+                      var first = args[0];
+                      var targetY = (typeof first === 'object' && first !== null) ? first.top : args[1];
+                      if ((targetY === 0 || (args[0] === 0 && args[1] === 0)) && window.scrollY > 40) {
+                        return;
+                      }
+                      return origScrollTo.apply(window, args);
+                    };
+                    window.scroll = function() {
+                      var args = arguments;
+                      var first = args[0];
+                      var targetY = (typeof first === 'object' && first !== null) ? first.top : args[1];
+                      if ((targetY === 0 || (args[0] === 0 && args[1] === 0)) && window.scrollY > 40) {
+                        return;
+                      }
+                      return origScroll.apply(window, args);
+                    };
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
       </head>
       <body className="min-h-screen bg-[#060911] text-slate-100 antialiased selection:bg-emerald-400 selection:text-slate-950 font-sans flex flex-col justify-between">
         {/* Top Iridescent Accent Border */}
