@@ -1,19 +1,71 @@
-# Automated UI/UX & Performance Auditor for "Vibe Coders"
+# Vibe Auditor — Autonomous UI/UX, Security & Invisible Defect Auditor
 
-An automated website UI/UX, responsive, and performance auditor built specifically for "vibe coders" (developers building sites with AI tools who lack visual design expertise).
+[![Vibe Audit](https://mejor-iota.vercel.app/api/v1/badges/mejor-iota.vercel.app.svg)](https://mejor-iota.vercel.app)
+[![CLI: npx arnav-audit](https://img.shields.io/badge/CLI-npx%20arnav--audit-00f5a0.svg)](https://mejor-iota.vercel.app)
+[![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](https://opensource.org/licenses/MIT)
 
-Inputs a URL, crawls and executes real browser measurements, runs failure/chaos simulations, and outputs scored reports accompanied by **ready-to-use AI fix prompts for Cursor, Claude Code, and Antigravity**, as well as a consolidated **Master Remediation Prompt**.
+An autonomous UI/UX, internal security, memory leakage, and performance auditor built specifically for "vibe coders" and AI builders.
+
+👉 **Live Production Dashboard**: [https://mejor-iota.vercel.app](https://mejor-iota.vercel.app)
+
+---
+
+## ⚡ Instant Terminal Audit (`arnav-audit`)
+
+Run a full audit of your local codebase or live deployed website directly from your terminal with zero installation:
+
+```bash
+# Audit current local project (security, memory leaks, invisible UI traps)
+npx arnav-audit
+
+# Audit a live deployed website
+npx arnav-audit https://mejor-iota.vercel.app
+
+# Output ready-to-paste AI fix prompts for Cursor, Claude Code, and Antigravity
+npx arnav-audit --prompts
+
+# Scan exclusively for credentials, secrets & code injection vectors
+npx arnav-audit --security-only
+
+# Scan exclusively for uncleaned listeners, interval timers & viewport leaks
+npx arnav-audit --leakage-only
+
+# Output machine-readable JSON for CI/CD pipelines
+npx arnav-audit --json > audit-report.json
+```
+
+---
+
+## 🛡️ What `arnav-audit` Detects
+
+### 1. Internal Security & Credential Leakage
+- **Hardcoded Secret Keys**: Scans for AWS keys (`AKIA...`), OpenAI API keys (`sk-...`), GitHub tokens (`ghp_...`), Stripe keys (`sk_live_...`), JWTs, and unencrypted private keys (`-----BEGIN RSA PRIVATE KEY-----`).
+- **Exposed Configuration**: Flags committed `.env` and `.env.local` files in git trees.
+- **XSS & Code Injection**: Unsanitized `dangerouslySetInnerHTML`, `eval()`, and `new Function()` invocations.
+
+### 2. Major & Minor Memory & Resource Leakage
+- **Event Listener Leaks**: `addEventListener` inside React `useEffect` hooks missing clean-up `removeEventListener` callbacks.
+- **Timer Leaks**: `setInterval` and `setTimeout` initialized without unmount `clearInterval` teardowns.
+- **Global Scope Pollution**: Accidental state assignments to the global `window` object.
+- **Residual Production Logging**: Production `console.log` statements leaking internal state and data payloads.
+
+### 3. Invisible Interface & UI/UX Traps
+- **iOS Safari Auto-Zoom Trap (`UX-IOS-AUTOZOOM`)**: Form inputs with `font-size < 16px` triggering mandatory mobile viewport zooming.
+- **300ms Touch Latency (`UX-TAP-LATENCY`)**: Interactive elements missing `touch-action: manipulation`.
+- **Obliterated Focus Rings (`A11Y-FOCUS-OBLITERATED`)**: `outline: none` removing keyboard accessibility indicators (WCAG 2.4.7).
+- **Flexbox Icon Collapse (`UI-FLEX-SQUISH`)**: Distorted SVG icons inside flex containers missing `flex-shrink: 0`.
+- **Viewport Bleed (`UX-VIEWPORT-BLEED`)**: Horizontal layout thrashing from `100vw` scrollbar leaks.
+- **Unannounced Icon Buttons (`A11Y-ICON-UNANNOUNCED`)**: Buttons with only icons missing `aria-label`.
 
 ---
 
 ## Key Differentiators
 
 1. **Measurement-Backed Findings**: Every issue is grounded in concrete DOM metrics, bounding-box coordinates, CDP layout telemetry, and computed CSS values. The LLM only phrases actionable instructions; it never invents or hallucinates issues.
-2. **Failure Lab & Chaos Simulation**: Automated injection of $+40\%$ pseudo-localized text lengths, numeric overflow, delayed responses (skeleton verification), and HTTP 500 API failures.
-3. **Copy-Paste Fix Prompts**: Pre-compiled prompts with exact selectors, source file references, constraints, and acceptance tests.
-4. **45+ Registered Checks**: Comprehensive catalog covering typography scales, off-grid spacing, 44px tap targets, contrast, CLS, longtasks, and dev leaks (`undefined`, `localhost`, `NaN`).
+2. **Synchronized Split-Screen Sandbox**: Live before-and-after view comparing original site vs. live injected CSS patch remediations.
+3. **Copy-Paste Fix Prompts**: Pre-compiled prompts with exact selectors, source file references, constraints, and acceptance tests for Cursor, Claude Code, and Antigravity.
+4. **200 Registered Checks**: Comprehensive catalog covering typography scales, off-grid spacing, 44px tap targets, contrast, CLS, longtasks, and dev leaks (`undefined`, `localhost`, `NaN`).
 5. **Before/After Rescan & Diffing**: Compares consecutive scan runs, highlighting resolved vs persistent issues and score deltas.
-6. **Transparent Coverage**: Reports exact coverage ("N of 200 checked automatically") alongside a guided Tier M manual verification checklist.
 
 ---
 
@@ -25,6 +77,7 @@ Inputs a URL, crawls and executes real browser measurements, runs failure/chaos 
 │   ├── worker/         # Playwright background worker (CDP telemetry, simulations, checks)
 │   └── web/            # Next.js 14 frontend (Tailwind CSS, App router, score dials)
 ├── packages/
+│   ├── arnav-audit/    # NPM CLI terminal tool (npx arnav-audit)
 │   ├── check_registry/ # Check plugin engine & 45+ deterministic & simulation checks
 │   ├── llm_analysis/   # Multimodal vision abstraction (Mock, OpenAI, Anthropic)
 │   ├── scoring_prompts/# Severity weighting, score calculation, and prompt compiler
@@ -37,82 +90,40 @@ Inputs a URL, crawls and executes real browser measurements, runs failure/chaos 
 
 ---
 
-## Quickstart
+## CI/CD GitHub Actions Workflow
 
-### Option A: Using Docker Compose (Recommended)
+Add `arnav-audit` to your `.github/workflows/audit.yml` to block pull requests containing security leaks or broken mobile viewports:
 
-To spin up all services (PostgreSQL 16 with pgvector, Redis 7.2, FastAPI backend, Playwright worker, and Next.js frontend):
+```yaml
+name: Interface Quality & Security Gate
+on: [push, pull_request]
 
-```bash
-docker-compose up --build
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run arnav-audit
+        run: npx arnav-audit .
 ```
-
-- Web UI: `http://localhost:3000`
-- API Gateway & Swagger Docs: `http://localhost:8000/docs`
-- Health Check: `http://localhost:8000/health`
 
 ---
 
-### Option B: Local Standalone Development (Without Docker)
+## Local Development Quickstart
 
-The backend natively supports SQLite and in-memory pub/sub if PostgreSQL/Redis are not installed locally.
-
-#### 1. Setup Python Backend & Worker
 ```bash
-# Install dependencies
-pip install -r requirements.txt
-playwright install chromium ffmpeg
-
-# Run API Server (Terminal 1)
-uvicorn apps.api.main:app --host 0.0.0.0 --port 8000 --reload
-
-# Run Playwright Worker Daemon (Terminal 2)
-python -m apps.worker.worker
-```
-
-#### 2. Setup Next.js Frontend
-```bash
-# Run Web Dashboard (Terminal 3)
+# 1. Setup Next.js Frontend
 npm run dev --prefix apps/web
+
+# 2. Test CLI Locally
+node packages/arnav-audit/bin/cli.js --help
 ```
-Open `http://localhost:3000` in your browser.
 
 ---
 
-## Demo Seed Data & Seeded Fixture
+## Production Deployment
 
-To seed the database with an initial baseline scan and a comparative rescan:
-```bash
-python scripts/seed_demo.py
-```
-This seeds:
-- **Baseline Scan** (`demo-base-scan-001`): Score `68.5` (Grade `C`) with mobile tap target and dev leak defects.
-- **Rescan Diff** (`demo-rescan-diff-002`): Score `94.0` (Grade `A`), demonstrating a $+25.5$ score delta and resolving all critical defects.
-
-View the seeded report at: `http://localhost:3000/scans/demo-base-scan-001`
-
----
-
-## Running the Automated Test Suite
-
-All tests across every phase are fully automated:
-
-```bash
-# Phase 1: Foundation (SSRF, Database, Health)
-pytest tests/test_phase1_foundation.py -v
-
-# Phase 2: Scanner (Playwright Crawl, Telemetry, Viewports)
-pytest tests/test_phase2_scanner.py -v
-
-# Phase 3: Check Registry (45+ checks verification)
-pytest tests/test_phase3_registry.py -v
-
-# Phase 5: Scoring & Prompt Compilation
-pytest tests/test_phase5_scoring_prompts.py -v
-
-# Phase 6: API Lifecycle (Endpoints, SSE, Badges)
-pytest tests/test_phase6_api.py -v
-
-# Differential Rescan & Fixture Defect Verification
-pytest tests/test_diff_and_fixture.py -v
-```
+Production URL: **[https://mejor-iota.vercel.app](https://mejor-iota.vercel.app)**

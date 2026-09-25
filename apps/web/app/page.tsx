@@ -23,6 +23,7 @@ import {
   Terminal,
   Code2,
   Check,
+  Copy,
   Activity,
   Maximize2,
   Lock,
@@ -51,6 +52,18 @@ export default function Home() {
 
   // Active showcase defect tab
   const [activeDefectTab, setActiveDefectTab] = useState<number>(0);
+
+  // Interactive arnav-audit CLI tab and copy state
+  const [cliTab, setCliTab] = useState<'all' | 'security' | 'leakage' | 'ui' | 'prompts'>('all');
+  const [copiedCli, setCopiedCli] = useState(false);
+
+  const handleCopyCli = (text: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedCli(true);
+      setTimeout(() => setCopiedCli(false), 2000);
+    }
+  };
 
   const [steps, setSteps] = useState<Step[]>([
     { id: '1', name: 'SSRF Validation & Pre-flight', completed: false, active: false },
@@ -224,6 +237,10 @@ export default function Home() {
     {
       q: 'Can I add Vibe Auditor to my CI/CD pipeline or embed a live badge?',
       a: 'Yes. Every audited domain generates a real-time SVG badge endpoint (e.g. /api/v1/badges/{domain}.svg) that can be embedded into your GitHub README to showcase your interface quality score.',
+    },
+    {
+      q: 'How do I run an internal audit with the npx arnav-audit command?',
+      a: 'Run "npx arnav-audit ." directly in any terminal or repository (or "npx arnav-audit https://mejor-iota.vercel.app" for live sites). It runs zero-dependency checks across security keys, memory & timer leakage, and invisible interface defects, producing human-readable and JSON reports along with copy-paste Cursor & Claude Code prompts.',
     },
   ];
 
@@ -828,7 +845,314 @@ Expected: font-size >= 16px to prevent iOS auto-zoom
         </div>
       </section>
 
-      {/* 7. FREQUENTLY ASKED QUESTIONS */}
+      {/* 7. NPM CLI & INTERNAL ISSUE AUDIT (arnav-audit) */}
+      <section id="cli" className="max-w-7xl mx-auto px-4 scroll-mt-20">
+        <div className="bg-[#0b101c]/90 backdrop-blur-2xl p-8 sm:p-12 rounded-3xl border border-white/[0.08] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] relative overflow-hidden">
+          {/* Top subtle iridescent glow */}
+          <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent pointer-events-none" />
+
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 mb-4 font-mono">
+              <Terminal className="w-3.5 h-3.5" />
+              <span>OFFICIAL NPM COMMAND • ZERO DEPENDENCY</span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-4">
+              Audit Internal Issues with{' '}
+              <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
+                npx arnav-audit
+              </span>
+            </h2>
+            <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+              Run a complete internal health inspection of your local codebase or deployed URL in seconds.
+              Detects exposed security keys, major & minor memory leaks, zombie intervals, and invisible UI flaws.
+            </p>
+          </div>
+
+          {/* Interactive Command Bar */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="bg-[#060911] border border-white/[0.12] rounded-2xl p-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner">
+              <div className="flex items-center gap-3 px-3 overflow-x-auto w-full sm:w-auto font-mono text-sm text-emerald-400">
+                <span className="text-slate-500 select-none">$</span>
+                <span className="font-semibold text-white tracking-wide">
+                  {cliTab === 'security'
+                    ? 'npx arnav-audit . --security-only'
+                    : cliTab === 'leakage'
+                    ? 'npx arnav-audit . --leakage-only'
+                    : cliTab === 'ui'
+                    ? 'npx arnav-audit https://mejor-iota.vercel.app'
+                    : cliTab === 'prompts'
+                    ? 'npx arnav-audit . --prompts'
+                    : 'npx arnav-audit .'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  handleCopyCli(
+                    cliTab === 'security'
+                      ? 'npx arnav-audit . --security-only'
+                      : cliTab === 'leakage'
+                      ? 'npx arnav-audit . --leakage-only'
+                      : cliTab === 'ui'
+                      ? 'npx arnav-audit https://mejor-iota.vercel.app'
+                      : cliTab === 'prompts'
+                      ? 'npx arnav-audit . --prompts'
+                      : 'npx arnav-audit .'
+                  )
+                }
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 text-emerald-300 hover:text-white transition flex items-center justify-center gap-2 text-xs font-mono font-semibold"
+              >
+                {copiedCli ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy Command</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Filter Pill Selectors */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-4 text-xs font-mono">
+              <button
+                type="button"
+                onClick={() => setCliTab('all')}
+                className={`px-3 py-1.5 rounded-lg border transition ${
+                  cliTab === 'all'
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm'
+                    : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                }`}
+              >
+                Full Internal Audit
+              </button>
+              <button
+                type="button"
+                onClick={() => setCliTab('security')}
+                className={`px-3 py-1.5 rounded-lg border transition ${
+                  cliTab === 'security'
+                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm'
+                    : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                }`}
+              >
+                Security & Secrets
+              </button>
+              <button
+                type="button"
+                onClick={() => setCliTab('leakage')}
+                className={`px-3 py-1.5 rounded-lg border transition ${
+                  cliTab === 'leakage'
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm'
+                    : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                }`}
+              >
+                Memory & Timer Leaks
+              </button>
+              <button
+                type="button"
+                onClick={() => setCliTab('ui')}
+                className={`px-3 py-1.5 rounded-lg border transition ${
+                  cliTab === 'ui'
+                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm'
+                    : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                }`}
+              >
+                Live URL Probing
+              </button>
+              <button
+                type="button"
+                onClick={() => setCliTab('prompts')}
+                className={`px-3 py-1.5 rounded-lg border transition ${
+                  cliTab === 'prompts'
+                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-sm'
+                    : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                }`}
+              >
+                Cursor / Claude Prompts
+              </button>
+            </div>
+          </div>
+
+          {/* Interactive Terminal Mockup */}
+          <div className="bg-[#05070f] rounded-2xl border border-white/[0.1] shadow-2xl overflow-hidden font-mono text-xs">
+            <div className="flex items-center justify-between px-4 py-3 bg-[#090d18] border-b border-white/[0.08]">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
+                <span className="ml-2 text-slate-400 text-[11px]">arnav-audit — terminal execution</span>
+              </div>
+              <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                <span className="text-emerald-400">●</span> 124 files analyzed in 84ms
+              </div>
+            </div>
+
+            <div className="p-6 text-slate-300 space-y-4 overflow-x-auto leading-relaxed">
+              <div className="text-slate-400 border-b border-white/[0.06] pb-3">
+                <span className="text-emerald-400 font-bold">⚡ arnav-audit v1.0.0</span> — Internal Issues & Leakage Auditor
+                <br />
+                <span className="text-slate-500">Scan target: . (Local Project Directory)</span>
+              </div>
+
+              {/* Dynamic Terminal Output based on cliTab */}
+              {cliTab === 'all' && (
+                <div className="space-y-3">
+                  <div className="text-rose-400 font-semibold flex items-center gap-2">
+                    <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px]">CRITICAL</span>
+                    [SECURITY] Hardcoded API Token Leakage
+                  </div>
+                  <div className="pl-4 text-slate-400 text-[11px] border-l border-rose-500/30">
+                    File: <span className="text-slate-200">apps/api/core/auth.ts:42</span>
+                    <br />
+                    Match: <code className="text-rose-300">sk-proj-**********************************</code>
+                    <br />
+                    Remedy: Move private credentials to environment variables (.env.local) and add to .gitignore.
+                  </div>
+
+                  <div className="text-amber-400 font-semibold flex items-center gap-2 pt-2">
+                    <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">HIGH</span>
+                    [MEMORY LEAK] Dangling EventListener Missing Unmount Cleanup
+                  </div>
+                  <div className="pl-4 text-slate-400 text-[11px] border-l border-amber-500/30">
+                    File: <span className="text-slate-200">apps/web/components/Navbar.tsx:88</span>
+                    <br />
+                    Match: <code className="text-amber-300">window.addEventListener(&apos;resize&apos;, handleResize)</code>
+                    <br />
+                    Remedy: Return unregister function: <code className="text-emerald-400">return () =&gt; window.removeEventListener(&apos;resize&apos;, handleResize);</code>
+                  </div>
+
+                  <div className="text-cyan-400 font-semibold flex items-center gap-2 pt-2">
+                    <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px]">HIGH</span>
+                    [UI/UX DEFECT] iOS Safari Input Auto-Zoom Trap
+                  </div>
+                  <div className="pl-4 text-slate-400 text-[11px] border-l border-cyan-500/30">
+                    File: <span className="text-slate-200">apps/web/styles/globals.css:14</span>
+                    <br />
+                    Match: <code className="text-cyan-300">input[type=&quot;text&quot;] &#123; font-size: 14px; &#125;</code>
+                    <br />
+                    Remedy: Apply media query <code className="text-emerald-400">font-size: 16px !important</code> for max-width: 768px.
+                  </div>
+                </div>
+              )}
+
+              {cliTab === 'security' && (
+                <div className="space-y-3">
+                  <div className="text-rose-400 font-semibold flex items-center gap-2">
+                    <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px]">CRITICAL</span>
+                    AWS Access Key & OpenAI Secret Pattern Found
+                  </div>
+                  <div className="pl-4 text-slate-400 text-[11px] border-l border-rose-500/30">
+                    Checks: AWS AKIA keys, OpenAI sk-, GitHub ghp_ tokens, Private RSA Keys, eval(), dangerouslySetInnerHTML
+                    <br />
+                    Result: <span className="text-emerald-400 font-semibold">2 warnings flagged</span> with exact line references.
+                  </div>
+                </div>
+              )}
+
+              {cliTab === 'leakage' && (
+                <div className="space-y-3">
+                  <div className="text-amber-400 font-semibold flex items-center gap-2">
+                    <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">HIGH</span>
+                    Uncleaned setInterval & React Hook Listener Leaks
+                  </div>
+                  <div className="pl-4 text-slate-400 text-[11px] border-l border-amber-500/30">
+                    Checks: addEventListener missing removeEventListener, setInterval without clearInterval, window global assignment
+                    <br />
+                    Result: Verified no dangling timers in background workers; 1 cleanup hook required in client component.
+                  </div>
+                </div>
+              )}
+
+              {cliTab === 'ui' && (
+                <div className="space-y-3">
+                  <div className="text-cyan-400 font-semibold flex items-center gap-2">
+                    <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px]">LIVE SCAN</span>
+                    Probing Remote Endpoint: https://mejor-iota.vercel.app
+                  </div>
+                  <div className="pl-4 text-slate-400 text-[11px] border-l border-cyan-500/30">
+                    Status: <span className="text-emerald-400 font-semibold">200 OK</span> | Viewport probe active
+                    <br />
+                    Security Headers: Content-Security-Policy (Enforced), Strict-Transport-Security (Active)
+                    <br />
+                    Touch Action: touch-action: manipulation active on all primary CTA buttons
+                  </div>
+                </div>
+              )}
+
+              {cliTab === 'prompts' && (
+                <div className="space-y-3">
+                  <div className="text-purple-400 font-semibold flex items-center gap-2">
+                    <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px]">AI COPILOT</span>
+                    Generated Remediation Prompts for Cursor & Claude Code
+                  </div>
+                  <div className="pl-4 text-slate-400 text-[11px] border-l border-purple-500/30">
+                    <code>
+                      ## FIX INSTRUCTION: [SECURITY-SECRET-LEAK]
+                      <br />
+                      Target: apps/api/core/auth.ts:42
+                      <br />
+                      Task: Replace literal string with process.env.API_KEY and verify fallback logic.
+                    </code>
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-slate-500">
+                <span>Exit code: 0 (Audit Complete)</span>
+                <span className="text-emerald-400 font-semibold">Zero dependencies required (Vanilla Node 18+)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 4 Feature Value Pillars for the CLI */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
+            <div className="bg-[#060911]/80 p-5 rounded-2xl border border-white/[0.06]">
+              <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 mb-3">
+                <Lock className="w-4 h-4" />
+              </div>
+              <h4 className="font-bold text-white text-sm mb-1">Security & Secret Leaks</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Flags AWS, OpenAI, GitHub PATs, private keys, eval(), and dangerous innerHTML injections before git push.
+              </p>
+            </div>
+
+            <div className="bg-[#060911]/80 p-5 rounded-2xl border border-white/[0.06]">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-3">
+                <Activity className="w-4 h-4" />
+              </div>
+              <h4 className="font-bold text-white text-sm mb-1">Memory & Timer Leaks</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Catches unmount event listeners, dangling setInterval loops, and global window namespace collisions.
+              </p>
+            </div>
+
+            <div className="bg-[#060911]/80 p-5 rounded-2xl border border-white/[0.06]">
+              <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-3">
+                <Eye className="w-4 h-4" />
+              </div>
+              <h4 className="font-bold text-white text-sm mb-1">Invisible Interface Traps</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Detects &lt;16px iOS auto-zoom inputs, 300ms tap lag, focus ring wipes, and flex SVG icon squishing.
+              </p>
+            </div>
+
+            <div className="bg-[#060911]/80 p-5 rounded-2xl border border-white/[0.06]">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3">
+                <Code2 className="w-4 h-4" />
+              </div>
+              <h4 className="font-bold text-white text-sm mb-1">Cursor & Claude Code Prompts</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Pass <code className="text-emerald-300">--prompts</code> to get ready-to-paste AI agent prompt blocks with exact line ranges.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. FREQUENTLY ASKED QUESTIONS */}
       <section id="faq" className="max-w-4xl mx-auto px-4 scroll-mt-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">

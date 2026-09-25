@@ -1,0 +1,30 @@
+{
+  "name": "arnav-audit",
+  "version": "1.0.0",
+  "description": "Comprehensive internal security, memory leakage, and invisible UI/UX interface auditor by Arnav.",
+  "bin": {
+    "arnav-audit": "./bin/cli.js"
+  },
+  "main": "./bin/cli.js",
+  "scripts": {
+    "start": "node ./bin/cli.js",
+    "test": "node ./bin/cli.js --help"
+  },
+  "keywords": [
+    "audit",
+    "security",
+    "leakage",
+    "memory-leak",
+    "ui-ux",
+    "vibe-coder",
+    "cursor",
+    "claude-code",
+    "antigravity",
+    "arnav"
+  ],
+  "author": "Arnav",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

@@ -64,6 +64,10 @@ export default function RootLayout({
             {/* Navigation Anchor Links */}
             <nav className="hidden lg:flex items-center gap-6 text-xs font-medium text-slate-300">
               <a href="#audit-console" className="hover:text-emerald-400 transition-colors">Audit Console</a>
+              <a href="#cli" className="hover:text-emerald-400 transition-colors flex items-center gap-1 text-emerald-300">
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">CLI</span>
+                arnav-audit
+              </a>
               <a href="#defects" className="hover:text-emerald-400 transition-colors">Invisible Defects</a>
               <a href="#pillars" className="hover:text-emerald-400 transition-colors">5 Pillars</a>
               <a href="#how-it-works" className="hover:text-emerald-400 transition-colors">How It Works</a>
@@ -112,6 +116,7 @@ export default function RootLayout({
 
             <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400 font-medium">
               <a href="#audit-console" className="hover:text-emerald-400 transition-colors">Scanner Console</a>
+              <a href="#cli" className="hover:text-emerald-400 transition-colors">CLI (arnav-audit)</a>
               <a href="#defects" className="hover:text-emerald-400 transition-colors">Defect Taxonomy</a>
               <a href="#pillars" className="hover:text-emerald-400 transition-colors">Quality Pillars</a>
               <a href="#faq" className="hover:text-emerald-400 transition-colors">FAQ</a>
