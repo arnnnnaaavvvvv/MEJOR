@@ -123,12 +123,20 @@ const IGNORED_DIRS = new Set([
   '.cache',
   'venv',
   '.venv',
+  'env',
   '__pycache__',
 ]);
 
-const ALLOWED_EXTS = new Set([
-  '.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs',
-  '.css', '.scss', '.html', '.json', '.env', '.yaml', '.yml'
+const BINARY_EXTS = new Set([
+  '.png', '.jpg', '.jpeg', '.gif', '.ico', '.webp', '.avif', '.svgz',
+  '.mp4', '.webm', '.ogg', '.mp3', '.wav', '.flac',
+  '.woff', '.woff2', '.ttf', '.eot', '.otf',
+  '.zip', '.tar', '.gz', '.tgz', '.rar', '.7z',
+  '.exe', '.dll', '.so', '.dylib', '.bin',
+  '.pyc', '.pyo', '.pyd',
+  '.db', '.sqlite', '.sqlite3',
+  '.pdf', '.doc', '.docx', '.xls', '.xlsx',
+  '.tsbuildinfo'
 ]);
 
 function walkDir(dir, fileList = []) {
@@ -140,15 +148,18 @@ function walkDir(dir, fileList = []) {
       try {
         const stat = fs.statSync(fullPath);
         if (stat.isDirectory()) {
-          // Ignore any hidden directory or internal worktree directory
-          if (file.startsWith('.') || file.includes('worktree')) continue;
+          // Allow .github workflow directory while ignoring other hidden dot-folders
+          if (file.startsWith('.') && file !== '.github') continue;
+          if (file.includes('worktree')) continue;
           walkDir(fullPath, fileList);
         } else {
-          // Skip the scanner's own implementation file so its rule regexes are not self-flagged
+          // Skip the scanner's own CLI script so its rule definitions are not self-flagged
           if (file === 'cli.js' && fullPath.includes('arnav-audit')) continue;
+          // Skip OS metadata
+          if (file === '.DS_Store' || file === 'Thumbs.db') continue;
 
-          const ext = path.extname(file);
-          if (ALLOWED_EXTS.has(ext) || file.startsWith('.env')) {
+          const ext = path.extname(file).toLowerCase();
+          if (!BINARY_EXTS.has(ext)) {
             fileList.push(fullPath);
           }
         }
@@ -160,7 +171,7 @@ function walkDir(dir, fileList = []) {
 
 // Pattern rules for security, leakage, and UI defects
 const RULES = [
-  // 1. SECURITY & CREDENTIAL LEAKAGE
+  // 1. SECURITY & CREDENTIAL LEAKAGE (UNIVERSAL)
   {
     id: 'SEC-AWS-KEY',
     category: 'Security',
@@ -203,15 +214,18 @@ const RULES = [
     tier: 'CRITICAL',
     title: 'Unencrypted Private Key Block in Code',
     desc: 'RSA/EC/SSH private key found directly committed.',
-    regex: /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/g,
+    regex: /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----\s*[\r\n]+[A-Za-z0-9+/=]{20,}/g,
     remedy: 'Remove private key file from version control immediately; load via secure KMS/vault.'
   },
+
+  // JAVASCRIPT & WEB CODE INJECTION
   {
     id: 'SEC-DANGEROUS-HTML',
     category: 'Security',
     tier: 'MAJOR',
     title: 'Unsanitized dangerouslySetInnerHTML Injection',
     desc: 'Direct usage of dangerouslySetInnerHTML without DOMPurify allows stored or reflected XSS.',
+    appliesTo: ['.js', '.jsx', '.ts', '.tsx', '.html'],
     regex: /dangerouslySetInnerHTML\s*=\s*\{\s*\{\s*__html\s*:\s*(?!DOMPurify|sanitize)[a-zA-Z0-9_.]+/g,
     remedy: 'Wrap raw HTML payload with DOMPurify.sanitize(dirtyHtml) before rendering.'
   },
@@ -221,17 +235,41 @@ const RULES = [
     tier: 'CRITICAL',
     title: 'Dangerous eval() or new Function() Execution',
     desc: 'Dynamic code execution opens remote arbitrary code execution vectors.',
-    regex: /\beval\s*\(|\bnew\s+Function\s*\(/g,
+    appliesTo: ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs'],
+    regex: /(?<![.\w])eval\s*\(|\bnew\s+Function\s*\(/g,
     remedy: 'Refactor dynamic evaluation to structured JSON.parse() or typed lookups.'
   },
 
-  // 2. MEMORY & RESOURCE LEAKAGE
+  // PYTHON BACKEND SECURITY
+  {
+    id: 'SEC-PY-SQL-INJECTION',
+    category: 'Security',
+    tier: 'CRITICAL',
+    title: 'Python SQL Query String Formatting Injection',
+    desc: 'Raw f-string or % formatting directly inside SQL query execution.',
+    appliesTo: ['.py'],
+    regex: /cursor\.execute\(\s*f["']|execute\(\s*f["']SELECT/gi,
+    remedy: 'Use parameterized queries: execute("SELECT ... WHERE id = :id", {"id": val}).'
+  },
+  {
+    id: 'SEC-PY-SHELL-TRUE',
+    category: 'Security',
+    tier: 'CRITICAL',
+    title: 'Python Subprocess shell=True Command Injection',
+    desc: 'Running shell commands with shell=True allows arbitrary remote command execution.',
+    appliesTo: ['.py'],
+    regex: /subprocess\.(?:run|call|Popen)\([^)]*shell\s*=\s*True/g,
+    remedy: 'Pass command arguments as an array ["cmd", "arg1"] with shell=False.'
+  },
+
+  // 2. MEMORY & RESOURCE LEAKAGE (FRONTEND JS/TS)
   {
     id: 'LEAK-EVENT-LISTENER',
     category: 'Memory Leakage',
     tier: 'MAJOR',
     title: 'Dangling EventListener in Hook (Missing Clean-up)',
     desc: 'addEventListener called inside useEffect without a corresponding removeEventListener in return cleanup.',
+    appliesTo: ['.js', '.jsx', '.ts', '.tsx'],
     customCheck: (content) => {
       if (!content.includes('addEventListener')) return null;
       if (content.includes('useEffect') && !content.includes('removeEventListener')) {
@@ -247,6 +285,7 @@ const RULES = [
     tier: 'MAJOR',
     title: 'Uncleaned setInterval / setTimeout Timer Leak',
     desc: 'setInterval called in lifecycle without clearInterval unmount teardown, continuing to run in background.',
+    appliesTo: ['.js', '.jsx', '.ts', '.tsx'],
     customCheck: (content) => {
       if (!content.includes('setInterval')) return null;
       if (content.includes('useEffect') && !content.includes('clearInterval')) {
@@ -262,7 +301,8 @@ const RULES = [
     tier: 'MINOR',
     title: 'Global Window Scope Object Pollution',
     desc: 'Assigning arbitrary variables to global window object prevents garbage collection.',
-    regex: /window\.[a-zA-Z0-9_$]+\s*=\s*(?!addEventListener|removeEventListener|location|scrollTo)[a-zA-Z0-9_$]+/g,
+    appliesTo: ['.js', '.jsx', '.ts', '.tsx'],
+    regex: /window\.(?!__)[a-zA-Z0-9_$]+\s*=\s*(?!addEventListener|removeEventListener|location|scrollTo)[a-zA-Z0-9_$]+/g,
     remedy: 'Encapsulate module state in React context, closures, or scoped module instances.'
   },
   {
@@ -271,6 +311,7 @@ const RULES = [
     tier: 'SUGGESTION',
     title: 'Residual Debug Console Logging',
     desc: 'Found console.log statements that can leak internal state and data payloads to browser devtools.',
+    appliesTo: ['.js', '.jsx', '.ts', '.tsx'],
     regex: /console\.log\s*\(/g,
     remedy: 'Remove console.log statements or strip via build compiler (e.g. babel-plugin-transform-remove-console).'
   },
@@ -282,6 +323,7 @@ const RULES = [
     tier: 'CRITICAL',
     title: 'Mobile iOS Safari Input Auto-Zoom Trap',
     desc: 'Text input font-size configured under 16px triggers mandatory Safari viewport zoom on focus.',
+    appliesTo: ['.css', '.scss', '.html', '.jsx', '.tsx'],
     regex: /(?:input|textarea)[^{]*\{[^}]*font-size\s*:\s*(?:1[0-5]|[89])px/gi,
     remedy: 'Enforce font-size: 16px minimum on mobile viewports for all form inputs (@media max-width: 768px).'
   },
@@ -291,8 +333,9 @@ const RULES = [
     tier: 'MAJOR',
     title: '300ms Mobile Tap Delay Latency',
     desc: 'Clickable elements missing touch-action: manipulation incur 300ms double-tap delay.',
-    customCheck: (content, ext) => {
-      if (ext === '.css' && content.includes('cursor: pointer') && !content.includes('touch-action: manipulation')) {
+    appliesTo: ['.css', '.scss'],
+    customCheck: (content) => {
+      if (content.includes('cursor: pointer') && !content.includes('touch-action: manipulation')) {
         return 'cursor: pointer declared on touch buttons without touch-action: manipulation.';
       }
       return null;
@@ -305,6 +348,7 @@ const RULES = [
     tier: 'MAJOR',
     title: 'Obliterated Keyboard Focus Ring',
     desc: 'outline: none or outline: 0 destroys accessibility keyboard indicator (WCAG 2.4.7 violation).',
+    appliesTo: ['.css', '.scss', '.html'],
     regex: /(?:button|a|\.btn)[^{]*\{[^}]*outline\s*:\s*(?:none|0)\b(?!.*focus-visible)/gi,
     remedy: 'Replace outline: none with button:focus-visible { outline: 2px solid #00f5a0; outline-offset: 2px; }.'
   },
@@ -314,6 +358,7 @@ const RULES = [
     tier: 'MAJOR',
     title: 'Flexbox SVG Icon Geometry Distortion',
     desc: 'SVG icons placed directly inside flex containers collapse when sibling text wraps or grows.',
+    appliesTo: ['.jsx', '.tsx', '.html'],
     customCheck: (content) => {
       if (content.includes('display: flex') && content.includes('<svg') && !content.includes('flex-shrink: 0')) {
         return 'Flex container contains SVG icons without flex-shrink: 0 declaration.';
@@ -328,6 +373,7 @@ const RULES = [
     tier: 'MAJOR',
     title: 'Horizontal Viewport Bleed (100vw Scrollbar Trap)',
     desc: 'Using width: 100vw includes the scrollbar gutter width, triggering unwanted horizontal overflow.',
+    appliesTo: ['.css', '.scss', '.html', '.jsx', '.tsx'],
     regex: /(?<!max-|min-)width\s*:\s*100vw/gi,
     remedy: 'Replace width: 100vw with width: 100% or use max-w-full to prevent horizontal layout thrashing.'
   },
@@ -337,6 +383,7 @@ const RULES = [
     tier: 'MAJOR',
     title: 'Unannounced Icon-Only Button',
     desc: 'Buttons containing only an SVG or icon without text or aria-label are completely invisible to screen readers.',
+    appliesTo: ['.jsx', '.tsx', '.html'],
     regex: /<button[^>]*>\s*<(?:svg|LucideIcon|[A-Z][a-zA-Z]+Icon)[^>]*\/>\s*<\/button>/g,
     remedy: 'Add aria-label="Action Name" or title attribute to all icon-only buttons.'
   }
@@ -354,7 +401,7 @@ function runLocalAudit(targetDir) {
 
   for (const filePath of files) {
     const relPath = path.relative(root, filePath);
-    const ext = path.extname(filePath);
+    const ext = path.extname(filePath).toLowerCase();
 
     let content = '';
     try {
@@ -390,6 +437,11 @@ function runLocalAudit(targetDir) {
     for (const rule of RULES) {
       if (options.securityOnly && rule.category !== 'Security') continue;
       if (options.leakageOnly && !rule.category.includes('Leakage')) continue;
+
+      // Filter by language/file extension if rule specifies appliesTo
+      if (rule.appliesTo && !rule.appliesTo.includes(ext)) {
+        continue;
+      }
 
       if (rule.regex) {
         rule.regex.lastIndex = 0;
