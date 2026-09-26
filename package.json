@@ -7,6 +7,7 @@
     "audit": "arnav-audit .",
     "audit:files": "arnav-audit . --files",
     "audit:verbose": "arnav-audit . --verbose",
-    "audit:fix": "arnav-audit . --prompts"
+    "audit:fix": "arnav-audit . --prompts",
+    "publish:cli": "npm publish ./packages/arnav-audit --access public"
   }
 }
