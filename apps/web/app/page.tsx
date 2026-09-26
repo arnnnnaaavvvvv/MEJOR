@@ -27,6 +27,11 @@ import {
   Activity,
   Maximize2,
   Lock,
+  Download,
+  Box,
+  Play,
+  Workflow,
+  FileText,
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
@@ -54,14 +59,24 @@ export default function Home() {
   const [activeDefectTab, setActiveDefectTab] = useState<number>(0);
 
   // Interactive arnav-audit CLI tab and copy state
-  const [cliTab, setCliTab] = useState<'all' | 'security' | 'leakage' | 'ui' | 'prompts'>('all');
+  const [cliTab, setCliTab] = useState<'all' | 'security' | 'leakage' | 'ui' | 'prompts' | 'json'>('all');
   const [copiedCli, setCopiedCli] = useState(false);
+  const [installMethod, setInstallMethod] = useState<'npx' | 'global' | 'project' | 'ci'>('npx');
+  const [copiedSnippet, setCopiedSnippet] = useState<string | null>(null);
 
   const handleCopyCli = (text: string) => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(text);
       setCopiedCli(true);
       setTimeout(() => setCopiedCli(false), 2000);
+    }
+  };
+
+  const handleCopySnippet = (id: string, text: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedSnippet(id);
+      setTimeout(() => setCopiedSnippet(null), 2000);
     }
   };
 
@@ -847,14 +862,15 @@ Expected: font-size >= 16px to prevent iOS auto-zoom
 
       {/* 7. NPM CLI & INTERNAL ISSUE AUDIT (arnav-audit) */}
       <section id="cli" className="max-w-7xl mx-auto px-4 scroll-mt-20">
-        <div className="bg-[#0b101c]/90 backdrop-blur-2xl p-8 sm:p-12 rounded-3xl border border-white/[0.08] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] relative overflow-hidden">
+        <div className="bg-[#0b101c]/90 backdrop-blur-2xl p-8 sm:p-12 rounded-3xl border border-white/[0.08] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] relative overflow-hidden space-y-12">
           {/* Top subtle iridescent glow */}
           <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent pointer-events-none" />
 
-          <div className="text-center max-w-3xl mx-auto mb-10">
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 mb-4 font-mono">
               <Terminal className="w-3.5 h-3.5" />
-              <span>OFFICIAL NPM COMMAND • ZERO DEPENDENCY</span>
+              <span>OFFICIAL NPM COMMAND • ZERO DEPENDENCY • NODE 16+</span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-4">
               Audit Internal Issues with{' '}
@@ -864,32 +880,129 @@ Expected: font-size >= 16px to prevent iOS auto-zoom
             </h2>
             <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
               Run a complete internal health inspection of your local codebase or deployed URL in seconds.
-              Detects exposed security keys, major & minor memory leaks, zombie intervals, and invisible UI flaws.
+              Detects exposed security keys, major &amp; minor memory leaks, zombie intervals, and invisible UI flaws.
             </p>
+
+            {/* Quick Badges Specs */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
+              <div className="bg-[#060911]/60 border border-white/[0.06] rounded-xl p-3 text-left">
+                <div className="text-[11px] text-slate-500 font-mono uppercase tracking-wider">Dependency Count</div>
+                <div className="text-sm font-bold text-emerald-400 font-mono">0 External Deps</div>
+              </div>
+              <div className="bg-[#060911]/60 border border-white/[0.06] rounded-xl p-3 text-left">
+                <div className="text-[11px] text-slate-500 font-mono uppercase tracking-wider">Engine Speed</div>
+                <div className="text-sm font-bold text-cyan-400 font-mono">&lt;100ms Native AST</div>
+              </div>
+              <div className="bg-[#060911]/60 border border-white/[0.06] rounded-xl p-3 text-left">
+                <div className="text-[11px] text-slate-500 font-mono uppercase tracking-wider">Targets Supported</div>
+                <div className="text-sm font-bold text-purple-400 font-mono">Local Repo &amp; Live URLs</div>
+              </div>
+              <div className="bg-[#060911]/60 border border-white/[0.06] rounded-xl p-3 text-left">
+                <div className="text-[11px] text-slate-500 font-mono uppercase tracking-wider">AI Remediation</div>
+                <div className="text-sm font-bold text-amber-400 font-mono">Cursor &amp; Claude Ready</div>
+              </div>
+            </div>
           </div>
 
-          {/* Interactive Command Bar */}
-          <div className="max-w-2xl mx-auto mb-8">
-            <div className="bg-[#060911] border border-white/[0.12] rounded-2xl p-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner">
-              <div className="flex items-center gap-3 px-3 overflow-x-auto w-full sm:w-auto font-mono text-sm text-emerald-400">
-                <span className="text-slate-500 select-none">$</span>
-                <span className="font-semibold text-white tracking-wide">
-                  {cliTab === 'security'
-                    ? 'npx arnav-audit . --security-only'
-                    : cliTab === 'leakage'
-                    ? 'npx arnav-audit . --leakage-only'
-                    : cliTab === 'ui'
-                    ? 'npx arnav-audit https://mejor-iota.vercel.app'
-                    : cliTab === 'prompts'
-                    ? 'npx arnav-audit . --prompts'
-                    : 'npx arnav-audit .'}
-                </span>
+          {/* 1. THREE-STEP QUICKSTART GUIDE */}
+          <div className="border-t border-white/[0.08] pt-8">
+            <div className="text-center max-w-xl mx-auto mb-8">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">How to Use in 3 Simple Steps</h3>
+              <p className="text-xs sm:text-sm text-slate-400">From zero installation to automated AI fixes in your terminal.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Step 1 */}
+              <div className="bg-[#060911] border border-white/[0.08] rounded-2xl p-6 relative group hover:border-emerald-500/40 transition">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-mono font-bold text-sm">
+                    1
+                  </span>
+                  <span className="text-[11px] font-mono text-emerald-400/80 uppercase">Instant Run</span>
+                </div>
+                <h4 className="text-base font-bold text-white mb-2">Run with npx (Zero Install)</h4>
+                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                  No permanent package download required. Node pulls and runs the auditor binary straight from the registry.
+                </p>
+                <div className="bg-[#090d18] rounded-lg p-2.5 font-mono text-xs text-emerald-400 flex items-center justify-between border border-white/[0.06]">
+                  <code>$ npx arnav-audit .</code>
+                  <button
+                    type="button"
+                    onClick={() => handleCopySnippet('step1', 'npx arnav-audit .')}
+                    className="text-slate-400 hover:text-white transition"
+                    title="Copy command"
+                  >
+                    {copiedSnippet === 'step1' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() =>
-                  handleCopyCli(
-                    cliTab === 'security'
+
+              {/* Step 2 */}
+              <div className="bg-[#060911] border border-white/[0.08] rounded-2xl p-6 relative group hover:border-cyan-500/40 transition">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center font-mono font-bold text-sm">
+                    2
+                  </span>
+                  <span className="text-[11px] font-mono text-cyan-400/80 uppercase">Select Target</span>
+                </div>
+                <h4 className="text-base font-bold text-white mb-2">Point to Codebase or URL</h4>
+                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                  Audit your whole project, a sub-package like <code className="text-slate-300">./src</code>, or test a live deployed URL via headless CDP probe.
+                </p>
+                <div className="bg-[#090d18] rounded-lg p-2.5 font-mono text-xs text-cyan-400 flex items-center justify-between border border-white/[0.06]">
+                  <code>$ npx arnav-audit ./apps/web</code>
+                  <button
+                    type="button"
+                    onClick={() => handleCopySnippet('step2', 'npx arnav-audit ./apps/web')}
+                    className="text-slate-400 hover:text-white transition"
+                    title="Copy command"
+                  >
+                    {copiedSnippet === 'step2' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="bg-[#060911] border border-white/[0.08] rounded-2xl p-6 relative group hover:border-purple-500/40 transition">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-mono font-bold text-sm">
+                    3
+                  </span>
+                  <span className="text-[11px] font-mono text-purple-400/80 uppercase">AI Remediation</span>
+                </div>
+                <h4 className="text-base font-bold text-white mb-2">Generate AI Fix Prompts</h4>
+                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                  Add <code className="text-purple-300">--prompts</code> to generate structured fix instructions ready to paste into Cursor or Claude Code.
+                </p>
+                <div className="bg-[#090d18] rounded-lg p-2.5 font-mono text-xs text-purple-400 flex items-center justify-between border border-white/[0.06]">
+                  <code>$ npx arnav-audit . --prompts</code>
+                  <button
+                    type="button"
+                    onClick={() => handleCopySnippet('step3', 'npx arnav-audit . --prompts')}
+                    className="text-slate-400 hover:text-white transition"
+                    title="Copy command"
+                  >
+                    {copiedSnippet === 'step3' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. INTERACTIVE COMMAND BAR & LIVE TERMINAL OUTPUT */}
+          <div className="border-t border-white/[0.08] pt-8">
+            <div className="text-center max-w-xl mx-auto mb-6">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Interactive Command Runner</h3>
+              <p className="text-xs sm:text-sm text-slate-400">Select any inspection profile to see live output simulations.</p>
+            </div>
+
+            {/* Interactive Command Bar */}
+            <div className="max-w-3xl mx-auto mb-6">
+              <div className="bg-[#060911] border border-white/[0.12] rounded-2xl p-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner">
+                <div className="flex items-center gap-3 px-3 overflow-x-auto w-full sm:w-auto font-mono text-sm text-emerald-400">
+                  <span className="text-slate-500 select-none">$</span>
+                  <span className="font-semibold text-white tracking-wide">
+                    {cliTab === 'security'
                       ? 'npx arnav-audit . --security-only'
                       : cliTab === 'leakage'
                       ? 'npx arnav-audit . --leakage-only'
@@ -897,256 +1010,593 @@ Expected: font-size >= 16px to prevent iOS auto-zoom
                       ? 'npx arnav-audit https://mejor-iota.vercel.app'
                       : cliTab === 'prompts'
                       ? 'npx arnav-audit . --prompts'
-                      : 'npx arnav-audit .'
-                  )
-                }
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 text-emerald-300 hover:text-white transition flex items-center justify-center gap-2 text-xs font-mono font-semibold"
-              >
-                {copiedCli ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copy Command</span>
-                  </>
+                      : cliTab === 'json'
+                      ? 'npx arnav-audit . --json > audit-report.json'
+                      : 'npx arnav-audit .'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleCopyCli(
+                      cliTab === 'security'
+                        ? 'npx arnav-audit . --security-only'
+                        : cliTab === 'leakage'
+                        ? 'npx arnav-audit . --leakage-only'
+                        : cliTab === 'ui'
+                        ? 'npx arnav-audit https://mejor-iota.vercel.app'
+                        : cliTab === 'prompts'
+                        ? 'npx arnav-audit . --prompts'
+                        : cliTab === 'json'
+                        ? 'npx arnav-audit . --json > audit-report.json'
+                        : 'npx arnav-audit .'
+                    )
+                  }
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 text-emerald-300 hover:text-white transition flex items-center justify-center gap-2 text-xs font-mono font-semibold"
+                >
+                  {copiedCli ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Command</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Filter Pill Selectors */}
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-4 text-xs font-mono">
+                <button
+                  type="button"
+                  onClick={() => setCliTab('all')}
+                  className={`px-3 py-1.5 rounded-lg border transition ${
+                    cliTab === 'all'
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm'
+                      : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                  }`}
+                >
+                  Full Internal Audit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCliTab('security')}
+                  className={`px-3 py-1.5 rounded-lg border transition ${
+                    cliTab === 'security'
+                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm'
+                      : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                  }`}
+                >
+                  Security &amp; Secrets
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCliTab('leakage')}
+                  className={`px-3 py-1.5 rounded-lg border transition ${
+                    cliTab === 'leakage'
+                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm'
+                      : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                  }`}
+                >
+                  Memory &amp; Timer Leaks
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCliTab('ui')}
+                  className={`px-3 py-1.5 rounded-lg border transition ${
+                    cliTab === 'ui'
+                      ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm'
+                      : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                  }`}
+                >
+                  Live URL Probing
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCliTab('prompts')}
+                  className={`px-3 py-1.5 rounded-lg border transition ${
+                    cliTab === 'prompts'
+                      ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-sm'
+                      : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                  }`}
+                >
+                  Cursor / Claude Prompts
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCliTab('json')}
+                  className={`px-3 py-1.5 rounded-lg border transition ${
+                    cliTab === 'json'
+                      ? 'bg-blue-500/20 text-blue-300 border-blue-500/40 shadow-sm'
+                      : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                  }`}
+                >
+                  CI/CD JSON Export
+                </button>
+              </div>
+            </div>
+
+            {/* Interactive Terminal Mockup */}
+            <div className="bg-[#05070f] rounded-2xl border border-white/[0.1] shadow-2xl overflow-hidden font-mono text-xs max-w-4xl mx-auto">
+              <div className="flex items-center justify-between px-4 py-3 bg-[#090d18] border-b border-white/[0.08]">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                  <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                  <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
+                  <span className="ml-2 text-slate-400 text-[11px]">arnav-audit — terminal execution</span>
+                </div>
+                <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                  <span className="text-emerald-400">●</span> 124 files analyzed in 84ms
+                </div>
+              </div>
+
+              <div className="p-6 text-slate-300 space-y-4 overflow-x-auto leading-relaxed max-h-96">
+                <div className="text-slate-400 border-b border-white/[0.06] pb-3">
+                  <span className="text-emerald-400 font-bold">⚡ arnav-audit v1.0.0</span> — Internal Issues &amp; Leakage Auditor
+                  <br />
+                  <span className="text-slate-500">Scan target: . (Local Project Directory)</span>
+                </div>
+
+                {/* Dynamic Terminal Output based on cliTab */}
+                {cliTab === 'all' && (
+                  <div className="space-y-3">
+                    <div className="text-rose-400 font-semibold flex items-center gap-2">
+                      <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px]">CRITICAL</span>
+                      [SECURITY] Hardcoded API Token Leakage
+                    </div>
+                    <div className="pl-4 text-slate-400 text-[11px] border-l border-rose-500/30">
+                      File: <span className="text-slate-200">apps/api/core/auth.ts:42</span>
+                      <br />
+                      Match: <code className="text-rose-300">sk-proj-**********************************</code>
+                      <br />
+                      Remedy: Move private credentials to environment variables (.env.local) and add to .gitignore.
+                    </div>
+
+                    <div className="text-amber-400 font-semibold flex items-center gap-2 pt-2">
+                      <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">HIGH</span>
+                      [MEMORY LEAK] Dangling EventListener Missing Unmount Cleanup
+                    </div>
+                    <div className="pl-4 text-slate-400 text-[11px] border-l border-amber-500/30">
+                      File: <span className="text-slate-200">apps/web/components/Navbar.tsx:88</span>
+                      <br />
+                      Match: <code className="text-amber-300">window.addEventListener(&apos;resize&apos;, handleResize)</code>
+                      <br />
+                      Remedy: Return unregister function: <code className="text-emerald-400">return () =&gt; window.removeEventListener(&apos;resize&apos;, handleResize);</code>
+                    </div>
+
+                    <div className="text-cyan-400 font-semibold flex items-center gap-2 pt-2">
+                      <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px]">HIGH</span>
+                      [UI/UX DEFECT] iOS Safari Input Auto-Zoom Trap
+                    </div>
+                    <div className="pl-4 text-slate-400 text-[11px] border-l border-cyan-500/30">
+                      File: <span className="text-slate-200">apps/web/styles/globals.css:14</span>
+                      <br />
+                      Match: <code className="text-cyan-300">input[type=&quot;text&quot;] &#123; font-size: 14px; &#125;</code>
+                      <br />
+                      Remedy: Apply media query <code className="text-emerald-400">font-size: 16px !important</code> for max-width: 768px.
+                    </div>
+                  </div>
                 )}
-              </button>
-            </div>
 
-            {/* Filter Pill Selectors */}
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-4 text-xs font-mono">
-              <button
-                type="button"
-                onClick={() => setCliTab('all')}
-                className={`px-3 py-1.5 rounded-lg border transition ${
-                  cliTab === 'all'
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm'
-                    : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
-                }`}
-              >
-                Full Internal Audit
-              </button>
-              <button
-                type="button"
-                onClick={() => setCliTab('security')}
-                className={`px-3 py-1.5 rounded-lg border transition ${
-                  cliTab === 'security'
-                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm'
-                    : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
-                }`}
-              >
-                Security & Secrets
-              </button>
-              <button
-                type="button"
-                onClick={() => setCliTab('leakage')}
-                className={`px-3 py-1.5 rounded-lg border transition ${
-                  cliTab === 'leakage'
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm'
-                    : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
-                }`}
-              >
-                Memory & Timer Leaks
-              </button>
-              <button
-                type="button"
-                onClick={() => setCliTab('ui')}
-                className={`px-3 py-1.5 rounded-lg border transition ${
-                  cliTab === 'ui'
-                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm'
-                    : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
-                }`}
-              >
-                Live URL Probing
-              </button>
-              <button
-                type="button"
-                onClick={() => setCliTab('prompts')}
-                className={`px-3 py-1.5 rounded-lg border transition ${
-                  cliTab === 'prompts'
-                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-sm'
-                    : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
-                }`}
-              >
-                Cursor / Claude Prompts
-              </button>
-            </div>
-          </div>
-
-          {/* Interactive Terminal Mockup */}
-          <div className="bg-[#05070f] rounded-2xl border border-white/[0.1] shadow-2xl overflow-hidden font-mono text-xs">
-            <div className="flex items-center justify-between px-4 py-3 bg-[#090d18] border-b border-white/[0.08]">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-                <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-                <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
-                <span className="ml-2 text-slate-400 text-[11px]">arnav-audit — terminal execution</span>
-              </div>
-              <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                <span className="text-emerald-400">●</span> 124 files analyzed in 84ms
-              </div>
-            </div>
-
-            <div className="p-6 text-slate-300 space-y-4 overflow-x-auto leading-relaxed">
-              <div className="text-slate-400 border-b border-white/[0.06] pb-3">
-                <span className="text-emerald-400 font-bold">⚡ arnav-audit v1.0.0</span> — Internal Issues & Leakage Auditor
-                <br />
-                <span className="text-slate-500">Scan target: . (Local Project Directory)</span>
-              </div>
-
-              {/* Dynamic Terminal Output based on cliTab */}
-              {cliTab === 'all' && (
-                <div className="space-y-3">
-                  <div className="text-rose-400 font-semibold flex items-center gap-2">
-                    <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px]">CRITICAL</span>
-                    [SECURITY] Hardcoded API Token Leakage
-                  </div>
-                  <div className="pl-4 text-slate-400 text-[11px] border-l border-rose-500/30">
-                    File: <span className="text-slate-200">apps/api/core/auth.ts:42</span>
-                    <br />
-                    Match: <code className="text-rose-300">sk-proj-**********************************</code>
-                    <br />
-                    Remedy: Move private credentials to environment variables (.env.local) and add to .gitignore.
-                  </div>
-
-                  <div className="text-amber-400 font-semibold flex items-center gap-2 pt-2">
-                    <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">HIGH</span>
-                    [MEMORY LEAK] Dangling EventListener Missing Unmount Cleanup
-                  </div>
-                  <div className="pl-4 text-slate-400 text-[11px] border-l border-amber-500/30">
-                    File: <span className="text-slate-200">apps/web/components/Navbar.tsx:88</span>
-                    <br />
-                    Match: <code className="text-amber-300">window.addEventListener(&apos;resize&apos;, handleResize)</code>
-                    <br />
-                    Remedy: Return unregister function: <code className="text-emerald-400">return () =&gt; window.removeEventListener(&apos;resize&apos;, handleResize);</code>
-                  </div>
-
-                  <div className="text-cyan-400 font-semibold flex items-center gap-2 pt-2">
-                    <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px]">HIGH</span>
-                    [UI/UX DEFECT] iOS Safari Input Auto-Zoom Trap
-                  </div>
-                  <div className="pl-4 text-slate-400 text-[11px] border-l border-cyan-500/30">
-                    File: <span className="text-slate-200">apps/web/styles/globals.css:14</span>
-                    <br />
-                    Match: <code className="text-cyan-300">input[type=&quot;text&quot;] &#123; font-size: 14px; &#125;</code>
-                    <br />
-                    Remedy: Apply media query <code className="text-emerald-400">font-size: 16px !important</code> for max-width: 768px.
-                  </div>
-                </div>
-              )}
-
-              {cliTab === 'security' && (
-                <div className="space-y-3">
-                  <div className="text-rose-400 font-semibold flex items-center gap-2">
-                    <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px]">CRITICAL</span>
-                    AWS Access Key & OpenAI Secret Pattern Found
-                  </div>
-                  <div className="pl-4 text-slate-400 text-[11px] border-l border-rose-500/30">
-                    Checks: AWS AKIA keys, OpenAI sk-, GitHub ghp_ tokens, Private RSA Keys, eval(), dangerouslySetInnerHTML
-                    <br />
-                    Result: <span className="text-emerald-400 font-semibold">2 warnings flagged</span> with exact line references.
-                  </div>
-                </div>
-              )}
-
-              {cliTab === 'leakage' && (
-                <div className="space-y-3">
-                  <div className="text-amber-400 font-semibold flex items-center gap-2">
-                    <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">HIGH</span>
-                    Uncleaned setInterval & React Hook Listener Leaks
-                  </div>
-                  <div className="pl-4 text-slate-400 text-[11px] border-l border-amber-500/30">
-                    Checks: addEventListener missing removeEventListener, setInterval without clearInterval, window global assignment
-                    <br />
-                    Result: Verified no dangling timers in background workers; 1 cleanup hook required in client component.
-                  </div>
-                </div>
-              )}
-
-              {cliTab === 'ui' && (
-                <div className="space-y-3">
-                  <div className="text-cyan-400 font-semibold flex items-center gap-2">
-                    <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px]">LIVE SCAN</span>
-                    Probing Remote Endpoint: https://mejor-iota.vercel.app
-                  </div>
-                  <div className="pl-4 text-slate-400 text-[11px] border-l border-cyan-500/30">
-                    Status: <span className="text-emerald-400 font-semibold">200 OK</span> | Viewport probe active
-                    <br />
-                    Security Headers: Content-Security-Policy (Enforced), Strict-Transport-Security (Active)
-                    <br />
-                    Touch Action: touch-action: manipulation active on all primary CTA buttons
-                  </div>
-                </div>
-              )}
-
-              {cliTab === 'prompts' && (
-                <div className="space-y-3">
-                  <div className="text-purple-400 font-semibold flex items-center gap-2">
-                    <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px]">AI COPILOT</span>
-                    Generated Remediation Prompts for Cursor & Claude Code
-                  </div>
-                  <div className="pl-4 text-slate-400 text-[11px] border-l border-purple-500/30">
-                    <code>
-                      ## FIX INSTRUCTION: [SECURITY-SECRET-LEAK]
+                {cliTab === 'security' && (
+                  <div className="space-y-3">
+                    <div className="text-rose-400 font-semibold flex items-center gap-2">
+                      <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px]">CRITICAL</span>
+                      AWS Access Key &amp; OpenAI Secret Pattern Found
+                    </div>
+                    <div className="pl-4 text-slate-400 text-[11px] border-l border-rose-500/30">
+                      Checks: AWS AKIA keys, OpenAI sk-, GitHub ghp_ tokens, Private RSA Keys, eval(), dangerouslySetInnerHTML
                       <br />
-                      Target: apps/api/core/auth.ts:42
-                      <br />
-                      Task: Replace literal string with process.env.API_KEY and verify fallback logic.
-                    </code>
+                      Result: <span className="text-emerald-400 font-semibold">2 warnings flagged</span> with exact line references.
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-slate-500">
-                <span>Exit code: 0 (Audit Complete)</span>
-                <span className="text-emerald-400 font-semibold">Zero dependencies required (Vanilla Node 18+)</span>
+                {cliTab === 'leakage' && (
+                  <div className="space-y-3">
+                    <div className="text-amber-400 font-semibold flex items-center gap-2">
+                      <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">HIGH</span>
+                      Uncleaned setInterval &amp; React Hook Listener Leaks
+                    </div>
+                    <div className="pl-4 text-slate-400 text-[11px] border-l border-amber-500/30">
+                      Checks: addEventListener missing removeEventListener, setInterval without clearInterval, window global assignment
+                      <br />
+                      Result: Verified no dangling timers in background workers; 1 cleanup hook required in client component.
+                    </div>
+                  </div>
+                )}
+
+                {cliTab === 'ui' && (
+                  <div className="space-y-3">
+                    <div className="text-cyan-400 font-semibold flex items-center gap-2">
+                      <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px]">LIVE SCAN</span>
+                      Probing Remote Endpoint: https://mejor-iota.vercel.app
+                    </div>
+                    <div className="pl-4 text-slate-400 text-[11px] border-l border-cyan-500/30">
+                      Status: <span className="text-emerald-400 font-semibold">200 OK</span> | Viewport probe active
+                      <br />
+                      Security Headers: Content-Security-Policy (Enforced), Strict-Transport-Security (Active)
+                      <br />
+                      Touch Action: touch-action: manipulation active on all primary CTA buttons
+                    </div>
+                  </div>
+                )}
+
+                {cliTab === 'prompts' && (
+                  <div className="space-y-3">
+                    <div className="text-purple-400 font-semibold flex items-center gap-2">
+                      <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px]">AI COPILOT</span>
+                      Generated Remediation Prompts for Cursor &amp; Claude Code
+                    </div>
+                    <div className="pl-4 text-slate-400 text-[11px] border-l border-purple-500/30">
+                      <code>
+                        ## FIX INSTRUCTION: [SECURITY-SECRET-LEAK]
+                        <br />
+                        Target: apps/api/core/auth.ts:42
+                        <br />
+                        Task: Replace literal string with process.env.API_KEY and verify fallback logic.
+                      </code>
+                    </div>
+                  </div>
+                )}
+
+                {cliTab === 'json' && (
+                  <div className="space-y-3">
+                    <div className="text-blue-400 font-semibold flex items-center gap-2">
+                      <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px]">JSON REPORT</span>
+                      CI/CD Pipeline Structured Output
+                    </div>
+                    <div className="pl-4 text-slate-400 text-[11px] border-l border-blue-500/30 font-mono">
+                      <pre className="text-slate-300">
+{`{
+  "summary": { "files": 124, "issues": 3, "score": 86 },
+  "security": [
+    { "id": "SEC-KEY-OPENAI", "severity": "CRITICAL", "file": "apps/api/core/auth.ts", "line": 42 }
+  ],
+  "leaks": [
+    { "id": "LEAK-HOOK-EVENT", "severity": "HIGH", "file": "apps/web/components/Navbar.tsx", "line": 88 }
+  ]
+}`}
+                      </pre>
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-slate-500">
+                  <span>Exit code: 0 (Audit Complete)</span>
+                  <span className="text-emerald-400 font-semibold">Zero dependencies required (Vanilla Node 16+)</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* 4 Feature Value Pillars for the CLI */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
-            <div className="bg-[#060911]/80 p-5 rounded-2xl border border-white/[0.06]">
-              <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 mb-3">
-                <Lock className="w-4 h-4" />
-              </div>
-              <h4 className="font-bold text-white text-sm mb-1">Security & Secret Leaks</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Flags AWS, OpenAI, GitHub PATs, private keys, eval(), and dangerous innerHTML injections before git push.
-              </p>
+          {/* 3. FOUR WAYS TO INSTALL & USE ARNAV-AUDIT */}
+          <div className="border-t border-white/[0.08] pt-8">
+            <div className="text-center max-w-xl mx-auto mb-6">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Installation &amp; Integration Methods</h3>
+              <p className="text-xs sm:text-sm text-slate-400">Choose the workflow that fits your team or development pipeline.</p>
             </div>
 
-            <div className="bg-[#060911]/80 p-5 rounded-2xl border border-white/[0.06]">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-3">
-                <Activity className="w-4 h-4" />
-              </div>
-              <h4 className="font-bold text-white text-sm mb-1">Memory & Timer Leaks</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Catches unmount event listeners, dangling setInterval loops, and global window namespace collisions.
-              </p>
+            {/* Installation Tabs */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-6 text-xs font-mono">
+              <button
+                type="button"
+                onClick={() => setInstallMethod('npx')}
+                className={`px-4 py-2 rounded-xl border transition flex items-center gap-2 ${
+                  installMethod === 'npx'
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-md'
+                    : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                }`}
+              >
+                <Zap className="w-3.5 h-3.5" />
+                <span>1. Zero-Install (npx)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setInstallMethod('global')}
+                className={`px-4 py-2 rounded-xl border transition flex items-center gap-2 ${
+                  installMethod === 'global'
+                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-md'
+                    : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                }`}
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>2. Global CLI (npm -g)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setInstallMethod('project')}
+                className={`px-4 py-2 rounded-xl border transition flex items-center gap-2 ${
+                  installMethod === 'project'
+                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-md'
+                    : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                }`}
+              >
+                <Box className="w-3.5 h-3.5" />
+                <span>3. Project Dependency (package.json)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setInstallMethod('ci')}
+                className={`px-4 py-2 rounded-xl border transition flex items-center gap-2 ${
+                  installMethod === 'ci'
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-md'
+                    : 'bg-white/[0.03] text-slate-400 border-white/[0.06] hover:text-white'
+                }`}
+              >
+                <Workflow className="w-3.5 h-3.5" />
+                <span>4. CI/CD (GitHub Actions)</span>
+              </button>
             </div>
 
-            <div className="bg-[#060911]/80 p-5 rounded-2xl border border-white/[0.06]">
-              <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-3">
-                <Eye className="w-4 h-4" />
-              </div>
-              <h4 className="font-bold text-white text-sm mb-1">Invisible Interface Traps</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Detects &lt;16px iOS auto-zoom inputs, 300ms tap lag, focus ring wipes, and flex SVG icon squishing.
-              </p>
+            {/* Install Method Content Card */}
+            <div className="bg-[#060911] border border-white/[0.08] rounded-2xl p-6 max-w-4xl mx-auto">
+              {installMethod === 'npx' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-base font-bold text-white">Instant One-Off Execution</h4>
+                      <p className="text-xs text-slate-400">
+                        Zero setup. Executes the latest version directly without adding packages to disk or package.json.
+                      </p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-md text-[11px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      Recommended
+                    </span>
+                  </div>
+                  <div className="bg-[#090d18] rounded-xl p-4 font-mono text-xs text-emerald-400 flex items-center justify-between border border-white/[0.06]">
+                    <code>npx arnav-audit .</code>
+                    <button
+                      type="button"
+                      onClick={() => handleCopySnippet('install-npx', 'npx arnav-audit .')}
+                      className="px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white transition flex items-center gap-1.5 text-[11px]"
+                    >
+                      {copiedSnippet === 'install-npx' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedSnippet === 'install-npx' ? 'Copied!' : 'Copy'}</span>
+                    </button>
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    💡 Ideal for quick PR checks, scanning open-source forks, and inspecting client projects before deployment.
+                  </p>
+                </div>
+              )}
+
+              {installMethod === 'global' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-base font-bold text-white">Global Command-Line Tool</h4>
+                      <p className="text-xs text-slate-400">
+                        Installs `arnav-audit` globally into your system path so you can run it from any terminal tab anytime.
+                      </p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-md text-[11px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                      System-Wide
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-[11px] text-slate-400 font-mono">Step 1: Install globally via npm</div>
+                    <div className="bg-[#090d18] rounded-xl p-4 font-mono text-xs text-cyan-400 flex items-center justify-between border border-white/[0.06]">
+                      <code>npm install -g arnav-audit</code>
+                      <button
+                        type="button"
+                        onClick={() => handleCopySnippet('install-global', 'npm install -g arnav-audit')}
+                        className="px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white transition flex items-center gap-1.5 text-[11px]"
+                      >
+                        {copiedSnippet === 'install-global' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedSnippet === 'install-global' ? 'Copied!' : 'Copy'}</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-[11px] text-slate-400 font-mono">Step 2: Run directly anywhere</div>
+                    <div className="bg-[#090d18] rounded-xl p-3 font-mono text-xs text-slate-300 border border-white/[0.06]">
+                      <code>arnav-audit .</code>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {installMethod === 'project' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-base font-bold text-white">Project Dev Dependency</h4>
+                      <p className="text-xs text-slate-400">
+                        Locks the auditor version in package.json and package-lock.json for standard team execution.
+                      </p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-md text-[11px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                      Team Standard
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-[11px] text-slate-400 font-mono">1. Install as developer dependency:</div>
+                    <div className="bg-[#090d18] rounded-xl p-4 font-mono text-xs text-purple-400 flex items-center justify-between border border-white/[0.06]">
+                      <code>npm install --save-dev arnav-audit</code>
+                      <button
+                        type="button"
+                        onClick={() => handleCopySnippet('install-dev', 'npm install --save-dev arnav-audit')}
+                        className="px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white transition flex items-center gap-1.5 text-[11px]"
+                      >
+                        {copiedSnippet === 'install-dev' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedSnippet === 'install-dev' ? 'Copied!' : 'Copy'}</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-[11px] text-slate-400 font-mono">2. Add script to package.json:</div>
+                    <div className="bg-[#090d18] rounded-xl p-4 font-mono text-xs text-slate-300 border border-white/[0.06]">
+                      <pre className="text-emerald-400">
+{`"scripts": {
+  "audit": "arnav-audit .",
+  "audit:security": "arnav-audit . --security-only",
+  "audit:ci": "arnav-audit . --json"
+}`}
+                      </pre>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {installMethod === 'ci' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-base font-bold text-white">Automated GitHub Actions Workflow</h4>
+                      <p className="text-xs text-slate-400">
+                        Fail pull requests if critical security credentials or severe memory leaks are detected.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleCopySnippet(
+                          'ci-workflow',
+                          `name: Internal Quality & Security Audit\non: [push, pull_request]\n\njobs:\n  audit:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 20\n      - name: Run arnav-audit\n        run: npx arnav-audit .`
+                        )
+                      }
+                      className="px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/30 transition flex items-center gap-1.5 text-xs font-mono"
+                    >
+                      {copiedSnippet === 'ci-workflow' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedSnippet === 'ci-workflow' ? 'Copied!' : 'Copy YAML'}</span>
+                    </button>
+                  </div>
+                  <div className="bg-[#090d18] rounded-xl p-4 font-mono text-xs text-slate-300 border border-white/[0.06] overflow-x-auto">
+                    <pre className="text-amber-400">
+{`# Save to .github/workflows/audit.yml
+name: Internal Quality & Security Audit
+on: [push, pull_request]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run arnav-audit
+        run: npx arnav-audit .`}
+                    </pre>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 4. COMPLETE CLI COMMAND & OPTIONS MATRIX */}
+          <div className="border-t border-white/[0.08] pt-8">
+            <div className="text-center max-w-xl mx-auto mb-6">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">CLI Options &amp; Flag Reference</h3>
+              <p className="text-xs sm:text-sm text-slate-400">Every parameter and flag available in the `arnav-audit` engine.</p>
             </div>
 
-            <div className="bg-[#060911]/80 p-5 rounded-2xl border border-white/[0.06]">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3">
-                <Code2 className="w-4 h-4" />
+            <div className="max-w-4xl mx-auto overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060911]">
+              <table className="w-full text-left font-mono text-xs border-collapse">
+                <thead>
+                  <tr className="bg-[#090d18] border-b border-white/[0.08] text-slate-400">
+                    <th className="py-3 px-4 font-semibold text-emerald-400">Flag / Argument</th>
+                    <th className="py-3 px-4 font-semibold text-slate-300">Description</th>
+                    <th className="py-3 px-4 font-semibold text-slate-400">Example</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/[0.04] text-slate-300">
+                  <tr className="hover:bg-white/[0.02] transition">
+                    <td className="py-3 px-4 text-emerald-300 font-bold">[target]</td>
+                    <td className="py-3 px-4 text-slate-400">
+                      Directory path (defaults to current folder <code className="text-slate-300">&quot;.&quot;</code>) or live <code className="text-slate-300">https://</code> URL.
+                    </td>
+                    <td className="py-3 px-4 text-slate-400"><code>npx arnav-audit ./src</code></td>
+                  </tr>
+                  <tr className="hover:bg-white/[0.02] transition">
+                    <td className="py-3 px-4 text-purple-300 font-bold">--prompts, --fix</td>
+                    <td className="py-3 px-4 text-slate-400">
+                      Generates ready-to-paste AI remediation prompt blocks for Cursor, Claude Code, and Copilot.
+                    </td>
+                    <td className="py-3 px-4 text-slate-400"><code>npx arnav-audit . --prompts</code></td>
+                  </tr>
+                  <tr className="hover:bg-white/[0.02] transition">
+                    <td className="py-3 px-4 text-rose-300 font-bold">--security-only</td>
+                    <td className="py-3 px-4 text-slate-400">
+                      Limits scan strictly to exposed credentials (AWS, OpenAI, GitHub PATs), private keys, and XSS injection vectors.
+                    </td>
+                    <td className="py-3 px-4 text-slate-400"><code>npx arnav-audit . --security-only</code></td>
+                  </tr>
+                  <tr className="hover:bg-white/[0.02] transition">
+                    <td className="py-3 px-4 text-amber-300 font-bold">--leakage-only</td>
+                    <td className="py-3 px-4 text-slate-400">
+                      Limits scan strictly to unmounted event listeners, zombie setInterval timers, and global window pollution.
+                    </td>
+                    <td className="py-3 px-4 text-slate-400"><code>npx arnav-audit . --leakage-only</code></td>
+                  </tr>
+                  <tr className="hover:bg-white/[0.02] transition">
+                    <td className="py-3 px-4 text-blue-300 font-bold">--json</td>
+                    <td className="py-3 px-4 text-slate-400">
+                      Outputs structured JSON format for automated pipelines, custom webhooks, or audit log archiving.
+                    </td>
+                    <td className="py-3 px-4 text-slate-400"><code>npx arnav-audit . --json &gt; report.json</code></td>
+                  </tr>
+                  <tr className="hover:bg-white/[0.02] transition">
+                    <td className="py-3 px-4 text-cyan-300 font-bold">-v, --version</td>
+                    <td className="py-3 px-4 text-slate-400">Displays the installed or running CLI version.</td>
+                    <td className="py-3 px-4 text-slate-400"><code>npx arnav-audit -v</code></td>
+                  </tr>
+                  <tr className="hover:bg-white/[0.02] transition">
+                    <td className="py-3 px-4 text-slate-300 font-bold">-h, --help</td>
+                    <td className="py-3 px-4 text-slate-400">Prints the complete terminal manual, flag list, and usage examples.</td>
+                    <td className="py-3 px-4 text-slate-400"><code>npx arnav-audit --help</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* 5. FOUR FEATURE VALUE PILLARS */}
+          <div className="border-t border-white/[0.08] pt-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-[#060911]/80 p-5 rounded-2xl border border-white/[0.06]">
+                <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 mb-3">
+                  <Lock className="w-4 h-4" />
+                </div>
+                <h4 className="font-bold text-white text-sm mb-1">Security &amp; Secret Leaks</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Flags AWS, OpenAI, GitHub PATs, private keys, eval(), and dangerous innerHTML injections before git push.
+                </p>
               </div>
-              <h4 className="font-bold text-white text-sm mb-1">Cursor & Claude Code Prompts</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Pass <code className="text-emerald-300">--prompts</code> to get ready-to-paste AI agent prompt blocks with exact line ranges.
-              </p>
+
+              <div className="bg-[#060911]/80 p-5 rounded-2xl border border-white/[0.06]">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-3">
+                  <Activity className="w-4 h-4" />
+                </div>
+                <h4 className="font-bold text-white text-sm mb-1">Memory &amp; Timer Leaks</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Catches unmount event listeners, dangling setInterval loops, and global window namespace collisions.
+                </p>
+              </div>
+
+              <div className="bg-[#060911]/80 p-5 rounded-2xl border border-white/[0.06]">
+                <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-3">
+                  <Eye className="w-4 h-4" />
+                </div>
+                <h4 className="font-bold text-white text-sm mb-1">Invisible Interface Traps</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Detects &lt;16px iOS auto-zoom inputs, 300ms tap lag, focus ring wipes, and flex SVG icon squishing.
+                </p>
+              </div>
+
+              <div className="bg-[#060911]/80 p-5 rounded-2xl border border-white/[0.06]">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3">
+                  <Code2 className="w-4 h-4" />
+                </div>
+                <h4 className="font-bold text-white text-sm mb-1">Cursor &amp; Claude Prompts</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Pass <code className="text-emerald-300">--prompts</code> to get ready-to-paste AI agent prompt blocks with exact line ranges.
+                </p>
+              </div>
             </div>
           </div>
         </div>

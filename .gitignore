@@ -18,6 +18,7 @@ node_modules/
 out/
 build/
 dist/
+*.tsbuildinfo
 # Environment
 .env
 .env.*
