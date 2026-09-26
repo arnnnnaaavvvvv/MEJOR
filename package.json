@@ -1,0 +1,12 @@
+{
+  "name": "mejor-monorepo",
+  "version": "1.0.2",
+  "private": true,
+  "description": "MEJOR - Autonomous Production Interface, Memory Leakage and Security Auditor",
+  "scripts": {
+    "audit": "arnav-audit .",
+    "audit:files": "arnav-audit . --files",
+    "audit:verbose": "arnav-audit . --verbose",
+    "audit:fix": "arnav-audit . --prompts"
+  }
+}

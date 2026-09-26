@@ -1,6 +1,6 @@
 {
   "name": "arnav-audit",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Comprehensive internal security, memory leakage, and invisible UI/UX interface auditor by Arnav.",
   "bin": {
     "arnav-audit": "bin/cli.js"

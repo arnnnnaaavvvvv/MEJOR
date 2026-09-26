@@ -57,6 +57,8 @@ const options = {
   prompts: false,
   securityOnly: false,
   leakageOnly: false,
+  verbose: false,
+  files: false,
   help: false,
   version: false,
 };
@@ -65,6 +67,8 @@ for (let i = 0; i < args.length; i++) {
   const arg = args[i];
   if (arg === '--help' || arg === '-h') options.help = true;
   else if (arg === '--version' || arg === '-v') options.version = true;
+  else if (arg === '--verbose') options.verbose = true;
+  else if (arg === '--files' || arg === '--list') options.files = true;
   else if (arg === '--json') options.json = true;
   else if (arg === '--prompts' || arg === '--fix') options.prompts = true;
   else if (arg === '--security' || arg === '--security-only') options.securityOnly = true;
@@ -73,7 +77,7 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (options.version) {
-  console.log('arnav-audit v1.0.1');
+  console.log('arnav-audit v1.0.2');
   process.exit(0);
 }
 
@@ -88,6 +92,8 @@ ${C.bold}TARGETS:${C.reset}
   [https://url]      Live website URL to run headless CDP telemetry & 200 checks
 
 ${C.bold}OPTIONS:${C.reset}
+  --files, --list    List every single scanned file path with inspection status
+  --verbose          Display detailed scan logs and file-by-file verification
   --prompts, --fix   Generate copy-paste AI fix prompts for Cursor & Claude Code
   --security-only    Scan exclusively for exposed credentials, secrets & XSS vectors
   --leakage-only     Scan exclusively for memory, event listeners & viewport leaks
@@ -97,6 +103,7 @@ ${C.bold}OPTIONS:${C.reset}
 
 ${C.bold}EXAMPLES:${C.reset}
   $ npx arnav-audit .
+  $ npx arnav-audit . --files
   $ npx arnav-audit https://mejor-iota.vercel.app
   $ npx arnav-audit . --prompts
   $ npx arnav-audit . --json > audit-report.json
@@ -398,10 +405,20 @@ function runLocalAudit(targetDir) {
 
   const files = walkDir(root);
   const issues = [];
+  const scannedFiles = [];
+  const extCounts = {};
+  const dirCounts = {};
 
   for (const filePath of files) {
     const relPath = path.relative(root, filePath);
     const ext = path.extname(filePath).toLowerCase();
+    scannedFiles.push(relPath);
+
+    const extKey = ext || '[config]';
+    extCounts[extKey] = (extCounts[extKey] || 0) + 1;
+
+    const topFolder = relPath.split(path.sep)[0] || '.';
+    dirCounts[topFolder] = (dirCounts[topFolder] || 0) + 1;
 
     let content = '';
     try {
@@ -485,7 +502,7 @@ function runLocalAudit(targetDir) {
     }
   }
 
-  return { root, totalFiles: files.length, issues };
+  return { root, totalFiles: files.length, scannedFiles, extCounts, dirCounts, issues };
 }
 
 // -------------------------------------------------------------
@@ -587,6 +604,7 @@ async function main() {
     console.log(JSON.stringify({
       target: audit.root,
       totalFiles: audit.totalFiles,
+      scannedFiles: audit.scannedFiles,
       score,
       grade,
       counts: {
@@ -601,18 +619,54 @@ async function main() {
     return;
   }
 
+  // Print all scanned files if --files or --verbose requested
+  if (options.files || options.verbose) {
+    console.log(`${C.bold}VERIFIED CODEBASE FILES (${audit.totalFiles} files inspected):${C.reset}`);
+    audit.scannedFiles.forEach((file, idx) => {
+      const fileIssues = audit.issues.filter(i => i.file === file);
+      const numStr = String(idx + 1).padStart(3, ' ');
+      if (fileIssues.length === 0) {
+        console.log(`  ${C.gray}[${numStr}/${audit.totalFiles}]${C.reset} ${C.emerald}✓${C.reset} ${file}`);
+      } else {
+        console.log(`  ${C.gray}[${numStr}/${audit.totalFiles}]${C.reset} ${C.rose}✗${C.reset} ${file} ${C.rose}(${fileIssues.length} issues)${C.reset}`);
+      }
+    });
+    console.log('');
+  }
+
   // Formatted Terminal Dashboard
   console.log(`${C.dim}————————————————————————————————————————————————————————————————————${C.reset}`);
-  console.log(`  ${C.bold}AUDIT REPORT OVERVIEW${C.reset}  •  Scanned ${C.bold}${audit.totalFiles}${C.reset} files`);
+  console.log(`  ${C.bold}AUDIT REPORT OVERVIEW${C.reset}  •  Scanned ${C.bold}${audit.totalFiles}${C.reset} files across entire codebase`);
   console.log(`${C.dim}————————————————————————————————————————————————————————————————————${C.reset}`);
   
   const gradeColor = grade.startsWith('A') ? C.emerald : grade === 'B' ? C.cyan : grade === 'C' ? C.amber : C.rose;
   console.log(`  Overall Score:  ${gradeColor}${C.bold}${score}/100${C.reset} (Grade ${gradeColor}${C.bold}${grade}${C.reset})`);
   console.log(`  Findings:       ${C.rose}${critical.length} Critical${C.reset}  |  ${C.amber}${major.length} Major${C.reset}  |  ${C.cyan}${minor.length} Minor${C.reset}  |  ${C.gray}${suggestions.length} Suggestions${C.reset}\n`);
 
+  console.log(`  ${C.bold}Full Codebase Coverage Breakdown:${C.reset}`);
+  const sortedExts = Object.entries(audit.extCounts).sort((a, b) => b[1] - a[1]);
+  sortedExts.forEach(([ext, count]) => {
+    let name = 'Source / Script';
+    if (ext === '.py') name = 'Python (FastAPI, Worker, Checks, Tests)';
+    else if (ext === '.ts') name = 'TypeScript (Backend, Core, API routes)';
+    else if (ext === '.tsx') name = 'React / Next.js Components';
+    else if (ext === '.js') name = 'JavaScript Modules & Configs';
+    else if (ext === '.json') name = 'JSON Manifests & Data schemas';
+    else if (ext === '.yml' || ext === '.yaml') name = 'GitHub CI & Docker Compose';
+    else if (ext === '.css' || ext === '.scss') name = 'Vanilla & Tailwind Styles';
+    else if (ext === '.html') name = 'HTML Templates & Fixtures';
+    else if (ext === '.md') name = 'Documentation & Blueprints';
+    else if (ext === '[config]') name = 'Dockerfiles, .env, .gitignore';
+    console.log(`   • ${C.cyan}${name.padEnd(42, ' ')}${C.reset} ${C.bold}${count}${C.reset} files (${ext})`);
+  });
+  console.log('');
+
   if (audit.issues.length === 0) {
-    console.log(`  ${C.emerald}✓ Zero internal security, leakage, or interface defects detected!${C.reset}\n`);
-    console.log(`  Your codebase meets enterprise production standards.`);
+    console.log(`  ${C.emerald}✓ Zero internal security, leakage, or interface defects detected!${C.reset}`);
+    console.log(`  Every file in the codebase was verified. Meets enterprise standards.\n`);
+    if (!options.files) {
+      console.log(`  ${C.dim}Tip: Run with ${C.white}--files${C.dim} to display each individual file path in the terminal.${C.reset}`);
+    }
     console.log(`${C.dim}————————————————————————————————————————————————————————————————————${C.reset}\n`);
     return;
   }
