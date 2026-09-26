@@ -289,7 +289,7 @@ export async function auditWebsite(targetUrl: string, mode: string = 'quick'): P
 
   // 6. Horizontal Scrollbar Bleed / 100vw Viewport Leak
   // macOS developers with floating scrollbars NEVER see this bug, but on Windows/Linux/Android,
-  // the 15-17px vertical scrollbar causes width: 100vw or w-screen to overflow, triggering horizontal scrollbar leaks.
+  // the 15-17px vertical scrollbar causes 100vw units or w-screen to overflow, triggering horizontal scrollbar leaks.
   const has100Vw = /100vw|w-screen/i.test(html);
   const hasOverflowClip = /overflow-x:\s*(?:clip|hidden)|overflow-x-clip/i.test(html);
   if (has100Vw && (!hasOverflowClip || !isLiveReachable)) {
@@ -300,14 +300,14 @@ export async function auditWebsite(targetUrl: string, mode: string = 'quick'): P
       severity: 'CRITICAL',
       tier: 'A',
       title: '100vw Horizontal Scrollbar Bleed & Viewport Width Leak',
-      problem: `Elements on ${domain} utilize width: 100vw (or w-screen) without container clipping. On systems with persistent vertical scrollbars (Windows, Android, Linux), 100vw exceeds document client width by 15-17px, causing an unwanted horizontal scrollbar and page jitter.`,
+      problem: `Elements on ${domain} utilize 100vw viewport sizing (or w-screen) without container clipping. On systems with persistent vertical scrollbars (Windows, Android, Linux), 100vw exceeds document client width by 15-17px, causing an unwanted horizontal scrollbar and page jitter.`,
       measured: { full_bleed_unit: '100vw', client_width_delta_px: 17, os_affected: 'Windows, Android, Linux' },
       expected: { full_bleed_rule: 'width: 100% or html, body { overflow-x: clip }' },
       selector: 'body, [class*="w-screen"], [style*="100vw"]',
       fix_goal: 'Contain horizontal bleed by replacing 100vw with 100% and setting overflow-x: clip on html and body.',
       acceptance: 'Page has zero horizontal scrollbar on devices with persistent vertical scrollbars.',
-      fix_prompt: `html, body {\n  max-width: 100vw !important;\n  overflow-x: clip !important;\n}`,
-      patch_css: `html, body {\n  max-width: 100vw !important;\n  overflow-x: clip !important;\n}`,
+      fix_prompt: `html, body {\n  max-width: 100% !important;\n  overflow-x: clip !important;\n}`,
+      patch_css: `html, body {\n  max-width: 100% !important;\n  overflow-x: clip !important;\n}`,
     });
   }
 

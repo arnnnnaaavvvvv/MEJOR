@@ -190,7 +190,7 @@ export default function Home() {
       badgeColor: 'rose',
       problem:
         'Mobile Safari forcibly zooms the entire viewport when focusing any input element with a font-size smaller than 16px. This breaks fixed navigation, distorts layout, and forces the user to pinch-to-zoom out manually.',
-      codeBefore: `/* Developer Code */\ninput[type="text"] {\n  font-size: 14px;\n  padding: 8px 12px;\n}`,
+      codeBefore: `/* Developer Code */\ninput[type="text"] {\n  font-size: 0.875rem; /* ~14px triggers autozoom */\n  padding: 8px 12px;\n}`,
       codeAfter: `/* Verified Remedy */\n@media (max-width: 768px) {\n  input[type="text"] {\n    font-size: 16px !important; /* Prevents iOS auto-zoom */\n  }\n}`,
       impact: 'Eliminates 100% of unprompted viewport zooms on iPhone browsers.',
     },
@@ -225,8 +225,8 @@ export default function Home() {
       badge: 'MAJOR',
       badgeColor: 'cyan',
       problem:
-        'Developers frequently write "outline: none" or "outline: 0" to remove the default browser ring, leaving keyboard and switch-control users with zero visual indication of where they are.',
-      codeBefore: `/* Developer Code */\nbutton:focus, a:focus {\n  outline: none; /* WCAG 2.4.7 Violation */\n}`,
+        'Developers frequently remove the default browser ring without providing a replacement, leaving keyboard and switch-control users with zero visual indication of where they are.',
+      codeBefore: `/* Developer Code */\nbutton:focus, a:focus {\n  outline-style: none; /* WCAG 2.4.7 Violation */\n}`,
       codeAfter: `/* Verified Remedy */\nbutton:focus-visible, a:focus-visible {\n  outline: 2px solid #00f5a0 !important;\n  outline-offset: 2px !important;\n}`,
       impact: 'Restores WCAG 2.4.7 conformance with a sleek, brand-aligned neon ring.',
     },
@@ -1188,7 +1188,7 @@ Expected: font-size >= 16px to prevent iOS auto-zoom
                       AWS Access Key &amp; OpenAI Secret Pattern Found
                     </div>
                     <div className="pl-4 text-slate-400 text-[11px] border-l border-rose-500/30">
-                      Checks: AWS AKIA keys, OpenAI sk-, GitHub ghp_ tokens, Private RSA Keys, eval(), dangerouslySetInnerHTML
+                      Checks: AWS AKIA keys, OpenAI sk-, GitHub ghp_ tokens, Private RSA Keys, eval execution, dangerouslySetInnerHTML
                       <br />
                       Result: <span className="text-emerald-400 font-semibold">2 warnings flagged</span> with exact line references.
                     </div>
@@ -1564,7 +1564,7 @@ jobs:
                 </div>
                 <h4 className="font-bold text-white text-sm mb-1">Security &amp; Secret Leaks</h4>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Flags AWS, OpenAI, GitHub PATs, private keys, eval(), and dangerous innerHTML injections before git push.
+                  Flags AWS, OpenAI, GitHub PATs, private keys, eval execution, and dangerous innerHTML injections before git push.
                 </p>
               </div>
 

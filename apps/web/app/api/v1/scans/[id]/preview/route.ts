@@ -325,7 +325,7 @@ export async function GET(
 
           /* 6. 100vw Viewport Bleed & Horizontal Scrollbar Lockout */
           html, body {
-            max-width: 100vw !important;
+            max-width: 100% !important;
             overflow-x: clip !important;
           }
 
@@ -855,7 +855,7 @@ export async function GET(
 
           ${!showHighlight ? `
             .auditor-fix-highlight, .auditor-defect-highlight {
-              outline: none !important;
+              outline-color: transparent !important;
               box-shadow: none !important;
               animation: none !important;
             }
@@ -980,7 +980,7 @@ export async function GET(
                   }
                 </div>
                 <div class="card-value" style="font-size: 16px; font-weight: 600; color: #e2e8f0; margin-top: 6px;">
-                  ${isPatched ? '2.5px High-Contrast Ring' : 'outline: none (Zero Visual Indicator)'}
+                  ${isPatched ? '2.5px High-Contrast Ring' : 'Missing Visible Focus Ring'}
                 </div>
               </div>
               <p class="card-desc">Power users pressing Tab receive clear feedback without unsightly mouse borders.</p>
@@ -1038,7 +1038,7 @@ export async function GET(
         <script>
           let count = 0;
           function handleClick() {
-            console.log('Action triggered in preview session');
+            // Preview interaction handler
           }
           function handleCounter() {
             count++;

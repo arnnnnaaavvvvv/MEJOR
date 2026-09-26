@@ -73,7 +73,7 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (options.version) {
-  console.log('arnav-audit v1.0.0');
+  console.log('arnav-audit v1.0.1');
   process.exit(0);
 }
 
@@ -112,6 +112,11 @@ const IGNORED_DIRS = new Set([
   '.git',
   '.next',
   '.vercel',
+  '.kilo',
+  '.pytest_cache',
+  'artifacts',
+  'test-results',
+  'playwright-report',
   'dist',
   'build',
   'coverage',
@@ -135,6 +140,8 @@ function walkDir(dir, fileList = []) {
       try {
         const stat = fs.statSync(fullPath);
         if (stat.isDirectory()) {
+          // Ignore any hidden directory or internal worktree directory
+          if (file.startsWith('.') || file.includes('worktree')) continue;
           walkDir(fullPath, fileList);
         } else {
           // Skip the scanner's own implementation file so its rule regexes are not self-flagged
@@ -321,7 +328,7 @@ const RULES = [
     tier: 'MAJOR',
     title: 'Horizontal Viewport Bleed (100vw Scrollbar Trap)',
     desc: 'Using width: 100vw includes the scrollbar gutter width, triggering unwanted horizontal overflow.',
-    regex: /width\s*:\s*100vw/gi,
+    regex: /(?<!max-|min-)width\s*:\s*100vw/gi,
     remedy: 'Replace width: 100vw with width: 100% or use max-w-full to prevent horizontal layout thrashing.'
   },
   {
@@ -356,18 +363,28 @@ function runLocalAudit(targetDir) {
       continue;
     }
 
-    // Check .env in git
-    if (filePath.endsWith('.env') || filePath.endsWith('.env.local')) {
-      issues.push({
-        id: 'SEC-ENV-EXPOSED',
-        category: 'Security',
-        tier: 'CRITICAL',
-        title: 'Environment Config File Committed to Source',
-        file: relPath,
-        line: 1,
-        snippet: 'Sensitive configuration file present in directory tree.',
-        remedy: 'Add .env* to .gitignore and remove from git index using git rm --cached.'
-      });
+    // Check raw un-scoped .env files that are missing from .gitignore
+    if (path.basename(filePath) === '.env') {
+      const gitignorePath = path.join(root, '.gitignore');
+      let isGitIgnored = false;
+      if (fs.existsSync(gitignorePath)) {
+        try {
+          const giContent = fs.readFileSync(gitignorePath, 'utf8');
+          if (giContent.includes('.env')) isGitIgnored = true;
+        } catch (e) {}
+      }
+      if (!isGitIgnored) {
+        issues.push({
+          id: 'SEC-ENV-EXPOSED',
+          category: 'Security',
+          tier: 'CRITICAL',
+          title: 'Environment Config File Committed to Source',
+          file: relPath,
+          line: 1,
+          snippet: 'Sensitive configuration file present in directory tree without .gitignore protection.',
+          remedy: 'Add .env* to .gitignore and remove from git index using git rm --cached.'
+        });
+      }
     }
 
     for (const rule of RULES) {

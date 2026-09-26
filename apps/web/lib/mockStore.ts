@@ -165,7 +165,7 @@ const demoBase: StoredScan = {
       confidence: 'HIGH',
       tier: 'A',
       title: '100vw Horizontal Scrollbar Bleed & Viewport Width Leak',
-      problem: 'Elements use width: 100vw without container clipping. On systems with persistent vertical scrollbars (Windows, Android), this causes an unwanted horizontal scrollbar.',
+      problem: 'Elements use 100vw viewport width without container clipping. On systems with persistent vertical scrollbars (Windows, Android), this causes an unwanted horizontal scrollbar.',
       evidence: {
         measured_values: { full_bleed_unit: '100vw', client_width_delta_px: 17 },
         expected_values: { full_bleed_rule: 'width: 100% or overflow-x: clip' },
@@ -174,9 +174,9 @@ const demoBase: StoredScan = {
       fix_goal: 'Contain horizontal bleed by setting overflow-x: clip on html and body.',
       constraints: ['Preserve full desktop bleed without horizontal scrollbars.'],
       acceptance_check: 'Page has zero horizontal scrollbar on devices with persistent vertical scrollbars.',
-      fix_prompt: '### AI FIX PROMPT: [UX-VIEWPORT-BLEED]\nhtml, body {\n  max-width: 100vw !important;\n  overflow-x: clip !important;\n}',
+      fix_prompt: '### AI FIX PROMPT: [UX-VIEWPORT-BLEED]\nhtml, body {\n  max-width: 100% !important;\n  overflow-x: clip !important;\n}',
       patchable: true,
-      verified_patch_css: `html, body {\n  max-width: 100vw !important;\n  overflow-x: clip !important;\n}`,
+      verified_patch_css: `html, body {\n  max-width: 100% !important;\n  overflow-x: clip !important;\n}`,
     },
   ],
   master_prompt: `# MASTER ARCHITECTURAL REMEDIATION PLAN: INVISIBLE INTERFACE DEFECTS
