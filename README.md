@@ -1,12 +1,12 @@
-# arnav-audit
+# @arnnnnaaavvvvv/arnav-audit
 
 > Autonomous Internal Security, Memory Leakage & Invisible UI/UX Interface Auditor
 
-[![npm version](https://img.shields.io/npm/v/arnav-audit.svg?color=00f5a0)](https://www.npmjs.com/package/arnav-audit)
+[![GitHub Package Registry](https://img.shields.io/badge/GitHub%20Packages-%40arnnnnaaavvvvv%2Farnav--audit-00f5a0.svg?logo=github)](https://github.com/arnnnnaaavvvvv/MEJOR/pkgs/npm/arnav-audit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](https://opensource.org/licenses/MIT)
 [![Node.js: >=16](https://img.shields.io/badge/node-%3E%3D16.0.0-blue.svg)](https://nodejs.org/)
 
-`arnav-audit` is a high-speed, zero-dependency command-line interface and npm package designed to audit local codebases for critical security credential leaks, React/JS memory leaks, and invisible frontend UI/UX interface defects.
+`arnav-audit` is a high-speed, zero-dependency command-line interface and package designed to audit local codebases for critical security credential leaks, React/JS memory leaks, and invisible frontend UI/UX interface defects.
 
 ---
 
@@ -15,32 +15,32 @@
 Run directly in any project folder with zero installation via `npx`:
 
 ```bash
-# Audit the current project directory
-npx arnav-audit .
+# Run directly via GitHub Packages / npx
+npx @arnnnnaaavvvvv/arnav-audit .
 
 # Audit a specific directory or subdirectory
-npx arnav-audit ./src
+npx @arnnnnaaavvvvv/arnav-audit ./src
 
 # Generate ready-to-paste AI fix prompts for Cursor, Claude Code, and Antigravity
-npx arnav-audit . --prompts
+npx @arnnnnaaavvvvv/arnav-audit . --prompts
 
 # List every verified file inspected
-npx arnav-audit . --files
+npx @arnnnnaaavvvvv/arnav-audit . --files
 
 # Scan exclusively for credentials, secrets & code injection vectors
-npx arnav-audit . --security-only
+npx @arnnnnaaavvvvv/arnav-audit . --security-only
 
 # Scan exclusively for uncleaned listeners, interval timers & viewport leaks
-npx arnav-audit . --leakage-only
+npx @arnnnnaaavvvvv/arnav-audit . --leakage-only
 
 # Output machine-readable JSON for CI/CD gates
-npx arnav-audit . --json > audit-report.json
+npx @arnnnnaaavvvvv/arnav-audit . --json > audit-report.json
 ```
 
 Or install globally:
 
 ```bash
-npm install -g arnav-audit
+npm install -g @arnnnnaaavvvvv/arnav-audit
 arnav-audit .
 ```
 
