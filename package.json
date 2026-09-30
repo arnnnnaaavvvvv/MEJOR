@@ -1,6 +1,6 @@
 {
-  "name": "@arnnnnaaavvvvv/arnav-audit",
-  "version": "1.0.3",
+  "name": "arnav-audit",
+  "version": "1.0.4",
   "description": "Autonomous internal security, memory leakage, and invisible UI/UX interface auditor.",
   "main": "bin/cli.js",
   "bin": {
@@ -26,7 +26,7 @@
     "url": "git+https://github.com/arnnnnaaavvvvv/MEJOR.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "homepage": "https://github.com/arnnnnaaavvvvv/MEJOR#readme",
   "bugs": {

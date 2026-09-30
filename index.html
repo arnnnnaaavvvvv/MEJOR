@@ -625,7 +625,7 @@
       <!-- Instant Install Bar -->
       <div class="install-box">
         <div class="install-cmd" id="installCmd">
-          npx <span>@arnnnnaaavvvvv/arnav-audit</span> .
+          npx <span>arnav-audit</span> .
         </div>
         <button class="btn-copy" id="copyBtn" onclick="copyInstall()">
           <span id="copyText">Copy Command</span>
@@ -715,12 +715,12 @@
           <div class="step-num">01</div>
           <div class="step-content">
             <h4 class="step-title">Install Globally</h4>
-            <p class="step-desc">Install arnav-audit globally via npm to make the CLI command available everywhere.</p>
+            <p class="step-desc">Install arnav-audit globally via npm or directly from the GitHub repository.</p>
             <div class="step-code">
-              <code>npm install -g @arnnnnaaavvvvv/arnav-audit</code>
-              <button class="step-copy-btn" onclick="copyStep('npm install -g @arnnnnaaavvvvv/arnav-audit', this)">Copy</button>
+              <code>npm install -g arnav-audit</code>
+              <button class="step-copy-btn" onclick="copyStep('npm install -g arnav-audit', this)">Copy</button>
             </div>
-            <div class="step-alt">Or inside cloned repo: <code>npm install -g . --force</code></div>
+            <div class="step-alt">Or via GitHub: <code>npm install -g github:arnnnnaaavvvvv/MEJOR</code></div>
           </div>
         </div>
 
@@ -733,7 +733,7 @@
               <code>arnav-audit --version</code>
               <button class="step-copy-btn" onclick="copyStep('arnav-audit --version', this)">Copy</button>
             </div>
-            <div class="step-alt">Displays version: <code>arnav-audit v1.0.3</code></div>
+            <div class="step-alt">Displays version: <code>arnav-audit v1.0.4</code></div>
           </div>
         </div>
 
@@ -862,7 +862,7 @@ jobs:
 
   <script>
     function copyInstall() {
-      navigator.clipboard.writeText('npx @arnnnnaaavvvvv/arnav-audit .');
+      navigator.clipboard.writeText('npx arnav-audit .');
       const text = document.getElementById('copyText');
       text.innerText = 'Copied!';
       setTimeout(() => {

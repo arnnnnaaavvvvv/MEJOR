@@ -1,14 +1,13 @@
-# @arnnnnaaavvvvv/arnav-audit
+# arnav-audit
 
 > Autonomous Internal Security, Memory Leakage & Invisible UI/UX Interface Auditor
 
-[![GitHub Package Registry](https://img.shields.io/badge/GitHub%20Packages-%40arnnnnaaavvvvv%2Farnav--audit-00f5a0.svg?logo=github)](https://github.com/arnnnnaaavvvvv/MEJOR/pkgs/npm/arnav-audit)
+[![npm version](https://img.shields.io/npm/v/arnav-audit.svg?color=00f5a0)](https://www.npmjs.com/package/arnav-audit)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-arnnnnaaavvvvv%2FMEJOR-00f5a0.svg?logo=github)](https://github.com/arnnnnaaavvvvv/MEJOR)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](https://opensource.org/licenses/MIT)
 [![Node.js: >=16](https://img.shields.io/badge/node-%3E%3D16.0.0-blue.svg)](https://nodejs.org/)
 
 `arnav-audit` is a high-speed, zero-dependency command-line interface and package designed to audit local codebases for critical security credential leaks, React/JS memory leaks, and invisible frontend UI/UX interface defects.
-
----
 
 ---
 
@@ -17,16 +16,20 @@
 Follow this 4-step workflow to install, verify, and run audits across your projects:
 
 ### Step 1: Install Globally
-Install the package globally from GitHub Packages / npm:
-```bash
-# Install globally via package manager
-npm install -g @arnnnnaaavvvvv/arnav-audit
+Choose any method to install or run the CLI:
 
-# Or if working inside this cloned repository:
+```bash
+# Method A: Install globally via npm
+npm install -g arnav-audit
+
+# Method B: Direct install from GitHub (works for anyone without npm login)
+npm install -g github:arnnnnaaavvvvv/MEJOR
+
+# Method C: If working inside this cloned repository
 npm install -g . --force
 ```
 
-*(Alternatively, run instantly with zero installation: `npx @arnnnnaaavvvvv/arnav-audit .`)*
+*(Alternatively, run instantly with zero installation: `npx github:arnnnnaaavvvvv/MEJOR .` or `npx arnav-audit .`)*
 
 ---
 
@@ -34,7 +37,7 @@ npm install -g . --force
 Confirm that `arnav-audit` is globally registered in your terminal:
 ```bash
 arnav-audit --version
-# Output: arnav-audit v1.0.3
+# Output: arnav-audit v1.0.4
 
 arnav-audit --help
 # Displays available flags, rules, and example commands
