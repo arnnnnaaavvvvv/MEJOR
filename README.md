@@ -10,38 +10,68 @@
 
 ---
 
-## ⚡ Instant Terminal Audit
+---
 
-Run directly in any project folder with zero installation via `npx`:
+## 🚀 Quickstart: Installation to Final Execution Pipeline
 
+Follow this 4-step workflow to install, verify, and run audits across your projects:
+
+### Step 1: Install Globally
+Install the package globally from GitHub Packages / npm:
 ```bash
-# Run directly via GitHub Packages / npx
-npx @arnnnnaaavvvvv/arnav-audit .
+# Install globally via package manager
+npm install -g @arnnnnaaavvvvv/arnav-audit
 
-# Audit a specific directory or subdirectory
-npx @arnnnnaaavvvvv/arnav-audit ./src
-
-# Generate ready-to-paste AI fix prompts for Cursor, Claude Code, and Antigravity
-npx @arnnnnaaavvvvv/arnav-audit . --prompts
-
-# List every verified file inspected
-npx @arnnnnaaavvvvv/arnav-audit . --files
-
-# Scan exclusively for credentials, secrets & code injection vectors
-npx @arnnnnaaavvvvv/arnav-audit . --security-only
-
-# Scan exclusively for uncleaned listeners, interval timers & viewport leaks
-npx @arnnnnaaavvvvv/arnav-audit . --leakage-only
-
-# Output machine-readable JSON for CI/CD gates
-npx @arnnnnaaavvvvv/arnav-audit . --json > audit-report.json
+# Or if working inside this cloned repository:
+npm install -g . --force
 ```
 
-Or install globally:
+*(Alternatively, run instantly with zero installation: `npx @arnnnnaaavvvvv/arnav-audit .`)*
 
+---
+
+### Step 2: Verify the CLI Binary
+Confirm that `arnav-audit` is globally registered in your terminal:
 ```bash
-npm install -g @arnnnnaaavvvvv/arnav-audit
+arnav-audit --version
+# Output: arnav-audit v1.0.3
+
+arnav-audit --help
+# Displays available flags, rules, and example commands
+```
+
+---
+
+### Step 3: Run the Codebase Audit
+Navigate to any project directory and run the audit:
+```bash
+# Audit the current project directory
 arnav-audit .
+
+# Audit a specific subdirectory or file
+arnav-audit ./src
+
+# List every single file inspected
+arnav-audit . --files
+
+# Scan exclusively for credentials & secrets
+arnav-audit . --security-only
+
+# Scan exclusively for memory & event listener leaks
+arnav-audit . --leakage-only
+```
+
+---
+
+### Step 4: Generate Automated AI Fix Prompts (Final Step)
+Generate ready-to-paste prompts formatted specifically for Cursor, Claude Code, or Antigravity:
+```bash
+arnav-audit . --prompts
+```
+
+Or pipe machine-readable JSON into CI/CD quality gates:
+```bash
+arnav-audit . --json > audit-report.json
 ```
 
 ---
