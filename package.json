@@ -1,13 +1,43 @@
 {
-  "name": "mejor-monorepo",
-  "version": "1.0.2",
-  "private": true,
-  "description": "MEJOR - Autonomous Production Interface, Memory Leakage and Security Auditor",
+  "name": "arnav-audit",
+  "version": "1.0.3",
+  "description": "Autonomous internal security, memory leakage, and invisible UI/UX interface auditor.",
+  "main": "bin/cli.js",
+  "bin": {
+    "arnav-audit": "bin/cli.js"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "audit": "arnav-audit .",
-    "audit:files": "arnav-audit . --files",
-    "audit:verbose": "arnav-audit . --verbose",
-    "audit:fix": "arnav-audit . --prompts",
-    "publish:cli": "npm publish ./packages/arnav-audit --access public"
+    "start": "node ./bin/cli.js",
+    "test": "node ./test/cli.test.js",
+    "audit": "node ./bin/cli.js .",
+    "audit:files": "node ./bin/cli.js . --files",
+    "audit:verbose": "node ./bin/cli.js . --verbose",
+    "audit:fix": "node ./bin/cli.js . --prompts",
+    "audit:security": "node ./bin/cli.js . --security-only",
+    "audit:leakage": "node ./bin/cli.js . --leakage-only"
+  },
+  "keywords": [
+    "audit",
+    "cli",
+    "security",
+    "leakage",
+    "memory-leak",
+    "ui-ux",
+    "vibe-coder",
+    "cursor",
+    "claude-code",
+    "antigravity",
+    "quality-gate",
+    "arnav"
+  ],
+  "author": "Arnav",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

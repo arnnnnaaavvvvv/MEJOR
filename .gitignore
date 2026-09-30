@@ -1,42 +1,28 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
-.pytest_cache/
-*.db
-*.sqlite
-*.sqlite3
-
-# Node / Next.js
+# Dependencies
 node_modules/
-.next/
-out/
-build/
+package-lock.json
+
+# Build and test artifacts
 dist/
-*.tsbuildinfo
-# Environment
-.env
-.env.*
-!.env.example
+build/
+coverage/
+.nyc_output/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# Playwright & Artifacts
-artifacts/
-test-results/
-playwright-report/
-blob-report/
-playwright/.cache/
+# Environment and local configs
+.env
+.env.*
 
-# IDE & OS
-.vscode/
+# IDE, Editors & OS metadata
 .idea/
+.vscode/
+.kilo/
 .DS_Store
 Thumbs.db
+
+.vercel
+.env*
