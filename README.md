@@ -37,7 +37,7 @@ npm install -g . --force
 Confirm that `arnav-audit` is globally registered in your terminal:
 ```bash
 arnav-audit --version
-# Output: arnav-audit v1.0.4
+# Output: arnav-audit v1.0.5
 
 arnav-audit --help
 # Displays available flags, rules, and example commands
@@ -48,16 +48,20 @@ arnav-audit --help
 ### Step 3: Run the Codebase Audit
 Navigate to any project directory and run the audit:
 ```bash
-# Audit the current project directory
+# Audit the current project directory (visits every file)
 arnav-audit .
 
-# Audit a specific subdirectory or file
-arnav-audit ./src
+# Audit a specific backend service, directory, or individual file
+arnav-audit ./apps/api
+arnav-audit ./apps/api/core/security.py
 
-# List every single file inspected
+# List every single file inspected across the codebase
 arnav-audit . --files
 
-# Scan exclusively for credentials & secrets
+# Scan exclusively for backend weak points, SQLi, RCE, and auth bypasses
+arnav-audit . --backend-only
+
+# Scan exclusively for secret gateways, database URIs, API keys & tokens
 arnav-audit . --security-only
 
 # Scan exclusively for memory & event listener leaks
@@ -81,19 +85,36 @@ arnav-audit . --json > audit-report.json
 
 ## 🛡️ Detection Capabilities
 
-### 1. Internal Security & Credential Leakage
-- **Hardcoded Secret Keys**: Scans for exposed AWS access keys (`AKIA...`), OpenAI API keys (`sk-...`), GitHub personal access tokens (`ghp_...`), Stripe live secret keys (`sk_live_...`), and private key blocks (`-----BEGIN RSA PRIVATE KEY-----`).
-- **Exposed Configuration**: Detects committed `.env` and `.env.local` files in git trees missing `.gitignore` coverage.
-- **XSS & Code Injection Vectors**: Unsanitized `dangerouslySetInnerHTML`, `eval()`, and `new Function()` invocations.
-- **Backend Injection Patterns**: Flags raw string interpolations in SQL queries and unsafe `subprocess(..., shell=True)` execution.
+### 1. Secret Gateway & Sensitive Credential Leakage
+- **Database Gateway URIs (`SEC-GATEWAY-DATABASE-URI`)**: Hardcoded connection strings with embedded plaintext passwords (`postgresql://`, `mysql://`, `mongodb://`, `mongodb+srv://`, `redis://`, `amqp://`).
+- **Authentication & Gateway Secrets (`SEC-GATEWAY-JWT-SECRET`)**: Hardcoded JWT signing keys (`JWT_SECRET`, `SECRET_KEY`, `AUTH_SECRET`).
+- **Cloud & AI Gateway API Keys**: Scans for AWS access keys (`AKIA...`), AWS secret access keys, OpenAI keys (`sk-...`, `sk-proj-...`), Anthropic Claude keys (`sk-ant-...`), Google Cloud keys (`AIza...`), and Stripe live secrets (`sk_live_...`).
+- **Developer & Webhook Gateways**: Scans for GitHub PATs (`ghp_...`, `github_pat_...`), GitLab tokens (`glpat-...`), Slack incoming webhooks, Discord webhook URLs, and SendGrid keys.
+- **Unencrypted Private Keys (`SEC-PRIVATE-KEY`)**: RSA, DSA, EC, OPENSSH, and PGP private key blocks committed to source.
+- **Exposed Configuration (`SEC-ENV-EXPOSED`)**: Detects committed `.env` and `.env.local` files in git trees missing `.gitignore` coverage.
 
-### 2. Major & Minor Memory & Resource Leakage
-- **Hook Listener Leaks**: `addEventListener` inside React `useEffect` hooks missing clean-up `removeEventListener` callbacks.
-- **Timer Leaks**: `setInterval` and `setTimeout` initialized without unmount `clearInterval` teardowns.
-- **Global Scope Pollution**: Accidental state assignments to the global `window` object preventing garbage collection.
-- **Residual Logging**: Production `console.log` statements leaking internal state and data payloads.
+### 2. Backend Security & Weak Points
+- **Production Debug Mode (`SEC-BACKEND-DEBUG-ENABLED`)**: Detects `DEBUG = True`, `app.run(debug=True)`, or `FastAPI(debug=True)` exposing interactive execution gateways in production.
+- **SQL Injection (`SEC-BACKEND-SQL-INJECTION`)**: Python f-strings, `%` format strings, and Node template literals directly interpolated into database queries (`cursor.execute`, `pool.query`).
+- **Remote Command Execution (`SEC-BACKEND-COMMAND-INJECTION`)**: Dangerous shell executions via `subprocess(..., shell=True)`, `os.system()`, `child_process.exec()`, or `execSync()`.
+- **Disabled TLS/SSL Verification (`SEC-BACKEND-SSL-VERIFY-DISABLED`)**: Detects `verify=False` in Python `requests`/`httpx` or `rejectUnauthorized: false` in Node.js.
+- **Insecure Object Deserialization (`SEC-BACKEND-INSECURE-DESERIALIZE`)**: Unsafe `pickle.loads()` and arbitrary YAML loading allowing remote code execution.
+- **Path Traversal & Arbitrary File Access (`SEC-BACKEND-PATH-TRAVERSAL`)**: User parameters passed directly to `open()`, `send_file()`, or `res.sendFile()`.
+- **SSRF Vectors (`SEC-BACKEND-SSRF`)**: Outgoing HTTP requests to raw unvalidated URLs without private/loopback IP validation.
+- **Permissive Wildcard CORS (`SEC-BACKEND-CORS-WILDCARD`)**: `allow_origins=["*"]` combined with credentials allowed.
+- **Hardcoded Admin Bypass (`SEC-BACKEND-HARDCODED-ADMIN`)**: Hardcoded authentication bypass conditions or admin tokens.
+- **Stack Trace Information Leaks (`SEC-BACKEND-STACKTRACE-LEAK`)**: Raw stack traces returned in HTTP API error payloads.
+- **Insecure Session Cookies (`SEC-BACKEND-INSECURE-COOKIE`)**: Missing `HttpOnly` or `Secure` flags on authentication cookies.
+- **Weak Cryptographic Hashes (`SEC-BACKEND-WEAK-HASH`)**: Insecure MD5 or SHA-1 hashes used for security or passwords.
 
-### 3. Invisible Interface & UI/UX Traps
+### 3. Major & Minor Memory & Resource Leakage
+- **Backend Mutable Default Arguments (`LEAK-BACKEND-MUTABLE-DEFAULT`)**: Python `def func(items=[])` leaking state across API requests and causing unbounded memory accumulation.
+- **Hook Listener Leaks (`LEAK-EVENT-LISTENER`)**: `addEventListener` inside React `useEffect` hooks missing clean-up `removeEventListener` callbacks.
+- **Timer Leaks (`LEAK-INTERVAL-TIMER`)**: `setInterval` and `setTimeout` initialized without unmount `clearInterval` teardowns.
+- **Global Scope Pollution (`LEAK-WINDOW-POLLUTION`)**: Accidental state assignments to the global `window` object preventing garbage collection.
+- **Residual Logging (`LEAK-CONSOLE-LOGS`)**: Production `console.log` statements leaking internal state and data payloads.
+
+### 4. Invisible Interface & UI/UX Traps
 - **iOS Safari Auto-Zoom Trap (`UX-IOS-AUTOZOOM`)**: Form inputs with `font-size < 16px` triggering mandatory mobile viewport zooming on focus.
 - **300ms Touch Latency (`UX-TAP-LATENCY`)**: Interactive elements missing `touch-action: manipulation`.
 - **Obliterated Focus Rings (`A11Y-FOCUS-OBLITERATED`)**: `outline: none` removing keyboard accessibility indicators (WCAG 2.4.7).
@@ -107,12 +128,14 @@ arnav-audit . --json > audit-report.json
 
 | Flag | Shorthand | Description |
 |---|---|---|
-| `[directory]` | — | Target path to audit (defaults to `.`) |
-| `--files` | `--list` | List every scanned file with inspection status |
+| `[directory\|file]` | — | Target path to audit (defaults to current directory `.`) |
+| `--files` | `--list` | List every single scanned file path with inspection status |
+| `--backend-only` | `--backend` | Scan exclusively for backend weak points, SQLi, RCE, CORS & auth bypasses |
+| `--security-only`| `--security` | Scan exclusively for secret gateways, database URIs, API keys & tokens |
+| `--leakage-only` | `--leakage` | Scan exclusively for memory leaks, mutable defaults & dangling listeners |
+| `--ui-only` | `--ui` | Scan exclusively for invisible UI/UX interface defects and accessibility traps |
+| `--prompts` | `--fix` | Pre-compile copy-paste AI fix prompts for Cursor, Claude Code & Antigravity |
 | `--verbose` | — | Display detailed scan logs and file-by-file verification |
-| `--prompts` | `--fix` | Pre-compile copy-paste AI fix prompts for Cursor / Claude Code |
-| `--security-only`| `--security` | Scan exclusively for credentials, secrets & injection vectors |
-| `--leakage-only` | `--leakage` | Scan exclusively for event listeners, timers & window leaks |
 | `--json` | — | Output raw machine-readable JSON for CI/CD pipelines |
 | `--version` | `-v` | Display CLI version |
 | `--help` | `-h` | Display help screen |

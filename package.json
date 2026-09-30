@@ -1,7 +1,7 @@
 {
   "name": "arnav-audit",
-  "version": "1.0.4",
-  "description": "Autonomous internal security, memory leakage, and invisible UI/UX interface auditor.",
+  "version": "1.0.5",
+  "description": "Autonomous internal security, secret gateway leaks, backend vulnerabilities, and memory leakage auditor.",
   "main": "bin/cli.js",
   "bin": {
     "arnav-audit": "bin/cli.js"
@@ -19,6 +19,7 @@
     "audit:verbose": "node ./bin/cli.js . --verbose",
     "audit:fix": "node ./bin/cli.js . --prompts",
     "audit:security": "node ./bin/cli.js . --security-only",
+    "audit:backend": "node ./bin/cli.js . --backend-only",
     "audit:leakage": "node ./bin/cli.js . --leakage-only"
   },
   "repository": {

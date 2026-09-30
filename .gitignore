@@ -26,3 +26,8 @@ Thumbs.db
 
 .vercel
 .env*
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.class
