@@ -1,5 +1,5 @@
 # MEJOR
-> **Autonomous zero-dependency AST security auditor and memory leak detector with automated prompt synthesis for AI code assistants.**
+> **Lightweight developer security and code quality scanner with zero dependencies and AI-assisted remediation.**
 
 [![npm version](https://img.shields.io/npm/v/arnav-audit.svg?color=00f5a0)](https://www.npmjs.com/package/arnav-audit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](https://opensource.org/licenses/MIT)
@@ -14,7 +14,7 @@
 
 ## Overview
 
-**MEJOR** (`arnav-audit`) is an enterprise-grade, zero-dependency command-line security auditor and AST quality gate engineered for modern full-stack codebases. While traditional static analysis suites like SonarQube or Snyk require heavy Java runtimes, cloud daemon setups, or slow compilation passes, MEJOR executes in sub-second intervals directly over local file streams without external network calls. The engine scans across four mission-critical pillars: (1) **Secret Gateways & Credentials** (unencrypted database URIs, JWT signing keys, cloud access keys, private SSH/RSA blocks), (2) **Backend Vulnerabilities** (production debug flags, SQL query formatting injection, remote shell execution, SSRF vectors, disabled TLS verification), (3) **Runtime Memory & Resource Leaks** (Python mutable function defaults, uncleaned React `useEffect` event listeners, orphaned `setInterval` timers), and (4) **Mobile UI/UX Traps** (iOS 16px auto-zoom triggers, missing focus rings, layout bleed). For every detected defect, MEJOR synthesizes immediate, pre-compiled remediation prompt payloads formatted specifically for Cursor, Claude Code, and Antigravity.
+**MEJOR** (`arnav-audit`) is a lightweight, zero-dependency developer security and code quality scanner designed to run in local development environments and CI pull-request checks. Rather than functioning as a replacement for comprehensive enterprise SAST suites or formal penetration testing, MEJOR operates as an instant, developer-first quality gate—providing immediate feedback during active coding and pre-commit phases in under 500 milliseconds. The scanner combines targeted regular-expression signatures with custom syntactic checks across four focused pillars: (1) **Secret Gateways & Credentials** (unencrypted database URIs, JWT signing keys, cloud API keys, private keys), (2) **Backend Vulnerabilities** (production debug mode, SQL query string formatting injection, command injection vectors, unvalidated SSRF URLs, disabled TLS validation), (3) **Runtime Memory & Resource Leaks** (Python mutable defaults, React hooks with missing `removeEventListener` cleanups, un-cleared interval timers), and (4) **Mobile UI/UX Traps** (iOS 16px auto-zoom triggers, missing keyboard focus rings, flexbox SVG collapse). When issues are discovered, MEJOR synthesizes structured remediation prompt blocks tailored for AI coding assistants (Cursor, Claude Code, and Antigravity) to accelerate developer fixes.
 
 ---
 
@@ -22,40 +22,42 @@
 
 | Feature | Description |
 | :--- | :--- |
-| **Zero-Dependency Architecture** | Built purely on native Node.js standard libraries (`fs`, `path`, `crypto`); installs in seconds without bulky dependency trees or security supply-chain risks. |
-| **Secret Gateway Detection** | Identifies exposed database connection strings (`postgresql://`, `mongodb+srv://`, `redis://`), JWT signing keys, AWS IAM credentials, and unencrypted private keys. |
-| **Backend OWASP Protection** | Flags SQL injection vectors (f-string and template literal queries), command injections (`shell=True`, `child_process.exec`), SSRF vectors, and production debug flags. |
-| **Memory & Lifecycle Leak Audit** | Pinpoints React hook memory leaks (missing `removeEventListener` cleanups), un-cleared intervals, global `window` object pollution, and Python mutable default arguments. |
-| **Mobile & Invisible UX Traps** | Detects iOS Safari form input auto-zoom traps (`< 16px`), 300ms mobile touch delay, obliterated keyboard focus rings (`outline: none`), and flexbox SVG collapse. |
-| **Automated AI Fix Prompts** | Compiles structured remediation prompt blocks (`--prompts` / `--fix`) containing exact line numbers, vulnerable snippets, and drop-in fixes for AI coding agents. |
-| **Strict CI/CD Quality Gating** | Returns deterministic exit codes (`0` for clean passes, `1` for critical breaches), integrating seamlessly into GitHub Actions and GitLab CI workflows. |
-| **Fast Recursive File Walker** | Traverses 10,000+ files in sub-second timeframes with automatic skipping of binary files, lockfiles, hidden directories, and test fixtures. |
-| **Machine-Readable JSON Output** | Emits standard JSON payloads (`--json`) for automated pipeline consumption, security dashboards, and internal compliance tracking. |
-| **Surgical Pillar Filtering** | Allows running focused scans with granular CLI flags: `--security-only`, `--backend-only`, `--leakage-only`, or `--ui-only`. |
+| **Zero-Dependency Core** | Built purely on Node.js standard libraries (`fs`, `path`, `crypto`); installs in seconds without bloated dependency trees or supply-chain overhead. |
+| **Developer-First Quality Gate** | Runs in sub-second timeframes (< 500ms) locally or in pre-commit hooks, giving engineers immediate feedback before pushing code. |
+| **Secret Gateway Detection** | Flags hardcoded database connection URIs (`postgresql://`, `mongodb+srv://`, `redis://`), JWT signing secrets, cloud provider keys, and committed private keys. |
+| **Common Backend Vulnerability Checks** | Catches SQL query string interpolation, un-sanitized shell execution (`shell=True`, `child_process.exec`), permissive CORS with credentials, and debug flags. |
+| **Syntactic Memory Leak Heuristics** | Identifies React `useEffect` hooks missing teardown callbacks, un-cleared intervals, window pollution, and Python mutable default arguments. |
+| **Mobile & Accessibility Trap Linter** | Spots CSS patterns that degrade usability, such as form input font sizes below 16px triggering iOS Safari zoom and suppressed focus rings (`outline: none`). |
+| **AI-Assisted Remediation Prompts** | Automatically compiles structured fix prompts (`--prompts` / `--fix`) containing file coordinates, matched snippets, and drop-in fixes for AI coding tools. |
+| **Deterministic CI Exit Codes** | Emits standard status codes (`0` for clean runs, `1` for critical breaches), making it simple to enforce quality gates in GitHub Actions. |
+| **Rapid Stream-Based File Walker** | Traverses codebases with low memory overhead, skipping binary blobs, lockfiles, hidden directories, and test fixtures automatically. |
+| **Pillar-Specific Targeted Scans** | Offers granular flags (`--security-only`, `--backend-only`, `--leakage-only`, `--ui-only`) for focused development workflows. |
 
 ---
 
 ## What It Can Do Now
 
-- **Audit Multi-Language Codebases**: Inspects JavaScript, TypeScript, Python, HTML, CSS, JSON, YAML, and `.env` files in a single pass.
-- **Prevent Credential Commits**: Halts CI pipelines whenever exposed database URIs with passwords or cloud API keys (AWS, OpenAI, Anthropic, Stripe) are discovered.
-- **Surface Invisible Mobile UI Traps**: Flags CSS rules causing mobile usability degradation (e.g., input font sizes below 16px forcing iOS Safari auto-zoom).
-- **Identify React Memory Leaks**: Scans component lifecycles to detect event listeners and interval timers missing cleanup teardowns.
-- **Generate Immediate AI Remediation**: Outputs pre-formatted fix instructions ready to paste into Cursor, Claude Code, or Antigravity.
-- **Run Standalone with Zero Installation**: Executes instantly on any machine with Node.js installed using `npx arnav-audit .`.
-- **Enforce Non-Zero Exit Codes**: Automatically fails build pipelines on CRITICAL vulnerability discoveries while reporting advisory warnings for minor issues.
+- **Run in Local Dev Loops with Zero Config**: Audits codebases immediately using `npx arnav-audit .` without installing heavy daemons, Docker images, or language servers.
+- **Catch Committed Credentials Early**: Alerts developers before unencrypted database connection strings, JWT signing keys, or cloud secrets reach remote git remotes.
+- **Inspect React Component Cleanups**: Detects `addEventListener` and `setInterval` invocations in `useEffect` hooks that lack proper unmount cleanup functions.
+- **Flag Mobile Viewport Usability Defects**: Scans CSS and styling blocks for input font sizes under 16px to prevent unwanted iOS Safari viewport auto-zooming.
+- **Generate Ready-to-Paste AI Prompts**: Formats detected issues into structured instructions that can be pasted directly into Cursor, Claude Code, or Antigravity for automated fixes.
+- **Emit Machine-Readable JSON**: Outputs standard JSON payloads via `--json` for integration into custom developer tooling, status dashboards, or CI pipelines.
+- **Support Multi-Language Codebases**: Inspects JavaScript, TypeScript, Python, HTML, CSS, JSON, and YAML files in a single unified run.
 
 ---
 
 ## The Problem
 
-| Dimension | Heavy SAST Suites (SonarQube, Snyk) | Generic Linters (ESLint, Flake8) | Manual Code Reviews | MEJOR (`arnav-audit`) |
+| Dimension | Enterprise SAST Platforms (SonarQube, Snyk) | Generic Language Linters (ESLint, Flake8) | Manual Code Reviews | MEJOR (`arnav-audit`) |
 | :--- | :--- | :--- | :--- | :--- |
-| **Dependency Footprint** | Gigabytes of runtime memory, JVM dependencies, external Docker containers. | Requires dozens of plugins, configuration files, and language-specific runners. | None, but consumes expensive engineering hours. | **Zero dependencies. Single self-contained JavaScript script running on native Node.js.** |
-| **Scan Velocity** | 30 to 300 seconds per scan; slow build pipeline bottlenecks. | 5 to 20 seconds; requires separate linters for Python, JS, and CSS. | Days of review cycle latency. | **Sub-second execution (< 500ms across thousands of codebase files).** |
-| **Credential & Secret Discovery** | Often locked behind enterprise commercial tiers or separate add-ons. | Incapable of cross-language secret detection. | Prone to human oversight in large diffs. | **Built-in 4-Pillar secret gateway auditing covering DB URIs, JWTs, and cloud keys.** |
-| **Memory & Mobile UX Auditing** | Blind to client-side timer leaks, iOS auto-zoom traps, and touch latency. | Requires bespoke, heavily configured ESLint rules for hooks. | Subjective and rarely tested across mobile viewports. | **Dedicated memory leak detection and mobile viewport/accessibility trap rules.** |
-| **Remediation Workflow** | Generic documentation links requiring manual developer research. | Simple error messages without context or automated fixes. | Freeform comment feedback. | **Auto-generated AI fix prompts tailored for Cursor, Claude Code, and Antigravity.** |
+| **Primary Role** | In-depth interprocedural analysis, organizational governance, and enterprise compliance. | Language syntax, code style conventions, and basic best-practice enforcement. | Human architecture evaluation and business logic validation. | **Fast, developer-facing pre-commit scanner and code quality gate with AI fix prompts.** |
+| **Setup & Footprint** | Heavy JVM / Docker runtimes, database backends, and cloud coordination. | Per-language configurations (`.eslintrc`, `.flake8`) and plugin ecosystems. | None, but consumes significant engineering hours and review turnaround time. | **Zero dependencies. Single self-contained Node.js script with zero configuration needed.** |
+| **Feedback Latency** | 2 to 10+ minutes during CI build jobs; slow for local interactive iteration. | Fast for individual files; often fragmented across separate tools for JS and Python. | Hours to days depending on reviewer availability. | **Instant (< 500ms) whole-project scans suited for local pre-commit hooks.** |
+| **Detection Scope** | Deep taint tracking and multi-file dataflow analysis across code paths. | Single-language lint rules; blind to cross-stack secrets or mobile viewport traps. | Variable; dependent on individual reviewer vigilance. | **Focused 4-pillar pattern checks: secrets, backend risks, lifecycle leaks, and mobile UI traps.** |
+| **Fix Workflow** | Static documentation links or general advisory notes. | Inline lint errors with limited automatic fixing for stylistic issues. | Comment threads with manual fix suggestions. | **Pre-compiled prompt blocks formatted for AI coding assistants (Cursor, Claude Code, Antigravity).** |
+
+> *Note: MEJOR is designed to complement—not replace—formal enterprise SAST solutions and manual security reviews. It empowers developers to catch common vulnerabilities and anti-patterns immediately at the workstation before code enters deeper CI pipelines.*
 
 ---
 
@@ -65,18 +67,18 @@
 - **Node.js**: v16.0.0 or higher
 - **npm** (comes bundled with Node.js)
 
-### 1. Global Installation (Recommended)
-Install `arnav-audit` globally via npm or directly from GitHub:
+### 1. Installation Options
+Run `arnav-audit` instantly without installation or install it globally:
 
 ```bash
-# Option A: Install from npm registry
+# Option A: Zero-install execution via npx (Recommended for quick scans)
+npx arnav-audit .
+
+# Option B: Global installation from npm
 npm install -g arnav-audit
 
-# Option B: Direct install from GitHub
+# Option C: Direct installation from GitHub repository
 npm install -g github:arnnnnaaavvvvv/MEJOR
-
-# Option C: Zero-install execution via npx
-npx arnav-audit .
 ```
 
 ### 2. Verify Installation
@@ -249,7 +251,7 @@ flowchart TD
         STREAM[File Stream Reader<br/>fs.readFileSync UTF-8]:::standard
     end
 
-    subgraph AuditEngine["4-Pillar AST & Regex Engine"]
+    subgraph AuditEngine["4-Pillar Pattern & Lifecycle Engine"]
         PILLAR1[Pillar 1: Secret Gateways<br/>DB URIs, JWTs, Cloud API Keys]:::highlight
         PILLAR2[Pillar 2: Backend Security<br/>SQLi, RCE, SSRF, Debug Flags]:::highlight
         PILLAR3[Pillar 3: Memory Leakage<br/>React Hooks, Timers, Window Pollution]:::highlight
@@ -310,7 +312,7 @@ sequenceDiagram
     loop For each candidate file
         CLI->>Reader: Read file contents (fs.readFileSync)
         Reader-->>Rules: Stream text content
-        Rules->>Rules: Evaluate regex patterns & custom AST check functions
+        Rules->>Rules: Evaluate regex signatures & syntactic lifecycle checks
         alt Rule Match Found
             Rules-->>CLI: Record finding (File, Line, Rule ID, Severity, Remedy)
         end
@@ -348,7 +350,7 @@ flowchart TD
     SKIP[Skip File from Scan]:::standard
     READ[Read UTF-8 Content]:::standard
     APPLIES_CHECK{File Extension Matches<br/>Rule Target?}:::standard
-    EVAL_RULE{Regex Match or Custom<br/>AST Condition Met?}:::standard
+    EVAL_RULE{Regex Match or Custom<br/>Syntactic Condition Met?}:::standard
     FALSE_POS{Is Test File and<br/>Rule Ignores Tests?}:::standard
     LOG_FINDING[Log Finding to Registry<br/>Record Line Number & Match]:::highlight
     SEV_CHECK{Finding Severity<br/>Tier?}:::standard
@@ -457,11 +459,11 @@ erDiagram
 
 ## Core Algorithm/Logic Explanation
 
-MEJOR avoids heavy external parsers by using an optimized three-stage scanning pipeline:
+MEJOR avoids heavy parsing runtimes by utilizing an optimized, stream-based three-stage scanning pipeline:
 
-1. **Pre-Filtering & Byte Ingestion**: Files are inspected for binary null bytes (`0x00`) within the first 512 bytes. Files exceeding 4MB or matching ignored directories (`node_modules`, `.git`, `venv`, `coverage`) are dropped immediately, eliminating disk thrashing.
-2. **Context-Aware Rule Execution**: Rules execute regular expressions or targeted AST checks against in-memory UTF-8 buffers. Rules marked with `ignoreInTests: true` automatically skip mock files and unit tests, avoiding spurious flags.
-3. **Severity Weighting & Prompt Assembly**: Each match is classified into `CRITICAL`, `MAJOR`, or `MINOR`. When the `--prompts` flag is provided, the engine extracts surrounding lines, packages the remediation advice, and synthesizes a structured prompt formatted for Cursor, Claude Code, and Antigravity.
+1. **Pre-Filtering & Byte Inspection**: Files are inspected for null bytes (`0x00`) within the first 512 bytes to rapidly detect binaries. Files exceeding 4MB or matching ignored directories (`node_modules`, `.git`, `venv`, `coverage`) are skipped immediately to prevent unnecessary disk reads.
+2. **Targeted Signature & Syntactic Check Execution**: Candidate text files are evaluated against targeted regular expression patterns and custom syntactic lifecycle checks. For example, the `LEAK-EVENT-LISTENER` check evaluates React files containing `addEventListener` inside `useEffect` and flags components where `removeEventListener` is absent from the cleanup callback. Rules with `ignoreInTests: true` automatically skip test files, suppressing false positives.
+3. **Severity Classification & Prompt Assembly**: Findings are classified into `CRITICAL`, `MAJOR`, or `MINOR`. When `--prompts` is supplied, the engine packages the exact file path, line numbers, and remediation guidance into ready-to-run prompt templates formatted for Cursor, Claude Code, and Antigravity.
 
 *Figure 5: Input signals converging into the audit decision and prompt output.*
 ```mermaid
@@ -470,11 +472,11 @@ flowchart LR
     classDef standard fill:#1e293b,stroke:#475569,stroke-width:1px,color:#f8fafc;
 
     SOURCE[Source Code Streams]:::standard
-    RULES[4-Pillar Rule Definitions]:::standard
+    RULES[Regex Signatures & Custom Checks]:::standard
     TEST_FILTER[Test & Fixture Filters]:::standard
     CLI_FLAGS[CLI Execution Flags]:::standard
 
-    ENGINE[Audit & Severity Engine<br/>arnav-audit Core]:::highlight
+    ENGINE[Pattern & Lifecycle Engine<br/>arnav-audit Core]:::highlight
 
     OUTPUT[Terminal Report / JSON<br/>+ AI Fix Prompts + Exit Code]:::standard
 
@@ -519,10 +521,10 @@ node bin/cli.js --version
 
 ## Design Philosophy
 
-1. **Zero External Dependencies**: The scanner must run instantly on any machine with Node.js installed, eliminating npm supply-chain vulnerabilities.
-2. **Sub-Second Execution**: A quality gate that takes minutes to run will be disabled by developers. MEJOR completes full audits in under 500ms.
-3. **Actionable Fixes Over Abstract Reports**: Highlighting a vulnerability without providing a concrete fix wastes engineering time. MEJOR generates ready-to-run AI prompts.
-4. **Zero False-Positive Toleration**: Test directories and legitimate environment variables are respected so developers never suffer alert fatigue.
+1. **Zero External Dependencies**: The scanner runs natively on standard Node.js without requiring third-party npm packages, eliminating installation overhead and supply-chain vulnerabilities.
+2. **Sub-Second Execution**: A pre-commit check must run fast enough that developers never bypass it. MEJOR finishes scans in under 500ms.
+3. **Actionable AI Fix Prompts**: Identifying an issue is only half the job; generating drop-in prompts for AI coding assistants lets engineers fix issues in seconds.
+4. **Pragmatic Positioning**: MEJOR focuses on catching high-frequency mistakes early in local developer environments, serving as a rapid first line of defense alongside full SAST suites.
 
 ---
 
