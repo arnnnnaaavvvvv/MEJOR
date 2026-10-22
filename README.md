@@ -84,7 +84,7 @@ npm install -g github:arnnnnaaavvvvv/MEJOR
 ### 2. Verify Installation
 ```bash
 arnav-audit --version
-# Output: arnav-audit v1.0.5
+# Output: arnav-audit v1.1.0
 
 arnav-audit --help
 # Displays usage flags, detection rules, and examples
@@ -219,13 +219,18 @@ All scanner options are supplied via command-line arguments:
 | Option | Flag | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `target` | `[path]` | `.` | Target directory or file path to evaluate. |
-| `prompts` | `--prompts`, `--fix` | `false` | Generates copy-paste prompt blocks for AI coding agents (Cursor, Claude Code). |
-| `json` | `--json` | `false` | Emits raw machine-readable JSON payload instead of ANSI terminal output. |
+| `ci` | `--ci` | `false` | Quality gate mode; exits with code `1` if CRITICAL or MAJOR issues are found. |
+| `includeDocs` | `--include-docs` | `false` | Scans documentation and markdown files (`.md`, `.txt`) for potential leaked secrets. |
+| `noCodeframe` | `--no-codeframe` | `false` | Disables surrounding visual codeframes for compact output. |
+| `minSeverity` | `--min-severity <level>` | `SUGGESTION` | Filters issues by minimum severity: `CRITICAL`, `MAJOR`, `MINOR`, `SUGGESTION`. |
+| `format` | `--format <type>` | `pretty` | Output format: `pretty` (default), `json`, `compact`. |
+| `prompts` | `--prompts`, `--fix` | `false` | Generates copy-paste prompt blocks for AI coding agents (Cursor, Claude Code, Antigravity). |
+| `json` | `--json` | `false` | Emits raw machine-readable JSON payload with CWE/OWASP mapping and telemetry. |
 | `securityOnly` | `--security-only`, `--security` | `false` | Filters rules exclusively to Secret Gateways & Credentials (Pillar 1). |
 | `backendOnly` | `--backend-only`, `--backend` | `false` | Filters rules exclusively to Backend Security & OWASP defects (Pillar 2). |
 | `leakageOnly` | `--leakage-only`, `--leakage` | `false` | Filters rules exclusively to Memory & Resource Leakage (Pillar 3). |
 | `uiOnly` | `--ui-only`, `--ui` | `false` | Filters rules exclusively to Invisible UI/UX Traps & Accessibility (Pillar 4). |
-| `verbose` | `--verbose` | `false` | Enables detailed logging of file evaluation and rule matching coordinates. |
+| `verbose` | `--verbose` | `false` | Enables detailed logging of file evaluation, rule matching coordinates, and telemetry. |
 | `files` | `--files`, `--list` | `false` | Prints a comprehensive manifest of all inspected file paths. |
 | `help` | `--help`, `-h` | `false` | Displays the help manual and usage instructions. |
 | `version` | `--version`, `-v` | `false` | Outputs the current installed version of `arnav-audit`. |

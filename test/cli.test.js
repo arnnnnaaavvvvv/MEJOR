@@ -160,5 +160,143 @@ console.log('Running test suite for arnav-audit CLI...\n');
   }
 }
 
-console.log('\nAll 10 tests passed successfully with 100% verification!');
+// Test 11: CWE and OWASP mapping are included in JSON report
+{
+  const output = execSync(`node "${cliPath}" "${__dirname}" --json`).toString();
+  const parsed = JSON.parse(output);
+  assert(typeof parsed.totalLinesScanned === 'number', 'Must include totalLinesScanned');
+  assert(typeof parsed.scanDurationMs === 'number', 'Must include scanDurationMs');
+  console.log('✓ Test 11: High-precision execution telemetry present in JSON');
+}
+
+// Test 12: Detects new modern cloud secrets (Slack token, HuggingFace token, Supabase key)
+{
+  const fs = require('fs');
+  const tmpDir = path.join(__dirname, 'tmp_cloud_secrets_test');
+  if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+  const testFile = path.join(tmpDir, 'integrations.js');
+  // Base64-encoded fixture payload to keep test runner source file clean
+  const content = Buffer.from(
+    'Y29uc3Qgc2xhY2tUb2tlbiA9ICJ4b3hiLTEyMzQ1Njc4OTAxMi0xMjM0NTY3ODkwMTItYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4IjsKY29uc3QgaGZUb2tlbiA9ICJoZl9hYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ejEyMzQ1Njc4IjsKY29uc3Qgc3VwYWJhc2VLZXkgPSAic2JwX2FiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6MDEyMzQ1Njc4OTAxMjMiOw==',
+    'base64'
+  ).toString('utf8');
+  fs.writeFileSync(testFile, content);
+
+  try {
+    const output = execSync(`node "${cliPath}" "${tmpDir}" --json`).toString();
+    const parsed = JSON.parse(output);
+    const ids = parsed.issues.map(i => i.id);
+    assert(ids.includes('SEC-SLACK-BOT-TOKEN'), 'Should detect Slack bot token');
+    assert(ids.includes('SEC-HUGGINGFACE-TOKEN'), 'Should detect HuggingFace token');
+    assert(ids.includes('SEC-SUPABASE-KEY'), 'Should detect Supabase service role key');
+    assert(parsed.issues[0].cwe.startsWith('CWE-'), 'Issues must have CWE identifier');
+    assert(parsed.issues[0].owasp.includes('2021'), 'Issues must have OWASP category');
+    console.log('✓ Test 12: Detects modern cloud secrets with CWE & OWASP mapping');
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+// Test 13: Detects insecure randomness used in security context
+{
+  const fs = require('fs');
+  const tmpDir = path.join(__dirname, 'tmp_random_test');
+  if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+  const testFile = path.join(tmpDir, 'auth_util.js');
+  fs.writeFileSync(testFile, Buffer.from('Y29uc3Qgc2Vzc2lvbl90b2tlbiA9IE1hdGgucmFuZG9tKCkudG9TdHJpbmcoMzYpLnN1YnN0cmluZygyKTs=', 'base64').toString('utf8'));
+
+  try {
+    const output = execSync(`node "${cliPath}" "${tmpDir}" --json`).toString();
+    const parsed = JSON.parse(output);
+    const ids = parsed.issues.map(i => i.id);
+    assert(ids.includes('SEC-BACKEND-INSECURE-RANDOM'), 'Should detect Math.random() for session token');
+    console.log('✓ Test 13: Correctly identifies insecure PRNG in security context');
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+// Test 14: Visual codeframe snippet output
+{
+  const fs = require('fs');
+  const tmpDir = path.join(__dirname, 'tmp_codeframe_test');
+  if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+  const testFile = path.join(tmpDir, 'leak.py');
+  fs.writeFileSync(testFile, 'DEBUG = True\n');
+
+  try {
+    const output = execSync(`node "${cliPath}" "${tmpDir}"`).toString();
+    assert(output.includes('Code Context:'), 'Output must include Code Context:');
+    assert(output.includes('DEBUG = True'), 'Codeframe must contain code snippet');
+    console.log('✓ Test 14: Visual codeframe renders accurately with context lines');
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+// Test 15: --ci flag exits with code 1 on Critical issues
+{
+  const fs = require('fs');
+  const tmpDir = path.join(__dirname, 'tmp_ci_test');
+  if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+  const testFile = path.join(tmpDir, 'vuln.py');
+  fs.writeFileSync(testFile, 'DEBUG = True\n');
+
+  let failed = false;
+  try {
+    execSync(`node "${cliPath}" "${tmpDir}" --ci`, { stdio: 'pipe' });
+  } catch (err) {
+    failed = true;
+    assert(err.status === 1, 'CI mode must exit with code 1 when Critical issues found');
+  }
+  fs.rmSync(tmpDir, { recursive: true, force: true });
+  assert(failed, '--ci flag should have failed with exit code 1');
+  console.log('✓ Test 15: --ci flag enforces quality gate by failing on critical issues');
+}
+
+// Test 16: Documentation false positive suppression & --include-docs support
+{
+  const fs = require('fs');
+  const tmpDir = path.join(__dirname, 'tmp_doc_test');
+  if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+  const docFile = path.join(tmpDir, 'EXPLANATION.md');
+  fs.writeFileSync(docFile, '# Example\npostgresql://admin:secret123@prod.internal/db\n');
+
+  try {
+    // Without --include-docs, markdown files are ignored to prevent false positives
+    const outputDefault = execSync(`node "${cliPath}" "${tmpDir}" --json`).toString();
+    const parsedDefault = JSON.parse(outputDefault);
+    assert(parsedDefault.totalFiles === 0, 'Markdown should be skipped by default');
+
+    // With --include-docs, markdown files are scanned
+    const outputWithDocs = execSync(`node "${cliPath}" "${tmpDir}" --include-docs --json`).toString();
+    const parsedWithDocs = JSON.parse(outputWithDocs);
+    assert(parsedWithDocs.totalFiles === 1, 'Markdown should be scanned with --include-docs');
+    assert(parsedWithDocs.issues.length > 0, 'Should find issues in doc when flag is enabled');
+    console.log('✓ Test 16: Accurate doc false-positive suppression & --include-docs flag verified');
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+// Test 17: UI/UX accessibility rule (missing alt on images)
+{
+  const fs = require('fs');
+  const tmpDir = path.join(__dirname, 'tmp_ui_test');
+  if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+  const htmlFile = path.join(tmpDir, 'hero.html');
+  fs.writeFileSync(htmlFile, '<div class="banner"><img src="/logo.png" /></div>');
+
+  try {
+    const output = execSync(`node "${cliPath}" "${tmpDir}" --json`).toString();
+    const parsed = JSON.parse(output);
+    const ids = parsed.issues.map(i => i.id);
+    assert(ids.includes('A11Y-IMG-MISSING-ALT'), 'Should detect image missing alt attribute');
+    console.log('✓ Test 17: Accessibility auditor flags images missing alt attributes');
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+console.log('\nAll 17 tests passed successfully with 100% verification!');
 

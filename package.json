@@ -1,7 +1,7 @@
 {
   "name": "arnav-audit",
-  "version": "1.0.5",
-  "description": "Autonomous internal security, secret gateway leaks, backend vulnerabilities, and memory leakage auditor.",
+  "version": "1.1.0",
+  "description": "High-accuracy internal security, secret gateway leaks, backend vulnerabilities, and memory leakage auditor with CWE and OWASP mapping.",
   "main": "bin/cli.js",
   "bin": {
     "arnav-audit": "bin/cli.js"
@@ -15,6 +15,7 @@
     "start": "node ./bin/cli.js",
     "test": "node ./test/cli.test.js",
     "audit": "node ./bin/cli.js .",
+    "audit:ci": "node ./bin/cli.js . --ci",
     "audit:files": "node ./bin/cli.js . --files",
     "audit:verbose": "node ./bin/cli.js . --verbose",
     "audit:fix": "node ./bin/cli.js . --prompts",
