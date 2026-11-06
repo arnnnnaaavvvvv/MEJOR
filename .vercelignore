@@ -1,0 +1,7 @@
+.kilo
+.github
+apps
+test
+bin
+*.md
+*.log
