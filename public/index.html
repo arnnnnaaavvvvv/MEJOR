@@ -178,6 +178,47 @@
       width: 100%;
     }
 
+    /* Scroll Progress Bar at Viewport Top */
+    .scroll-progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2.5px;
+      width: 0%;
+      background: linear-gradient(90deg, #6366f1 0%, #38bdf8 50%, #10b981 100%);
+      z-index: 1001;
+      transition: width 0.08s linear;
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.7);
+      pointer-events: none;
+    }
+
+    /* Scroll Reveal & Micro-Interactions */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-stagger > * {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+    .reveal-stagger.is-visible > *:nth-child(1) { transition-delay: 50ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.is-visible > *:nth-child(2) { transition-delay: 110ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.is-visible > *:nth-child(3) { transition-delay: 170ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.is-visible > *:nth-child(4) { transition-delay: 230ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.is-visible > *:nth-child(5) { transition-delay: 290ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.is-visible > *:nth-child(6) { transition-delay: 350ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.is-visible > *:nth-child(7) { transition-delay: 410ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.is-visible > *:nth-child(8) { transition-delay: 470ms; opacity: 1; transform: translateY(0); }
+
     /* Spotlight Card Effect */
     .spotlight-card {
       position: relative;
@@ -187,23 +228,26 @@
       overflow: hidden;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      box-shadow: var(--shadow-premium), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      box-shadow: var(--shadow-premium), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+                  transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+                  box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .spotlight-card::before {
       content: '';
       position: absolute;
-      inset: 0;
+      inset: -1px;
       border-radius: inherit;
       background: radial-gradient(
-        700px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-        rgba(255, 255, 255, 0.06),
-        transparent 40%
+        650px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(99, 102, 241, 0.12),
+        rgba(56, 189, 248, 0.04) 40%,
+        transparent 70%
       );
       pointer-events: none;
       z-index: 1;
       opacity: 0;
-      transition: opacity 0.4s ease;
+      transition: opacity 0.3s ease;
     }
     .spotlight-card:hover::before {
       opacity: 1;
@@ -211,15 +255,24 @@
 
     /* Navigation */
     header {
-      padding: 16px 0;
+      padding: 18px 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(5, 7, 14, 0.82);
-      transition: all 0.25s ease;
+      background: rgba(5, 7, 14, 0.78);
+      transition: padding 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                  background 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                  border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                  box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    header.scrolled {
+      padding: 12px 0;
+      background: rgba(5, 7, 14, 0.94);
+      border-bottom-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.75);
     }
     .nav-inner {
       display: flex;
@@ -414,6 +467,7 @@
     }
     .hero-badge-wrap {
       margin-bottom: 24px;
+      animation: heroSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     .hero-pill {
       display: inline-flex;
@@ -459,6 +513,7 @@
       max-width: 980px;
       margin-left: auto;
       margin-right: auto;
+      animation: heroSlideUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.08s backwards;
     }
     .hero-title .shimmer-text {
       background: linear-gradient(180deg, #ffffff 15%, #cbd5e1 65%, #94a3b8 100%);
@@ -480,6 +535,7 @@
       margin: 0 auto 40px;
       font-weight: 400;
       line-height: 1.65;
+      animation: heroSlideUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.16s backwards;
     }
 
     /* Key Stats Ribbon */
@@ -489,6 +545,18 @@
       justify-content: center;
       gap: 18px 30px;
       margin-bottom: 44px;
+      animation: heroSlideUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.24s backwards;
+    }
+
+    @keyframes heroSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(22px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     .stat-item {
       display: flex;
@@ -1122,10 +1190,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
       margin: 0 auto 18px;
       color: var(--emerald);
       box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .clean-pass-icon:hover {
+      transform: scale(1.1) rotate(6deg);
     }
     .clean-pass-title {
       font-family: var(--font-title);
@@ -1187,9 +1258,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
       background: var(--icon-bg, rgba(99, 102, 241, 0.1));
       border: 1px solid var(--icon-border, rgba(99, 102, 241, 0.25));
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .feature-card:hover .feature-icon-wrap {
+      transform: scale(1.08) translateY(-2px);
     }
     .card-pillar-tag {
       font-family: var(--font-mono);
@@ -1474,12 +1548,32 @@
       padding: 28px;
       display: flex;
       flex-direction: column;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+    }
+    .bench-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), 0 0 30px rgba(99, 102, 241, 0.12);
     }
     .bench-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 16px;
+    }
+    .bench-icon-wrap {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s;
+    }
+    .bench-card:hover .bench-icon-wrap {
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.08);
     }
     .bench-title {
       font-family: var(--font-title);
@@ -1973,6 +2067,9 @@
   </style>
 </head>
 <body>
+  <!-- Scroll Progress Bar -->
+  <div class="scroll-progress-bar" id="scrollProgressBar"></div>
+
   <div class="bg-grid"></div>
   <div class="glow-canvas">
     <div class="glow-orb glow-1"></div>
@@ -1993,7 +2090,9 @@
     <div class="modal-card" onclick="event.stopPropagation()">
       <div class="modal-header">
         <h3>Keyboard Navigation</h3>
-        <button class="modal-close-btn" onclick="toggleShortcutsModal()">✕</button>
+        <button class="modal-close-btn" onclick="toggleShortcutsModal()" aria-label="Close shortcuts modal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
       <div class="shortcuts-list">
         <div class="shortcut-row">
@@ -2101,22 +2200,22 @@
       </p>
 
       <!-- Key Stats Bar -->
-      <div class="hero-stats">
+      <div class="hero-stats reveal">
         <div class="stat-item">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span><strong>100% Offline</strong> &amp; Air-Gapped</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span><strong data-counter="100" data-suffix="%">100%</strong> Offline &amp; Air-Gapped</span>
         </div>
         <div class="stat-item">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          <span><strong>&lt; 15ms</strong> Scan Speed</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span><strong data-counter="15" data-prefix="&lt; " data-suffix="ms">&lt; 15ms</strong> Scan Speed</span>
         </div>
         <div class="stat-item">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span><strong>0</strong> Dependencies</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span><strong>Zero</strong> Dependencies</span>
         </div>
         <div class="stat-item">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-          <span><strong>AI Prompts</strong> for Cursor &amp; Claude</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          <span><strong>AI Prompts</strong> for Copilots</span>
         </div>
       </div>
 
@@ -2198,10 +2297,10 @@
   Violations:     <span class="term-emerald">0 Critical</span>  |  <span class="term-emerald">0 Major</span>  |  <span class="term-emerald">0 Minor</span>  |  <span class="term-dim">0 Suggestions</span>
 
   <span class="term-bold">4-PILLAR CODEBASE QUALITY MATRIX:</span>
-   <span class="term-emerald">✔ [PASS]</span> 🔐 Secret Gateways &amp; Credentials       <span class="term-dim">(0 detected)</span>
-   <span class="term-emerald">✔ [PASS]</span> 🛡️ Backend Security &amp; Weak Points     <span class="term-dim">(0 detected)</span>
-   <span class="term-emerald">✔ [PASS]</span> 🧠 Memory &amp; Resource Leakage          <span class="term-dim">(0 detected)</span>
-   <span class="term-emerald">✔ [PASS]</span> 📱 UI/UX &amp; Accessibility Traps        <span class="term-dim">(0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> Secret Gateways &amp; Credentials       <span class="term-dim">(0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> Backend Security &amp; Weak Points     <span class="term-dim">(0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> Memory &amp; Resource Leakage          <span class="term-dim">(0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> UI/UX &amp; Accessibility Traps        <span class="term-dim">(0 detected)</span>
 
   <span class="term-bold">Codebase File Coverage Breakdown:</span>
    • TypeScript (Backend, Core, API)          <span class="term-bold">54</span> files (.ts)
@@ -2217,7 +2316,7 @@
     </section>
 
     <!-- Interactive Live Browser Playground -->
-    <section class="playground-section" id="playground">
+    <section class="playground-section reveal" id="playground">
       <div class="section-title-wrap">
         <span class="section-eyebrow">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -2231,11 +2330,26 @@
         <div class="playground-toolbar">
           <span class="preset-label">Test Scenarios:</span>
           <div class="preset-btns">
-            <button class="preset-btn active" onclick="loadPreset('secrets', this)">🔑 Exposed AWS &amp; JWT</button>
-            <button class="preset-btn" onclick="loadPreset('backend', this)">🛡️ Backend SQLi &amp; Debug</button>
-            <button class="preset-btn" onclick="loadPreset('leakage', this)">⚡ React Memory Leaks</button>
-            <button class="preset-btn" onclick="loadPreset('ui', this)">📱 Mobile UI &amp; A11y Traps</button>
-            <button class="preset-btn" onclick="loadPreset('clean', this)">✨ Clean Code (Grade A+)</button>
+            <button class="preset-btn active" onclick="loadPreset('secrets', this)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span>Exposed Secrets</span>
+            </button>
+            <button class="preset-btn" onclick="loadPreset('backend', this)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <span>Backend Injection</span>
+            </button>
+            <button class="preset-btn" onclick="loadPreset('leakage', this)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <span>Memory Leaks</span>
+            </button>
+            <button class="preset-btn" onclick="loadPreset('ui', this)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              <span>Mobile UI &amp; A11y</span>
+            </button>
+            <button class="preset-btn" onclick="loadPreset('clean', this)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Clean Code (Grade A+)</span>
+            </button>
           </div>
         </div>
 
@@ -2286,18 +2400,20 @@
     </section>
 
     <!-- 4 Pillars Grid -->
-    <section id="pillars" style="margin-bottom: 120px;">
+    <section id="pillars" class="reveal" style="margin-bottom: 120px;">
       <div class="section-title-wrap">
         <span class="section-eyebrow">Enterprise Defense in Depth</span>
         <h2 class="section-title">Comprehensive 4-Pillar Codebase Inspection</h2>
         <p class="section-subtitle">Grounded in concrete AST heuristics, pattern boundary recognition, and mobile viewport constraints.</p>
       </div>
 
-      <div class="features-grid">
+      <div class="features-grid reveal-stagger">
         <!-- Pillar 1 -->
         <div class="feature-card spotlight-card" style="--card-accent: #6366f1; --card-glow: rgba(99, 102, 241, 0.18); --icon-bg: rgba(99, 102, 241, 0.12); --icon-border: rgba(99, 102, 241, 0.28);">
           <div class="feature-header">
-            <div class="feature-icon-wrap">🔐</div>
+            <div class="feature-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
             <span class="card-pillar-tag">PILLAR 01 • CWE-798</span>
           </div>
           <h3 class="feature-title">Secret Gateways &amp; Credentials</h3>
@@ -2316,7 +2432,9 @@
         <!-- Pillar 2 -->
         <div class="feature-card spotlight-card" style="--card-accent: #38bdf8; --card-glow: rgba(56, 189, 248, 0.18); --icon-bg: rgba(56, 189, 248, 0.12); --icon-border: rgba(56, 189, 248, 0.28);">
           <div class="feature-header">
-            <div class="feature-icon-wrap">🛡️</div>
+            <div class="feature-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
             <span class="card-pillar-tag">PILLAR 02 • CWE-89 &amp; 78</span>
           </div>
           <h3 class="feature-title">Backend Security &amp; Weak Points</h3>
@@ -2335,7 +2453,9 @@
         <!-- Pillar 3 -->
         <div class="feature-card spotlight-card" style="--card-accent: #fbbf24; --card-glow: rgba(251, 191, 36, 0.18); --icon-bg: rgba(251, 191, 36, 0.12); --icon-border: rgba(251, 191, 36, 0.28);">
           <div class="feature-header">
-            <div class="feature-icon-wrap">🧠</div>
+            <div class="feature-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+            </div>
             <span class="card-pillar-tag">PILLAR 03 • CWE-400</span>
           </div>
           <h3 class="feature-title">Memory &amp; Resource Leakage</h3>
@@ -2353,7 +2473,9 @@
         <!-- Pillar 4 -->
         <div class="feature-card spotlight-card" style="--card-accent: #f43f5e; --card-glow: rgba(244, 63, 94, 0.18); --icon-bg: rgba(244, 63, 94, 0.12); --icon-border: rgba(244, 63, 94, 0.28);">
           <div class="feature-header">
-            <div class="feature-icon-wrap">📱</div>
+            <div class="feature-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+            </div>
             <span class="card-pillar-tag">PILLAR 04 • WCAG 2.4.7</span>
           </div>
           <h3 class="feature-title">Invisible UI/UX Traps &amp; A11y</h3>
@@ -2371,14 +2493,14 @@
     </section>
 
     <!-- Installation to Execution Pipeline -->
-    <section class="pipeline-section" id="pipeline">
+    <section class="pipeline-section reveal" id="pipeline">
       <div class="section-title-wrap">
         <span class="section-eyebrow">Zero-Friction Workflow</span>
         <h2 class="section-title">Installation to Final Execution Pipeline</h2>
         <p class="section-subtitle">A clear 4-step workflow: from initial setup to scanning and automated AI remediation.</p>
       </div>
 
-      <div class="pipeline-grid">
+      <div class="pipeline-grid reveal-stagger">
         <div class="pipeline-step spotlight-card">
           <div class="step-num">01</div>
           <h4 class="step-title">Install Globally</h4>
@@ -2426,18 +2548,20 @@
     </section>
 
     <!-- Speed & Architecture Benchmarks Section -->
-    <section class="benchmarks-section" id="benchmarks">
+    <section class="benchmarks-section reveal" id="benchmarks">
       <div class="section-title-wrap">
         <span class="section-eyebrow">Extreme Engineering</span>
         <h2 class="section-title">Speed &amp; Footprint Benchmarks</h2>
         <p class="section-subtitle">Engineered in pure native JavaScript with zero external runtime dependencies. Runs hundreds of times faster than heavy legacy scanners.</p>
       </div>
 
-      <div class="benchmarks-grid">
+      <div class="benchmarks-grid reveal-stagger">
         <div class="bench-card spotlight-card">
           <div class="bench-header">
             <span class="bench-title">Execution Latency</span>
-            <span style="font-size: 20px;">⚡</span>
+            <div class="bench-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--indigo)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            </div>
           </div>
           <div class="bench-metric">&lt; 15ms</div>
           <p class="bench-desc">Instantaneous AST-heuristic scanning in pure local memory. Zero JVM or heavy language daemon warmup required.</p>
@@ -2462,7 +2586,9 @@
         <div class="bench-card spotlight-card">
           <div class="bench-header">
             <span class="bench-title">Runtime Dependencies</span>
-            <span style="font-size: 20px;">📦</span>
+            <div class="bench-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--sapphire)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            </div>
           </div>
           <div class="bench-metric">0 Deps</div>
           <p class="bench-desc">Zero sub-dependencies in node_modules. Completely immune to supply-chain attacks, left-pad vulnerabilities, and nested package bloat.</p>
@@ -2487,7 +2613,9 @@
         <div class="bench-card spotlight-card">
           <div class="bench-header">
             <span class="bench-title">Network &amp; Air-Gap</span>
-            <span style="font-size: 20px;">🛡️</span>
+            <div class="bench-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--emerald)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
           </div>
           <div class="bench-metric">0 Bytes</div>
           <p class="bench-desc">Zero external network requests or telemetry emitted. Proprietary enterprise source code never leaves your workstation or CI runner.</p>
@@ -2512,7 +2640,7 @@
     </section>
 
     <!-- Interactive CLI Reference Table -->
-    <section class="cli-section" id="cli">
+    <section class="cli-section reveal" id="cli">
       <div class="section-title-wrap">
         <span class="section-eyebrow">Command Line Interface</span>
         <h2 class="section-title">Command-Line Reference</h2>
@@ -2632,7 +2760,7 @@
     </section>
 
     <!-- CI/CD & IDE Integrations -->
-    <section class="cicd-section" id="cicd">
+    <section class="cicd-section reveal" id="cicd">
       <div class="section-title-wrap">
         <span class="section-eyebrow">Enterprise Automation</span>
         <h2 class="section-title">Automated CI/CD &amp; Copilot Workflows</h2>
@@ -2671,7 +2799,7 @@ jobs:
     </section>
 
     <!-- Interactive README Badge Customizer -->
-    <section class="badge-maker-section" id="badges">
+    <section class="badge-maker-section reveal" id="badges">
       <div class="section-title-wrap">
         <span class="section-eyebrow">Showcase Your Quality</span>
         <h2 class="section-title">Interactive README Badge Generator</h2>
@@ -2719,7 +2847,7 @@ jobs:
     </section>
 
     <!-- Privacy & Local Security Guarantee -->
-    <section class="privacy-card">
+    <section class="privacy-card reveal">
       <div class="privacy-content">
         <h3>100% Offline &amp; Air-Gapped Security Guarantee</h3>
         <p>
@@ -2743,14 +2871,14 @@ jobs:
     </section>
 
     <!-- Frequently Asked Questions -->
-    <section class="faq-section" id="faq">
+    <section class="faq-section reveal" id="faq">
       <div class="section-title-wrap">
         <span class="section-eyebrow">Clear Answers</span>
         <h2 class="section-title">Frequently Asked Questions</h2>
         <p class="section-subtitle">Everything you need to know about arnav-audit architecture and engineering standards.</p>
       </div>
 
-      <div class="faq-list">
+      <div class="faq-list reveal-stagger">
         <div class="faq-item" onclick="toggleFaq(this)">
           <div class="faq-question">
             <span>How does arnav-audit achieve zero external dependencies?</span>
@@ -2977,10 +3105,10 @@ jobs:
   Violations:     <span class="term-emerald">0 Critical</span>  |  <span class="term-emerald">0 Major</span>  |  <span class="term-emerald">0 Minor</span>  |  <span class="term-dim">0 Suggestions</span>
 
   <span class="term-bold">4-PILLAR CODEBASE QUALITY MATRIX:</span>
-   <span class="term-emerald">✔ [PASS]</span> 🔐 Secret Gateways &amp; Credentials       <span class="term-dim">(0 detected)</span>
-   <span class="term-emerald">✔ [PASS]</span> 🛡️ Backend Security &amp; Weak Points     <span class="term-dim">(0 detected)</span>
-   <span class="term-emerald">✔ [PASS]</span> 🧠 Memory &amp; Resource Leakage          <span class="term-dim">(0 detected)</span>
-   <span class="term-emerald">✔ [PASS]</span> 📱 UI/UX &amp; Accessibility Traps        <span class="term-dim">(0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> Secret Gateways &amp; Credentials       <span class="term-dim">(0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> Backend Security &amp; Weak Points     <span class="term-dim">(0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> Memory &amp; Resource Leakage          <span class="term-dim">(0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> UI/UX &amp; Accessibility Traps        <span class="term-dim">(0 detected)</span>
 
   <span class="term-bold">Codebase File Coverage Breakdown:</span>
    • TypeScript (Backend, Core, API)          <span class="term-bold">54</span> files (.ts)
@@ -3443,7 +3571,9 @@ export function setupResizeListener(onResize: () => void) {
             <button class="step-copy-btn" onclick="copySnippet('npx arnav-audit .', this)">Run on CLI</button>
           </div>
           <div class="clean-pass-box">
-            <div class="clean-pass-icon">✓</div>
+            <div class="clean-pass-icon">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
             <h4 class="clean-pass-title">Clean Enterprise Grade Code</h4>
             <p class="clean-pass-desc">Zero exposed secret keys, backend injection vulnerabilities, memory leaks, or mobile touch traps detected in this sample.</p>
           </div>
@@ -3674,8 +3804,64 @@ arnav_audit:
       }
     });
 
-    // Spotlight cursor movement listener
+    // ==========================================
+    // SCROLL PROGRESS & HEADER ELEVATION
+    // ==========================================
+    function updateScrollProgress() {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+      const progressBar = document.getElementById('scrollProgressBar');
+      if (progressBar) {
+        progressBar.style.width = scrolled + '%';
+      }
+      const header = document.querySelector('header');
+      if (header) {
+        if (winScroll > 24) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      }
+    }
+    window.addEventListener('scroll', updateScrollProgress, { passive: true });
+
+    // ==========================================
+    // SMOOTH NUMBER COUNTER ANIMATION
+    // ==========================================
+    function triggerCounters(counters) {
+      counters.forEach(counter => {
+        if (counter.dataset.counted) return;
+        counter.dataset.counted = 'true';
+        const target = parseFloat(counter.getAttribute('data-counter'));
+        const suffix = counter.getAttribute('data-suffix') || '';
+        const prefix = counter.getAttribute('data-prefix') || '';
+        const duration = 1200;
+        const startTime = performance.now();
+
+        function step(now) {
+          const progress = Math.min((now - startTime) / duration, 1);
+          const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+          const current = Math.round(target * ease);
+          counter.innerText = prefix + current.toLocaleString() + suffix;
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            counter.innerText = prefix + target.toLocaleString() + suffix;
+          }
+        }
+        requestAnimationFrame(step);
+      });
+    }
+
+    // ==========================================
+    // DOM INITIALIZATION & OBSERVERS
+    // ==========================================
     document.addEventListener('DOMContentLoaded', () => {
+      // Initialize Scroll Progress
+      updateScrollProgress();
+
+      // Spotlight cursor movement listener across cards
       document.querySelectorAll('.spotlight-card').forEach(card => {
         card.addEventListener('mousemove', e => {
           const rect = card.getBoundingClientRect();
@@ -3685,6 +3871,36 @@ arnav_audit:
           card.style.setProperty('--mouse-y', `${y}px`);
         });
       });
+
+      // Scroll Reveal IntersectionObserver
+      if ('IntersectionObserver' in window) {
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              const counters = entry.target.querySelectorAll('[data-counter]');
+              if (counters.length > 0) {
+                triggerCounters(counters);
+              }
+              observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          root: null,
+          rootMargin: '0px 0px -50px 0px',
+          threshold: 0.08
+        });
+
+        document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => {
+          revealObserver.observe(el);
+        });
+      } else {
+        // Fallback for older browsers
+        document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => {
+          el.classList.add('is-visible');
+        });
+        triggerCounters(document.querySelectorAll('[data-counter]'));
+      }
 
       // Initialize default views
       document.getElementById('termOutput').innerHTML = TERMINAL_DATA.default;
