@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>arnav-audit — Autonomous Security, Memory Leakage, Backend & UI/UX Quality Gate</title>
-  <meta name="description" content="Instant zero-dependency CLI and in-browser auditor to inspect codebases for exposed secrets, backend vulnerabilities, memory leaks, and invisible mobile UI traps. Built for high-velocity teams, Cursor, and Claude Code.">
+  <title>arnav-audit — Autonomous Security, Memory Leakage &amp; Quality Gate</title>
+  <meta name="description" content="Instant zero-dependency CLI and in-browser auditor to inspect codebases for exposed secrets, backend injection vulnerabilities, React memory leaks, and invisible mobile UI traps. Built for high-velocity teams, Cursor, and Claude Code.">
   <meta name="theme-color" content="#030712">
   <meta name="author" content="Arnav">
 
@@ -21,7 +21,7 @@
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300f5a0'/%3E%3Cstop offset='100%25' stop-color='%2300d2ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%23060913'/%3E%3Cpath d='M16 6 L25 24 L20 24 L16 16 L12 24 L7 24 Z' fill='url(%23g)'/%3E%3C/svg%3E">
 
-  <!-- Modern Typography: Plus Jakarta Sans, Inter & JetBrains Mono -->
+  <!-- Premium Typography: Plus Jakarta Sans, Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
@@ -29,10 +29,10 @@
   <style>
     :root {
       --bg: #030712;
-      --bg-surface: #080d1a;
-      --bg-card: rgba(11, 18, 33, 0.75);
-      --bg-card-hover: rgba(16, 26, 48, 0.88);
-      --bg-glass: rgba(8, 14, 27, 0.65);
+      --bg-surface: #070c1a;
+      --bg-card: rgba(10, 16, 31, 0.72);
+      --bg-card-hover: rgba(14, 23, 44, 0.88);
+      --bg-glass: rgba(6, 11, 22, 0.65);
       
       --border: rgba(255, 255, 255, 0.08);
       --border-light: rgba(255, 255, 255, 0.14);
@@ -50,7 +50,7 @@
       --purple: #a855f7;
       --purple-glow: rgba(168, 85, 247, 0.16);
       
-      --amber: #f59e0b;
+      --amber: #fbbf24;
       --rose: #f43f5e;
       --slate-dark: #0f172a;
       
@@ -68,7 +68,6 @@
       --radius-xl: 24px;
       --radius-2xl: 32px;
       
-      --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.35);
       --shadow-premium: 0 20px 50px -10px rgba(0, 0, 0, 0.7), 0 10px 20px -10px rgba(0, 0, 0, 0.5);
       --shadow-glow: 0 0 50px -10px var(--emerald-glow);
     }
@@ -100,7 +99,7 @@
     }
 
     /* Accessibility focus indicators (WCAG 2.4.7 compliant) */
-    a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex="0"]:focus-visible {
+    a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
       outline: 2px solid var(--emerald);
       outline-offset: 3px;
     }
@@ -114,8 +113,7 @@
       height: 100%;
       pointer-events: none;
       z-index: 0;
-      background-image: 
-        radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+      background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
       background-size: 32px 32px;
       mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, #000 45%, transparent 95%);
       -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, #000 45%, transparent 95%);
@@ -134,7 +132,7 @@
       border-radius: 50%;
       filter: blur(140px);
       pointer-events: none;
-      opacity: 0.65;
+      opacity: 0.6;
       animation: floatAura 18s ease-in-out infinite alternate;
       will-change: transform, opacity;
     }
@@ -143,29 +141,29 @@
       left: 20%;
       width: 600px;
       height: 600px;
-      background: radial-gradient(circle, rgba(0, 245, 160, 0.18) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(0, 245, 160, 0.16) 0%, transparent 70%);
     }
     .glow-2 {
-      top: 600px;
+      top: 650px;
       right: 5%;
       width: 550px;
       height: 550px;
-      background: radial-gradient(circle, rgba(0, 210, 255, 0.14) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(0, 210, 255, 0.13) 0%, transparent 70%);
       animation-delay: -6s;
     }
     .glow-3 {
-      top: 1500px;
+      top: 1550px;
       left: 5%;
       width: 580px;
       height: 580px;
-      background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.11) 0%, transparent 70%);
       animation-delay: -11s;
     }
 
     @keyframes floatAura {
-      0% { transform: translate(0, 0) scale(1); opacity: 0.55; }
-      50% { transform: translate(30px, 40px) scale(1.08); opacity: 0.75; }
-      100% { transform: translate(-25px, -20px) scale(0.96); opacity: 0.55; }
+      0% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+      50% { transform: translate(30px, 35px) scale(1.08); opacity: 0.7; }
+      100% { transform: translate(-25px, -20px) scale(0.96); opacity: 0.5; }
     }
 
     .container {
@@ -177,7 +175,7 @@
       width: 100%;
     }
 
-    /* Spotlight Card Effect (Linear / Vercel style) */
+    /* Spotlight Card Effect */
     .spotlight-card {
       position: relative;
       background: var(--bg-card);
@@ -217,7 +215,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(3, 7, 18, 0.78);
+      background: rgba(3, 7, 18, 0.82);
       transition: all 0.25s ease;
     }
     .nav-inner {
@@ -289,14 +287,9 @@
       font-size: 14px;
       font-weight: 500;
       transition: color 0.2s;
-      position: relative;
     }
     .nav-menu a:hover {
       color: var(--text-main);
-    }
-    .nav-menu a.active {
-      color: var(--emerald);
-      font-weight: 600;
     }
 
     .nav-actions {
@@ -390,7 +383,7 @@
       top: 68px;
       left: 0;
       right: 0;
-      background: rgba(3, 7, 18, 0.95);
+      background: rgba(3, 7, 18, 0.96);
       backdrop-filter: blur(24px);
       border-bottom: 1px solid var(--border);
       padding: 24px;
@@ -455,7 +448,7 @@
 
     .hero-title {
       font-family: var(--font-title);
-      font-size: clamp(38px, 6.2vw, 70px);
+      font-size: clamp(38px, 6.2vw, 68px);
       font-weight: 900;
       letter-spacing: -2.2px;
       line-height: 1.08;
@@ -491,7 +484,7 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 20px 32px;
+      gap: 18px 30px;
       margin-bottom: 44px;
     }
     .stat-item {
@@ -633,6 +626,7 @@
     }
     .btn-jump-sandbox svg {
       transition: transform 0.2s;
+      flex-shrink: 0;
     }
     .btn-jump-sandbox:hover svg {
       transform: translateY(2px);
@@ -734,16 +728,18 @@
       font-weight: 600;
     }
     .terminal-body {
-      padding: 26px 28px;
+      padding: 24px 28px;
       font-family: var(--font-mono);
       font-size: 13.5px;
-      line-height: 1.75;
+      line-height: 1.7;
       text-align: left;
       min-height: 380px;
-      max-height: 500px;
+      max-height: 520px;
       overflow-y: auto;
       overflow-x: auto;
       background: #040713;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
     .term-dim { color: #64748b; }
     .term-bold { font-weight: 700; }
@@ -1340,7 +1336,7 @@
       color: var(--cyan);
     }
 
-    /* CLI & Rulebook Reference Table */
+    /* CLI Reference Table */
     .cli-section {
       margin-bottom: 120px;
     }
@@ -1380,7 +1376,7 @@
       background: transparent;
       border: none;
       color: var(--text-main);
-      font-size: 16px; /* Enforces >= 16px to prevent mobile zoom trap */
+      font-size: 16px;
       width: 100%;
     }
     .cli-search-box input:focus-visible {
@@ -2013,7 +2009,7 @@
           <span class="kbd">R</span>
         </div>
         <div class="shortcut-row">
-          <span>Toggle this shortcuts modal</span>
+          <span>Toggle shortcuts modal</span>
           <span class="kbd">?</span>
         </div>
         <div class="shortcut-row">
@@ -2175,8 +2171,8 @@
         </div>
         
         <div class="terminal-tabs">
-          <button class="term-tab-btn active" onclick="switchTerminalTab('default', this)">Default Scan</button>
-          <button class="term-tab-btn" onclick="switchTerminalTab('prompts', this)">--prompts (Cursor/Claude)</button>
+          <button class="term-tab-btn active" onclick="switchTerminalTab('default', this)">Default Audit</button>
+          <button class="term-tab-btn" onclick="switchTerminalTab('prompts', this)">--prompts (Cursor / Claude)</button>
           <button class="term-tab-btn" onclick="switchTerminalTab('security', this)">--security-only</button>
           <button class="term-tab-btn" onclick="switchTerminalTab('backend', this)">--backend-only</button>
           <button class="term-tab-btn" onclick="switchTerminalTab('leakage', this)">--leakage-only</button>
@@ -2308,7 +2304,7 @@
         </div>
 
         <!-- Pillar 3 -->
-        <div class="feature-card spotlight-card" style="--card-accent: #f59e0b; --card-glow: rgba(245, 158, 11, 0.15); --icon-bg: rgba(245, 158, 11, 0.1); --icon-border: rgba(245, 158, 11, 0.25);">
+        <div class="feature-card spotlight-card" style="--card-accent: #fbbf24; --card-glow: rgba(251, 191, 36, 0.15); --icon-bg: rgba(251, 191, 36, 0.1); --icon-border: rgba(251, 191, 36, 0.25);">
           <div class="feature-header">
             <div class="feature-icon-wrap">🧠</div>
             <span class="card-pillar-tag">PILLAR 03 • CWE-400</span>
@@ -2849,7 +2845,7 @@ jobs:
   </footer>
 
   <script>
-    // Audio Feedback Synthesizer using Web Audio API (Zero external assets)
+    // Audio Feedback Synthesizer using Web Audio API
     let audioCtx = null;
     function playSoftClick() {
       try {
@@ -2871,7 +2867,7 @@ jobs:
         osc.start();
         osc.stop(audioCtx.currentTime + 0.04);
       } catch (e) {
-        // Audio synthesis fallback
+        // Fallback silently
       }
     }
 
@@ -2937,33 +2933,25 @@ jobs:
       }, 2000);
     }
 
-    // Terminal Simulator Data & Logic
+    // Terminal Simulator Data & Logic (Clean, High-Readability Layout)
     const TERMINAL_DATA = {
-      default: `
-<span class="term-dim">$ npx arnav-audit .</span>
+      default: `<span class="term-dim">$ npx arnav-audit .</span>
 
-<span class="term-emerald term-bold">   _    ____  _   _    ___     __     _   _   _ ____ ___ _____ 
-  / \\  |  _ \\| \\ | |  / \\ \\   / /    / \\ | | | |  _ \\_ _|_   _|
- / _ \\ | |_) |  \\| | / _ \\ \\ / /    / _ \\| | | | | | | |  | |  
-/ ___ \\|  _ <| |\\  |/ ___ \\ V /    / ___ \\ |_| | |_| | |  | |  
-/_/   \\_\\_| \\_\\_| \\_/_/   \\_\\_/    /_/   \\_\\___/|____/___| |_|  </span>
-<span class="term-dim">High-Accuracy Security, Memory Leakage, Secret Gateways &amp; Backend Auditor</span>
-<span class="term-dim">Engine by Arnav • Cross-Platform Codebase &amp; Gateway Quality Gate v1.1.0</span>
-
-<span class="term-cyan">▸ Scanning local codebase on this device:</span> <span class="term-bold">/workspace/my-app</span>
+<span class="term-emerald term-bold">▲ arnav-audit v1.1.0 — Codebase Quality Gate</span>
+<span class="term-dim">ℹ Architecture: In-Memory Heuristics • 100% Offline &amp; Air-Gapped</span>
+<span class="term-cyan">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
 
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
-  <span class="term-bold">AUDIT REPORT OVERVIEW</span>  •  Scanned <span class="term-bold">142</span> files across codebase
-  <span class="term-emerald">⚡ Execution Time: 12.4ms (11,450 lines/sec)</span>
+  <span class="term-bold">AUDIT REPORT OVERVIEW</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-emerald">12.4ms</span> (91,200 lines/sec)
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
-  Overall Score:  <span class="term-emerald term-bold">100/100 (Grade A+)</span>
-  Findings:       <span class="term-rose">0 Critical</span>  |  <span class="term-amber">0 Major</span>  |  <span class="term-cyan">0 Minor</span>  |  <span class="term-dim">0 Suggestions</span>
+  Overall Score:  <span class="term-emerald term-bold">100/100 (Grade A+ Enterprise Verified)</span>
+  Violations:     <span class="term-emerald">0 Critical</span>  |  <span class="term-emerald">0 Major</span>  |  <span class="term-emerald">0 Minor</span>  |  <span class="term-dim">0 Suggestions</span>
 
   <span class="term-bold">4-PILLAR CODEBASE QUALITY MATRIX:</span>
-   • 🔐 Secret Gateways &amp; Credentials  : <span class="term-emerald">✓ SECURE  (0 detected)</span>
-   • 🛡️ Backend Security &amp; Weak Points : <span class="term-emerald">✓ SECURE  (0 detected)</span>
-   • 🧠 Memory &amp; Resource Leakage      : <span class="term-emerald">✓ SECURE  (0 detected)</span>
-   • 📱 UI/UX &amp; Accessibility Traps    : <span class="term-emerald">✓ SECURE  (0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> 🔐 Secret Gateways &amp; Credentials       <span class="term-dim">(0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> 🛡️ Backend Security &amp; Weak Points     <span class="term-dim">(0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> 🧠 Memory &amp; Resource Leakage          <span class="term-dim">(0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> 📱 UI/UX &amp; Accessibility Traps        <span class="term-dim">(0 detected)</span>
 
   <span class="term-bold">Codebase File Coverage Breakdown:</span>
    • TypeScript (Backend, Core, API)          <span class="term-bold">54</span> files (.ts)
@@ -2973,14 +2961,13 @@ jobs:
    • JSON Manifests &amp; Data schemas            <span class="term-bold">10</span> files (.json)
 
   <span class="term-emerald">✓ Zero internal security, leakage, or interface defects detected!</span>
-  Every file in the codebase was verified on this device. Meets enterprise standards.
-<span class="term-dim">————————————————————————————————————————————————————————————————————</span>
-`,
-      prompts: `
-<span class="term-dim">$ npx arnav-audit . --prompts</span>
+  All 142 files verified on this device. Meets enterprise standards.
+<span class="term-dim">————————————————————————————————————————————————————————————————————</span>`,
+
+      prompts: `<span class="term-dim">$ npx arnav-audit . --prompts</span>
 
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
-  <span class="term-emerald term-bold">READY-TO-USE CURSOR &amp; CLAUDE CODE FIX PROMPT:</span>
+  <span class="term-emerald term-bold">AI COPILOT REMEDIATION PROMPT (Cursor / Claude Code / Antigravity)</span>
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
 
 <span class="term-cyan">## AUDIT REMEDIATION INSTRUCTIONS (via arnav-audit)</span>
@@ -2988,79 +2975,77 @@ Fix the following 2 verified codebase defects:
 
 <span class="term-bold">### 1. [CRITICAL] Hardcoded AWS Access Key Exposed (SEC-AWS-KEY • CWE-798)</span>
 - File: src/config/storage.ts:14
-- Problem: Exposed active AWS credential
-- Required Fix: Read from process.env.AWS_ACCESS_KEY_ID; rotate credential immediately.
+- Defect Codeframe:
+    13 | export const storageConfig = {
+  <span class="term-rose">> 14 |   accessKeyId: "AKIA..."</span>
+       |   <span class="term-rose">^^^^^^^^^^^^^^^^^^^^^^ [CRITICAL: Hardcoded credential]</span>
+    15 | };
+- Remediation: Read from process.env.AWS_ACCESS_KEY_ID; rotate credential immediately.
 
 <span class="term-bold">### 2. [MAJOR] Dangling EventListener in Hook (LEAK-EVENT-LISTENER • CWE-400)</span>
 - File: src/components/ResizeHandler.tsx:28
-- Problem: addEventListener registered without matching removeEventListener in return teardown.
-- Required Fix: Return a cleanup function: () =&gt; window.removeEventListener('resize', handleResize).
+- Remediation: Return a cleanup function: () =&gt; window.removeEventListener('resize', handleResize).
 
-<span class="term-bold">### Guardrails:</span>
+<span class="term-bold">### Implementation Guardrails:</span>
 1. Preserve all existing business logic and component interfaces.
 2. Verify all event listeners and intervals have cleanup in unmount.
-3. Ensure zero credentials remain in codebase.
-`,
-      security: `
-<span class="term-dim">$ npx arnav-audit . --security-only</span>
+3. Ensure zero credentials remain in codebase.`,
 
-<span class="term-cyan">▸ Scanning local project repository:</span> <span class="term-bold">/workspace/my-app</span>
+      security: `<span class="term-dim">$ npx arnav-audit . --security-only</span>
+
+<span class="term-cyan">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
 <span class="term-dim">Filter: Secret Gateways &amp; Sensitive Credentials Leaks only</span>
 
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
-  <span class="term-bold">AUDIT REPORT OVERVIEW</span>  •  Scanned <span class="term-bold">142</span> files across codebase
+  <span class="term-bold">SECURITY GATE REPORT</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-emerald">4.2ms</span>
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
   Overall Score:  <span class="term-emerald term-bold">100/100 (Grade A+)</span>
   Findings:       <span class="term-emerald">0 Security Violations</span>
 
-  <span class="term-emerald">✓ Zero hardcoded secret keys, DB URIs, or credential leaks found!</span>
-`,
-      backend: `
-<span class="term-dim">$ npx arnav-audit . --backend-only</span>
+  <span class="term-emerald">✓ Zero hardcoded secret keys, DB URIs, or credential leaks found!</span>`,
 
-<span class="term-cyan">▸ Scanning local project repository:</span> <span class="term-bold">/workspace/my-app</span>
+      backend: `<span class="term-dim">$ npx arnav-audit . --backend-only</span>
+
+<span class="term-cyan">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
 <span class="term-dim">Filter: Backend Security, SQLi, RCE, SSRF &amp; Weak Points only</span>
 
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
-  <span class="term-bold">AUDIT REPORT OVERVIEW</span>  •  Scanned <span class="term-bold">142</span> files across codebase
+  <span class="term-bold">BACKEND VULNERABILITY REPORT</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-emerald">5.1ms</span>
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
   Overall Score:  <span class="term-emerald term-bold">100/100 (Grade A+)</span>
-  Findings:       <span class="term-emerald">0 Backend Vulnerabilities</span>
+  Findings:       <span class="term-emerald">0 Backend Weak Points</span>
 
-  <span class="term-emerald">✓ All SQL queries parameterized. No shell=True or debug mode leaks found!</span>
-`,
-      leakage: `
-<span class="term-dim">$ npx arnav-audit . --leakage-only</span>
+  <span class="term-emerald">✓ All SQL queries parameterized. No shell=True or debug mode leaks found!</span>`,
 
-<span class="term-cyan">▸ Scanning local project repository:</span> <span class="term-bold">/workspace/my-app</span>
+      leakage: `<span class="term-dim">$ npx arnav-audit . --leakage-only</span>
+
+<span class="term-cyan">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
 <span class="term-dim">Filter: Memory, Timers, File Handles &amp; Resource Leakage only</span>
 
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
-  <span class="term-bold">AUDIT REPORT OVERVIEW</span>  •  Scanned <span class="term-bold">142</span> files across codebase
+  <span class="term-bold">RESOURCE LEAKAGE REPORT</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-emerald">3.8ms</span>
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
   Overall Score:  <span class="term-emerald term-bold">100/100 (Grade A+)</span>
   Findings:       <span class="term-emerald">0 Resource Leaks</span>
 
-  <span class="term-emerald">✓ All React useEffect hooks contain correct teardown callbacks!</span>
-`,
-      ui: `
-<span class="term-dim">$ npx arnav-audit . --ui-only</span>
+  <span class="term-emerald">✓ All React useEffect hooks contain correct teardown callbacks!</span>`,
 
-<span class="term-cyan">▸ Scanning local project repository:</span> <span class="term-bold">/workspace/my-app</span>
+      ui: `<span class="term-dim">$ npx arnav-audit . --ui-only</span>
+
+<span class="term-cyan">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
 <span class="term-dim">Filter: Invisible UI/UX Traps, iOS Safari Zoom &amp; A11y Defects only</span>
 
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
-  <span class="term-bold">AUDIT REPORT OVERVIEW</span>  •  Scanned <span class="term-bold">142</span> files across codebase
+  <span class="term-bold">UI/UX &amp; ACCESSIBILITY REPORT</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-emerald">4.0ms</span>
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
   Overall Score:  <span class="term-emerald term-bold">100/100 (Grade A+)</span>
   Findings:       <span class="term-emerald">0 UI/UX Traps</span>
 
-  <span class="term-emerald">✓ All inputs enforced &gt;= 16px. No 300ms tap delay or outline destruction detected!</span>
-`,
-      files: `
-<span class="term-dim">$ npx arnav-audit . --files</span>
+  <span class="term-emerald">✓ All inputs enforced &gt;= 16px. No 300ms tap delay or outline destruction detected!</span>`,
 
-<span class="term-cyan">▸ Full Verified File Coverage Trace:</span>
+      files: `<span class="term-dim">$ npx arnav-audit . --files</span>
+
+<span class="term-cyan">▸ Verified File Coverage Trace:</span>
  <span class="term-emerald">✓ PASS</span>  src/config/gateway.ts
  <span class="term-emerald">✓ PASS</span>  src/config/storage.ts
  <span class="term-emerald">✓ PASS</span>  apps/api/controllers/auth.py
@@ -3069,10 +3054,9 @@ Fix the following 2 verified codebase defects:
  <span class="term-emerald">✓ PASS</span>  src/components/DataStream.tsx
  <span class="term-emerald">✓ PASS</span>  src/styles/globals.css
  <span class="term-emerald">✓ PASS</span>  src/styles/mobile.css
- <span class="term-dim">... and 134 more files verified with 100% compliance.</span>
-`,
-      json: `
-<span class="term-dim">$ npx arnav-audit . --json</span>
+ <span class="term-dim">... and 134 more files verified with 100% compliance.</span>`,
+
+      json: `<span class="term-dim">$ npx arnav-audit . --json</span>
 {
   "target": "/workspace/my-app",
   "version": "1.1.0",
@@ -3088,8 +3072,7 @@ Fix the following 2 verified codebase defects:
     "total": 0
   },
   "issues": []
-}
-`
+}`
     };
 
     let activeTermTab = 'default';
@@ -3119,7 +3102,6 @@ Fix the following 2 verified codebase defects:
     // ==========================================
     // LIVE IN-BROWSER AUDIT PLAYGROUND ENGINE
     // ==========================================
-    // Pre-assemble test samples dynamically so static scanners see zero false positives
     const SAMPLE_DB_URI = ['postgres', '://', 'admin_user:SuperSecretPassword123!', '@db.internal.net:5432/prod_db'].join('');
     const SAMPLE_AWS_KEY = ['AKIA', 'IOSFODNN7EXAMPLE'].join('');
     const SAMPLE_OPENAI_KEY = ['sk-', 'proj-', '99999888887777766666555554444433333222221111100000'].join('');
@@ -3258,7 +3240,6 @@ export function setupResizeListener(onResize: () => void) {
       auditDebounceTimer = setTimeout(runLiveAudit, 250);
     }
 
-    // Dynamic pattern matchers
     const REG_DB = new RegExp('\\b(?:postgres|postgresql|mysql|mongodb|redis):' + '//[a-zA-Z0-9_.-]+:(?:(?!\\$\\{)[^@\\s\'"]+)@[a-zA-Z0-9_.-]+', 'gi');
     const REG_AWS = new RegExp('\\b(?:AKIA|ABIA|ACCA|ASIA)' + '[0-9A-Z]{16}\\b', 'g');
     const REG_OPENAI = new RegExp('\\bsk-(?:proj-)?' + '[a-zA-Z0-9_-]{30,}\\b', 'g');
@@ -3643,7 +3624,7 @@ arnav_audit:
 
     // Keyboard Shortcut Event Listeners
     window.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
       if (e.key === '?') {
         e.preventDefault();
         toggleShortcutsModal();
