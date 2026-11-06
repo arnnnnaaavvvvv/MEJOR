@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>arnav-audit — Autonomous Security, Memory Leakage &amp; Quality Gate</title>
   <meta name="description" content="Instant zero-dependency CLI and in-browser auditor to inspect codebases for exposed secrets, backend injection vulnerabilities, React memory leaks, and invisible mobile UI traps. Built for high-velocity teams, Cursor, and Claude Code.">
-  <meta name="theme-color" content="#030712">
+  <meta name="theme-color" content="#05070e">
   <meta name="author" content="Arnav">
 
   <!-- OpenGraph / Social Meta -->
@@ -19,46 +19,49 @@
   <meta name="twitter:description" content="Instant zero-dependency CLI to audit codebases for exposed credentials, memory leaks, backend weak points, and mobile UI traps.">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300f5a0'/%3E%3Cstop offset='100%25' stop-color='%2300d2ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%23060913'/%3E%3Cpath d='M16 6 L25 24 L20 24 L16 16 L12 24 L7 24 Z' fill='url(%23g)'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%2338bdf8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%2305070e'/%3E%3Cpath d='M16 6 L25 24 L20 24 L16 16 L12 24 L7 24 Z' fill='url(%23g)'/%3E%3C/svg%3E">
 
-  <!-- Premium Typography: Plus Jakarta Sans, Inter & JetBrains Mono -->
+  <!-- Premium Typography: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg: #030712;
-      --bg-surface: #070c1a;
-      --bg-card: rgba(10, 16, 31, 0.72);
-      --bg-card-hover: rgba(14, 23, 44, 0.88);
-      --bg-glass: rgba(6, 11, 22, 0.65);
+      /* Luxury Dark Space & Sapphire Titanium Theme */
+      --bg: #05070e;
+      --bg-surface: #090d1a;
+      --bg-card: rgba(13, 20, 38, 0.72);
+      --bg-card-hover: rgba(18, 28, 54, 0.88);
+      --bg-glass: rgba(8, 13, 26, 0.75);
       
       --border: rgba(255, 255, 255, 0.08);
       --border-light: rgba(255, 255, 255, 0.14);
-      --border-highlight: rgba(0, 245, 160, 0.35);
-      --border-cyan: rgba(0, 210, 255, 0.3);
+      --border-highlight: rgba(99, 102, 241, 0.4);
+      --border-sapphire: rgba(56, 189, 248, 0.35);
       
-      --emerald: #00f5a0;
-      --emerald-dark: #00ba78;
-      --emerald-glow: rgba(0, 245, 160, 0.2);
-      
-      --cyan: #00d2ff;
-      --cyan-glow: rgba(0, 210, 255, 0.18);
-      
+      /* Sophisticated Accents: Electric Indigo, Sapphire & Jade Emerald */
       --indigo: #6366f1;
-      --purple: #a855f7;
-      --purple-glow: rgba(168, 85, 247, 0.16);
+      --indigo-glow: rgba(99, 102, 241, 0.22);
+      --indigo-dark: #4f46e5;
       
+      --sapphire: #38bdf8;
+      --sapphire-glow: rgba(56, 189, 248, 0.2);
+      
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.2);
+      --emerald-dark: #059669;
+      
+      --violet: #8b5cf6;
       --amber: #fbbf24;
       --rose: #f43f5e;
       --slate-dark: #0f172a;
       
-      --text-main: #f8fafc;
+      --text-main: #ffffff;
       --text-muted: #94a3b8;
       --text-dim: #64748b;
       
-      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       --font-title: 'Plus Jakarta Sans', sans-serif;
       --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
       
@@ -68,8 +71,8 @@
       --radius-xl: 24px;
       --radius-2xl: 32px;
       
-      --shadow-premium: 0 20px 50px -10px rgba(0, 0, 0, 0.7), 0 10px 20px -10px rgba(0, 0, 0, 0.5);
-      --shadow-glow: 0 0 50px -10px var(--emerald-glow);
+      --shadow-premium: 0 24px 60px -12px rgba(0, 0, 0, 0.75), 0 12px 24px -12px rgba(0, 0, 0, 0.5);
+      --shadow-glow: 0 0 50px -10px var(--indigo-glow);
     }
 
     * {
@@ -100,7 +103,7 @@
 
     /* Accessibility focus indicators (WCAG 2.4.7 compliant) */
     a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
-      outline: 2px solid var(--emerald);
+      outline: 2px solid var(--indigo);
       outline-offset: 3px;
     }
 
@@ -141,14 +144,14 @@
       left: 20%;
       width: 600px;
       height: 600px;
-      background: radial-gradient(circle, rgba(0, 245, 160, 0.16) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, transparent 70%);
     }
     .glow-2 {
       top: 650px;
       right: 5%;
       width: 550px;
       height: 550px;
-      background: radial-gradient(circle, rgba(0, 210, 255, 0.13) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.14) 0%, transparent 70%);
       animation-delay: -6s;
     }
     .glow-3 {
@@ -156,7 +159,7 @@
       left: 5%;
       width: 580px;
       height: 580px;
-      background: radial-gradient(circle, rgba(168, 85, 247, 0.11) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
       animation-delay: -11s;
     }
 
@@ -215,7 +218,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(3, 7, 18, 0.82);
+      background: rgba(5, 7, 14, 0.82);
       transition: all 0.25s ease;
     }
     .nav-inner {
@@ -234,22 +237,22 @@
     .brand-logo {
       width: 38px;
       height: 38px;
-      background: linear-gradient(135deg, #00f5a0 0%, #00d2ff 60%, #a855f7 100%);
+      background: linear-gradient(135deg, #6366f1 0%, #38bdf8 60%, #10b981 100%);
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
       font-family: var(--font-title);
-      color: #030712;
+      color: #05070e;
       font-size: 19px;
-      box-shadow: 0 0 24px rgba(0, 245, 160, 0.45);
+      box-shadow: 0 0 24px rgba(99, 102, 241, 0.45);
       flex-shrink: 0;
       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
     }
     .brand:hover .brand-logo {
       transform: scale(1.08) rotate(-2deg);
-      box-shadow: 0 0 32px rgba(0, 245, 160, 0.65);
+      box-shadow: 0 0 32px rgba(99, 102, 241, 0.65);
     }
     .brand-meta {
       display: flex;
@@ -269,9 +272,9 @@
       font-family: var(--font-mono);
       padding: 3px 9px;
       border-radius: 999px;
-      background: rgba(0, 245, 160, 0.12);
-      color: var(--emerald);
-      border: 1px solid rgba(0, 245, 160, 0.3);
+      background: rgba(99, 102, 241, 0.14);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.32);
       letter-spacing: 0.3px;
     }
 
@@ -349,21 +352,21 @@
       gap: 8px;
       padding: 7px 16px;
       border-radius: var(--radius-sm);
-      background: linear-gradient(135deg, #00f5a0 0%, #00d2ff 100%);
-      color: #030712;
+      background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%);
+      color: #ffffff;
       border: none;
       font-family: var(--font-body);
       font-weight: 700;
       font-size: 13px;
       cursor: pointer;
       text-decoration: none;
-      box-shadow: 0 4px 16px rgba(0, 245, 160, 0.3);
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
       transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
       white-space: nowrap;
     }
     .btn-header-cta:hover {
       transform: translateY(-1px) scale(1.02);
-      box-shadow: 0 6px 22px rgba(0, 245, 160, 0.5);
+      box-shadow: 0 6px 22px rgba(99, 102, 241, 0.55);
     }
 
     .btn-mobile-toggle {
@@ -383,7 +386,7 @@
       top: 68px;
       left: 0;
       right: 0;
-      background: rgba(3, 7, 18, 0.96);
+      background: rgba(5, 7, 14, 0.96);
       backdrop-filter: blur(24px);
       border-bottom: 1px solid var(--border);
       padding: 24px;
@@ -418,19 +421,19 @@
       gap: 9px;
       padding: 6px 18px;
       border-radius: 999px;
-      background: rgba(0, 245, 160, 0.07);
-      border: 1px solid rgba(0, 245, 160, 0.26);
-      color: var(--emerald);
+      background: rgba(99, 102, 241, 0.09);
+      border: 1px solid rgba(99, 102, 241, 0.28);
+      color: #a5b4fc;
       font-size: 13px;
       font-weight: 600;
       letter-spacing: 0.5px;
-      box-shadow: 0 0 24px rgba(0, 245, 160, 0.1);
+      box-shadow: 0 0 24px rgba(99, 102, 241, 0.12);
       text-decoration: none;
       transition: all 0.2s ease;
     }
     .hero-pill:hover {
-      background: rgba(0, 245, 160, 0.12);
-      border-color: rgba(0, 245, 160, 0.4);
+      background: rgba(99, 102, 241, 0.16);
+      border-color: rgba(99, 102, 241, 0.45);
       transform: translateY(-1px);
     }
     .hero-pill .dot-live {
@@ -458,13 +461,13 @@
       margin-right: auto;
     }
     .hero-title .shimmer-text {
-      background: linear-gradient(135deg, #ffffff 10%, #cbd5e1 55%, #94a3b8 100%);
+      background: linear-gradient(180deg, #ffffff 15%, #cbd5e1 65%, #94a3b8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       display: inline;
     }
     .hero-title .gradient-text {
-      background: linear-gradient(135deg, #00f5a0 0%, #00d2ff 45%, #a855f7 100%);
+      background: linear-gradient(135deg, #6366f1 0%, #38bdf8 50%, #10b981 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       display: inline;
@@ -507,7 +510,7 @@
       transform: translateY(-1px);
     }
     .stat-item svg {
-      color: var(--emerald);
+      color: var(--sapphire);
       flex-shrink: 0;
     }
     .stat-item strong {
@@ -515,15 +518,15 @@
       font-weight: 700;
     }
 
-    /* Modern Multi-Package Install Bar */
+    /* Multi-Package Manager Switcher */
     .install-container {
       max-width: 640px;
       margin: 0 auto 36px;
-      background: rgba(8, 14, 28, 0.88);
+      background: rgba(9, 13, 26, 0.9);
       border: 1px solid var(--border-highlight);
       border-radius: var(--radius-xl);
       padding: 8px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px var(--emerald-glow);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px var(--indigo-glow);
       backdrop-filter: blur(20px);
       position: relative;
     }
@@ -553,7 +556,7 @@
     }
     .pkg-tab.active {
       background: rgba(255, 255, 255, 0.08);
-      color: var(--emerald);
+      color: #a5b4fc;
     }
     .install-box {
       display: flex;
@@ -573,14 +576,14 @@
       padding: 6px 0;
     }
     .install-cmd span {
-      color: var(--emerald);
+      color: var(--sapphire);
       font-weight: 600;
     }
     .btn-copy {
       padding: 10px 22px;
       border-radius: var(--radius-md);
-      background: linear-gradient(135deg, #00f5a0 0%, #00d2ff 100%);
-      color: #030712;
+      background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%);
+      color: #ffffff;
       border: none;
       font-family: var(--font-body);
       font-weight: 700;
@@ -590,12 +593,12 @@
       align-items: center;
       gap: 8px;
       transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 4px 16px rgba(0, 245, 160, 0.35);
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
       flex-shrink: 0;
     }
     .btn-copy:hover {
       transform: translateY(-1px) scale(1.02);
-      box-shadow: 0 6px 24px rgba(0, 245, 160, 0.5);
+      box-shadow: 0 6px 24px rgba(99, 102, 241, 0.55);
     }
     .btn-copy:active {
       transform: translateY(0) scale(0.98);
@@ -622,7 +625,7 @@
       transition: color 0.2s;
     }
     .btn-jump-sandbox:hover {
-      color: var(--emerald);
+      color: var(--sapphire);
     }
     .btn-jump-sandbox svg {
       transition: transform 0.2s;
@@ -632,19 +635,19 @@
       transform: translateY(2px);
     }
 
-    /* Terminal Simulator 2.0 */
+    /* Terminal Simulator */
     .terminal-wrapper {
       max-width: 980px;
       margin: 0 auto 100px;
       border-radius: var(--radius-xl);
-      background: #050814;
+      background: #040713;
       border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.75), 0 0 50px rgba(0, 210, 255, 0.08);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.75), 0 0 50px rgba(99, 102, 241, 0.08);
       overflow: hidden;
       text-align: left;
     }
     .terminal-header {
-      background: #090e1d;
+      background: #070c1c;
       padding: 13px 20px;
       display: flex;
       align-items: center;
@@ -692,14 +695,14 @@
       gap: 5px;
     }
     .terminal-btn:hover {
-      background: rgba(0, 245, 160, 0.15);
-      color: var(--emerald);
-      border-color: rgba(0, 245, 160, 0.3);
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border-color: rgba(99, 102, 241, 0.35);
     }
 
     .terminal-tabs {
       display: flex;
-      background: #070b17;
+      background: #060a16;
       padding: 8px 16px 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       gap: 6px;
@@ -722,9 +725,9 @@
       background: rgba(255, 255, 255, 0.04);
     }
     .term-tab-btn.active {
-      color: var(--emerald);
-      background: rgba(0, 245, 160, 0.09);
-      border-bottom: 2px solid var(--emerald);
+      color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.12);
+      border-bottom: 2px solid var(--indigo);
       font-weight: 600;
     }
     .terminal-body {
@@ -737,14 +740,15 @@
       max-height: 520px;
       overflow-y: auto;
       overflow-x: auto;
-      background: #040713;
+      background: #030611;
       white-space: pre-wrap;
       word-break: break-word;
     }
     .term-dim { color: #64748b; }
     .term-bold { font-weight: 700; }
-    .term-emerald { color: #00f5a0; }
-    .term-cyan { color: #00d2ff; }
+    .term-indigo { color: #a5b4fc; }
+    .term-sapphire { color: #38bdf8; }
+    .term-emerald { color: #10b981; }
     .term-amber { color: #fbbf24; }
     .term-rose { color: #f43f5e; }
 
@@ -757,7 +761,7 @@
       font-size: 12.5px;
       font-weight: 700;
       letter-spacing: 1.2px;
-      color: var(--emerald);
+      color: var(--sapphire);
       text-transform: uppercase;
       margin-bottom: 12px;
       display: inline-flex;
@@ -793,7 +797,7 @@
       backdrop-filter: blur(20px);
     }
     .playground-toolbar {
-      background: #0a0f20;
+      background: #090e20;
       padding: 14px 22px;
       display: flex;
       flex-wrap: wrap;
@@ -833,9 +837,9 @@
       color: var(--text-main);
     }
     .preset-btn.active {
-      background: rgba(0, 245, 160, 0.14);
-      border-color: rgba(0, 245, 160, 0.4);
-      color: var(--emerald);
+      background: rgba(99, 102, 241, 0.16);
+      border-color: rgba(99, 102, 241, 0.45);
+      color: #a5b4fc;
     }
 
     .playground-grid {
@@ -854,11 +858,11 @@
       display: flex;
       flex-direction: column;
       border-right: 1px solid var(--border);
-      background: #050813;
+      background: #030611;
     }
     .pane-header {
       padding: 11px 18px;
-      background: #080d1b;
+      background: #070b1a;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       font-family: var(--font-mono);
       font-size: 12.5px;
@@ -892,7 +896,7 @@
       font-size: 13.5px;
       line-height: 1.6;
       color: #334155;
-      background: #040610;
+      background: #02040c;
       border-right: 1px solid rgba(255, 255, 255, 0.04);
       flex-shrink: 0;
     }
@@ -917,12 +921,12 @@
       tab-size: 2;
     }
     .code-editor:focus-visible {
-      outline: 2px solid var(--emerald);
+      outline: 2px solid var(--indigo);
       outline-offset: -2px;
     }
     .editor-footer {
       padding: 12px 18px;
-      background: #070b17;
+      background: #060a16;
       border-top: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
@@ -930,8 +934,8 @@
       gap: 12px;
     }
     .btn-run-audit {
-      background: linear-gradient(135deg, #00f5a0 0%, #00d2ff 100%);
-      color: #030712;
+      background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%);
+      color: #ffffff;
       border: none;
       font-family: var(--font-body);
       font-weight: 700;
@@ -943,16 +947,16 @@
       align-items: center;
       gap: 8px;
       transition: all 0.15s ease;
-      box-shadow: 0 4px 14px rgba(0, 245, 160, 0.35);
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
     }
     .btn-run-audit:hover {
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(0, 245, 160, 0.5);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.55);
     }
 
     /* Right pane: Live Results */
     .results-pane {
-      background: #070b16;
+      background: #050816;
       display: flex;
       flex-direction: column;
     }
@@ -1061,13 +1065,13 @@
       color: #fb7185;
     }
     .tier-major {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.35);
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.35);
       color: #fbbf24;
     }
     .tier-minor {
-      background: rgba(0, 210, 255, 0.15);
-      border: 1px solid rgba(0, 210, 255, 0.35);
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
       color: #38bdf8;
     }
     .cwe-tag {
@@ -1098,11 +1102,11 @@
     .issue-remedy {
       font-family: var(--font-mono);
       font-size: 11.5px;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.35);
       padding: 8px 12px;
       border-radius: 5px;
-      color: var(--emerald);
-      border-left: 2px solid var(--emerald);
+      color: var(--sapphire);
+      border-left: 2px solid var(--indigo);
     }
 
     .clean-pass-box {
@@ -1112,8 +1116,8 @@
     .clean-pass-icon {
       width: 64px;
       height: 64px;
-      background: rgba(0, 245, 160, 0.1);
-      border: 1px solid rgba(0, 245, 160, 0.25);
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.28);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -1121,7 +1125,7 @@
       font-size: 28px;
       margin: 0 auto 18px;
       color: var(--emerald);
-      box-shadow: 0 0 30px rgba(0, 245, 160, 0.2);
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
     }
     .clean-pass-title {
       font-family: var(--font-title);
@@ -1161,14 +1165,14 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent, var(--card-accent, var(--emerald)), transparent);
-      opacity: 0.6;
+      background: linear-gradient(90deg, transparent, var(--card-accent, var(--indigo)), transparent);
+      opacity: 0.7;
       transition: opacity 0.3s;
     }
     .feature-card:hover {
       border-color: rgba(255, 255, 255, 0.22);
       transform: translateY(-4px);
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 40px var(--card-glow, rgba(0, 245, 160, 0.1));
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 40px var(--card-glow, rgba(99, 102, 241, 0.15));
     }
     .feature-header {
       display: flex;
@@ -1184,8 +1188,8 @@
       align-items: center;
       justify-content: center;
       font-size: 24px;
-      background: var(--icon-bg, rgba(0, 245, 160, 0.1));
-      border: 1px solid var(--icon-border, rgba(0, 245, 160, 0.25));
+      background: var(--icon-bg, rgba(99, 102, 241, 0.1));
+      border: 1px solid var(--icon-border, rgba(99, 102, 241, 0.25));
     }
     .card-pillar-tag {
       font-family: var(--font-mono);
@@ -1257,7 +1261,7 @@
       flex-direction: column;
     }
     .pipeline-step:hover {
-      border-color: rgba(0, 245, 160, 0.4);
+      border-color: rgba(99, 102, 241, 0.4);
       transform: translateY(-3px);
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
     }
@@ -1265,9 +1269,9 @@
       font-family: var(--font-mono);
       font-size: 13px;
       font-weight: 700;
-      color: var(--emerald);
-      background: rgba(0, 245, 160, 0.1);
-      border: 1px solid rgba(0, 245, 160, 0.28);
+      color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
       width: 36px;
       height: 36px;
       border-radius: 10px;
@@ -1291,7 +1295,7 @@
       flex-grow: 1;
     }
     .step-code {
-      background: #040713;
+      background: #030611;
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 8px;
       padding: 9px 12px;
@@ -1301,7 +1305,7 @@
       gap: 8px;
       font-family: var(--font-mono);
       font-size: 12px;
-      color: var(--emerald);
+      color: #a5b4fc;
       margin-bottom: 10px;
     }
     .step-code code {
@@ -1322,9 +1326,9 @@
       transition: all 0.15s ease;
     }
     .step-copy-btn:hover {
-      background: var(--emerald);
-      color: #030712;
-      border-color: var(--emerald);
+      background: var(--indigo);
+      color: #ffffff;
+      border-color: var(--indigo);
     }
     .step-alt {
       font-size: 12px;
@@ -1333,7 +1337,7 @@
       line-height: 1.4;
     }
     .step-alt code {
-      color: var(--cyan);
+      color: var(--sapphire);
     }
 
     /* CLI Reference Table */
@@ -1348,7 +1352,7 @@
     }
     .cli-toolbar {
       padding: 18px 24px;
-      background: #090e1e;
+      background: #070c1d;
       border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
@@ -1369,8 +1373,8 @@
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .cli-search-box:focus-within {
-      border-color: var(--emerald);
-      box-shadow: 0 0 16px var(--emerald-glow);
+      border-color: var(--indigo);
+      box-shadow: 0 0 16px var(--indigo-glow);
     }
     .cli-search-box input {
       background: transparent;
@@ -1407,9 +1411,9 @@
       background: rgba(255, 255, 255, 0.04);
     }
     .cli-filter-btn.active {
-      background: rgba(0, 245, 160, 0.12);
-      border-color: rgba(0, 245, 160, 0.35);
-      color: var(--emerald);
+      background: rgba(99, 102, 241, 0.14);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
     }
 
     .table-wrap {
@@ -1422,7 +1426,7 @@
       font-size: 13.5px;
     }
     th {
-      background: #070c1a;
+      background: #060a18;
       padding: 15px 22px;
       color: var(--text-dim);
       font-family: var(--font-mono);
@@ -1441,13 +1445,13 @@
     }
     td.cmd-cell {
       font-family: var(--font-mono);
-      color: var(--emerald);
+      color: #a5b4fc;
       font-weight: 600;
       white-space: nowrap;
     }
     td.alias-cell {
       font-family: var(--font-mono);
-      color: var(--cyan);
+      color: var(--sapphire);
       font-size: 12.5px;
       white-space: nowrap;
     }
@@ -1487,7 +1491,7 @@
       font-family: var(--font-title);
       font-size: 36px;
       font-weight: 900;
-      color: var(--emerald);
+      color: #a5b4fc;
       margin-bottom: 8px;
       line-height: 1.1;
     }
@@ -1519,10 +1523,10 @@
       overflow: hidden;
       margin-bottom: 10px;
     }
-    .bench-fill-emerald {
+    .bench-fill-indigo {
       height: 100%;
       width: 98%;
-      background: linear-gradient(90deg, #00f5a0, #00d2ff);
+      background: linear-gradient(90deg, #6366f1, #38bdf8);
     }
     .bench-fill-slow {
       height: 100%;
@@ -1535,7 +1539,7 @@
       margin-bottom: 120px;
     }
     .cicd-card {
-      background: #060a16;
+      background: #050816;
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
       overflow: hidden;
@@ -1543,7 +1547,7 @@
     }
     .cicd-nav {
       display: flex;
-      background: #090f20;
+      background: #080d1e;
       padding: 12px 18px 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.07);
       gap: 8px;
@@ -1565,9 +1569,9 @@
       color: var(--text-main);
     }
     .cicd-tab.active {
-      color: var(--cyan);
-      background: rgba(0, 210, 255, 0.08);
-      border-bottom: 2px solid var(--cyan);
+      color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.12);
+      border-bottom: 2px solid var(--indigo);
       font-weight: 600;
     }
     .cicd-header-inner {
@@ -1590,7 +1594,7 @@
       font-size: 13.5px;
     }
     .code-box {
-      background: #030610;
+      background: #02050f;
       padding: 24px;
       font-family: var(--font-mono);
       font-size: 13px;
@@ -1639,12 +1643,12 @@
       font-family: var(--font-body);
     }
     .form-input:focus-visible {
-      border-color: var(--emerald);
-      outline: 2px solid var(--emerald);
+      border-color: var(--indigo);
+      outline: 2px solid var(--indigo);
       outline-offset: 1px;
     }
     .badge-preview-area {
-      background: #040714;
+      background: #030612;
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       padding: 24px;
@@ -1660,7 +1664,7 @@
     .badge-snippet-code {
       font-family: var(--font-mono);
       font-size: 12px;
-      color: var(--emerald);
+      color: #a5b4fc;
       background: rgba(0, 0, 0, 0.4);
       padding: 12px;
       border-radius: 6px;
@@ -1672,8 +1676,8 @@
 
     /* Privacy & Architecture Guarantee */
     .privacy-card {
-      background: linear-gradient(135deg, rgba(0, 245, 160, 0.06) 0%, rgba(0, 210, 255, 0.06) 100%);
-      border: 1px solid rgba(0, 245, 160, 0.28);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(56, 189, 248, 0.08) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.3);
       border-radius: var(--radius-xl);
       padding: 42px 36px;
       margin-bottom: 120px;
@@ -1716,7 +1720,7 @@
       color: var(--text-main);
     }
     .priv-badge svg {
-      color: var(--emerald);
+      color: var(--sapphire);
       flex-shrink: 0;
     }
 
@@ -1755,7 +1759,7 @@
     }
     .faq-question svg {
       transition: transform 0.25s ease;
-      color: var(--emerald);
+      color: var(--sapphire);
       flex-shrink: 0;
     }
     .faq-item.open .faq-question svg {
@@ -1776,7 +1780,7 @@
     footer {
       border-top: 1px solid var(--border);
       padding: 60px 0 40px;
-      background: #02040a;
+      background: #03050c;
       color: var(--text-dim);
       font-size: 14px;
       margin-top: auto;
@@ -1829,7 +1833,7 @@
       transition: color 0.2s;
     }
     .footer-links a:hover {
-      color: var(--emerald);
+      color: var(--sapphire);
     }
     .footer-bottom {
       border-top: 1px solid rgba(255, 255, 255, 0.05);
@@ -1856,9 +1860,9 @@
       gap: 6px;
     }
     .btn-scroll-top:hover {
-      background: rgba(0, 245, 160, 0.12);
-      color: var(--emerald);
-      border-color: rgba(0, 245, 160, 0.3);
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border-color: rgba(99, 102, 241, 0.35);
     }
 
     /* Toast Notification */
@@ -1866,14 +1870,14 @@
       position: fixed;
       bottom: 28px;
       right: 28px;
-      background: #091224;
-      border: 1px solid var(--emerald);
+      background: #090f24;
+      border: 1px solid var(--indigo);
       color: var(--text-main);
       padding: 14px 22px;
       border-radius: 12px;
       font-size: 13.5px;
       font-weight: 600;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 24px var(--emerald-glow);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 24px var(--indigo-glow);
       display: flex;
       align-items: center;
       gap: 12px;
@@ -1978,7 +1982,7 @@
 
   <!-- Toast Notification -->
   <div class="toast" id="toast">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00f5a0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
       <polyline points="20 6 9 17 4 12"></polyline>
     </svg>
     <span id="toastMsg">Copied to clipboard!</span>
@@ -2082,18 +2086,18 @@
       <div class="hero-badge-wrap">
         <a href="#pillars" class="hero-pill">
           <span class="dot-live"></span>
-          <span>v1.1.0 Released — Native CWE &amp; OWASP Mappings</span>
+          <span>Security Standard v1.1.0 • CWE &amp; OWASP Mapped</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polyline points="9 18 15 12 9 6"/></svg>
         </a>
       </div>
       
       <h1 class="hero-title">
-        <span class="shimmer-text">The Autonomous Quality Gate for</span><br>
-        <span class="gradient-text">Security Leaks, Memory &amp; UI Traps</span>
+        <span class="shimmer-text">Autonomous Code Quality &amp;</span><br>
+        <span class="gradient-text">Security Intelligence Gate</span>
       </h1>
       
       <p class="hero-desc">
-        Zero-dependency static auditor designed for modern AI-assisted engineering. Catch leaked credentials, backend injection vectors, unmounted React hooks, and broken mobile touch targets before they hit production.
+        Zero-dependency static security auditor engineered for high-velocity teams and AI copilots. Detect exposed credentials, backend injection vulnerabilities, React memory leaks, and invisible mobile UI traps in milliseconds.
       </p>
 
       <!-- Key Stats Bar -->
@@ -2156,7 +2160,7 @@
           </div>
           <div class="terminal-title">
             <span>arnav-audit — bash — 80x24</span>
-            <span style="color: var(--emerald); font-size: 11px;">● node v20</span>
+            <span style="color: #a5b4fc; font-size: 11px;">● node v20</span>
           </div>
           <div class="terminal-actions-group">
             <button class="terminal-btn" onclick="rerunTerminalScan()">
@@ -2181,9 +2185,34 @@
           <button class="term-tab-btn" onclick="switchTerminalTab('json', this)">--json (CI/CD)</button>
         </div>
         
-        <div class="terminal-body" id="termOutput">
-          <!-- Terminal simulated content will render here -->
-        </div>
+        <div class="terminal-body" id="termOutput"><span class="term-dim">$ npx arnav-audit .</span>
+
+<span class="term-indigo term-bold">▲ arnav-audit v1.1.0 — Codebase Quality Gate</span>
+<span class="term-dim">ℹ Architecture: In-Memory Heuristics • 100% Offline &amp; Air-Gapped</span>
+<span class="term-sapphire">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
+
+<span class="term-dim">————————————————————————————————————————————————————————————————————</span>
+  <span class="term-bold">AUDIT REPORT OVERVIEW</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-sapphire">12.4ms</span> (91,200 lines/sec)
+<span class="term-dim">————————————————————————————————————————————————————————————————————</span>
+  Overall Score:  <span class="term-emerald term-bold">100/100 (Grade A+ Enterprise Verified)</span>
+  Violations:     <span class="term-emerald">0 Critical</span>  |  <span class="term-emerald">0 Major</span>  |  <span class="term-emerald">0 Minor</span>  |  <span class="term-dim">0 Suggestions</span>
+
+  <span class="term-bold">4-PILLAR CODEBASE QUALITY MATRIX:</span>
+   <span class="term-emerald">✔ [PASS]</span> 🔐 Secret Gateways &amp; Credentials       <span class="term-dim">(0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> 🛡️ Backend Security &amp; Weak Points     <span class="term-dim">(0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> 🧠 Memory &amp; Resource Leakage          <span class="term-dim">(0 detected)</span>
+   <span class="term-emerald">✔ [PASS]</span> 📱 UI/UX &amp; Accessibility Traps        <span class="term-dim">(0 detected)</span>
+
+  <span class="term-bold">Codebase File Coverage Breakdown:</span>
+   • TypeScript (Backend, Core, API)          <span class="term-bold">54</span> files (.ts)
+   • React / Next.js Components               <span class="term-bold">48</span> files (.tsx)
+   • Python Services &amp; Security Gateways      <span class="term-bold">12</span> files (.py)
+   • Vanilla &amp; Tailwind Styles                <span class="term-bold">18</span> files (.css)
+   • JSON Manifests &amp; Data schemas            <span class="term-bold">10</span> files (.json)
+
+  <span class="term-emerald">✓ Zero internal security, leakage, or interface defects detected!</span>
+  All 142 files verified on this device. Meets enterprise standards.
+<span class="term-dim">————————————————————————————————————————————————————————————————————</span></div>
       </div>
     </section>
 
@@ -2246,7 +2275,7 @@
           <div class="results-pane">
             <div class="pane-header">
               <span>Auditor Diagnostics HUD</span>
-              <span id="scanTimeBadge" style="color: var(--emerald); font-weight: 600;">Scan: 1.2ms</span>
+              <span id="scanTimeBadge" style="color: var(--sapphire); font-weight: 600;">Scan: 1.2ms</span>
             </div>
             <div class="results-body" id="resultsBody">
               <!-- Live inspection result cards rendered here -->
@@ -2266,7 +2295,7 @@
 
       <div class="features-grid">
         <!-- Pillar 1 -->
-        <div class="feature-card spotlight-card" style="--card-accent: #00f5a0; --card-glow: rgba(0, 245, 160, 0.15); --icon-bg: rgba(0, 245, 160, 0.1); --icon-border: rgba(0, 245, 160, 0.25);">
+        <div class="feature-card spotlight-card" style="--card-accent: #6366f1; --card-glow: rgba(99, 102, 241, 0.18); --icon-bg: rgba(99, 102, 241, 0.12); --icon-border: rgba(99, 102, 241, 0.28);">
           <div class="feature-header">
             <div class="feature-icon-wrap">🔐</div>
             <span class="card-pillar-tag">PILLAR 01 • CWE-798</span>
@@ -2285,7 +2314,7 @@
         </div>
 
         <!-- Pillar 2 -->
-        <div class="feature-card spotlight-card" style="--card-accent: #00d2ff; --card-glow: rgba(0, 210, 255, 0.15); --icon-bg: rgba(0, 210, 255, 0.1); --icon-border: rgba(0, 210, 255, 0.25);">
+        <div class="feature-card spotlight-card" style="--card-accent: #38bdf8; --card-glow: rgba(56, 189, 248, 0.18); --icon-bg: rgba(56, 189, 248, 0.12); --icon-border: rgba(56, 189, 248, 0.28);">
           <div class="feature-header">
             <div class="feature-icon-wrap">🛡️</div>
             <span class="card-pillar-tag">PILLAR 02 • CWE-89 &amp; 78</span>
@@ -2304,7 +2333,7 @@
         </div>
 
         <!-- Pillar 3 -->
-        <div class="feature-card spotlight-card" style="--card-accent: #fbbf24; --card-glow: rgba(251, 191, 36, 0.15); --icon-bg: rgba(251, 191, 36, 0.1); --icon-border: rgba(251, 191, 36, 0.25);">
+        <div class="feature-card spotlight-card" style="--card-accent: #fbbf24; --card-glow: rgba(251, 191, 36, 0.18); --icon-bg: rgba(251, 191, 36, 0.12); --icon-border: rgba(251, 191, 36, 0.28);">
           <div class="feature-header">
             <div class="feature-icon-wrap">🧠</div>
             <span class="card-pillar-tag">PILLAR 03 • CWE-400</span>
@@ -2322,7 +2351,7 @@
         </div>
 
         <!-- Pillar 4 -->
-        <div class="feature-card spotlight-card" style="--card-accent: #f43f5e; --card-glow: rgba(244, 63, 94, 0.15); --icon-bg: rgba(244, 63, 94, 0.1); --icon-border: rgba(244, 63, 94, 0.25);">
+        <div class="feature-card spotlight-card" style="--card-accent: #f43f5e; --card-glow: rgba(244, 63, 94, 0.18); --icon-bg: rgba(244, 63, 94, 0.12); --icon-border: rgba(244, 63, 94, 0.28);">
           <div class="feature-header">
             <div class="feature-icon-wrap">📱</div>
             <span class="card-pillar-tag">PILLAR 04 • WCAG 2.4.7</span>
@@ -2415,10 +2444,10 @@
           <div class="bench-bar-wrap">
             <div class="bench-row">
               <span>arnav-audit</span>
-              <span style="color: var(--emerald);">12.4ms</span>
+              <span style="color: #a5b4fc;">12.4ms</span>
             </div>
             <div class="bench-progress">
-              <div class="bench-fill-emerald"></div>
+              <div class="bench-fill-indigo"></div>
             </div>
             <div class="bench-row">
               <span style="color: var(--text-dim);">Legacy SAST</span>
@@ -2440,10 +2469,10 @@
           <div class="bench-bar-wrap">
             <div class="bench-row">
               <span>arnav-audit</span>
-              <span style="color: var(--emerald);">0 packages (2.8MB)</span>
+              <span style="color: #a5b4fc;">0 packages (2.8MB)</span>
             </div>
             <div class="bench-progress">
-              <div class="bench-fill-emerald"></div>
+              <div class="bench-fill-indigo"></div>
             </div>
             <div class="bench-row">
               <span style="color: var(--text-dim);">Heavy Linters</span>
@@ -2468,7 +2497,7 @@
               <span style="color: var(--emerald);">100% Offline</span>
             </div>
             <div class="bench-progress">
-              <div class="bench-fill-emerald"></div>
+              <div class="bench-fill-indigo"></div>
             </div>
             <div class="bench-row">
               <span style="color: var(--text-dim);">Cloud SaaS Scanners</span>
@@ -2676,10 +2705,10 @@ jobs:
         <div class="badge-preview-area">
           <div class="preset-label" style="margin-bottom: 12px;">Live Badge Preview:</div>
           <div class="badge-render" id="badgeRender">
-            <img id="badgeImage" src="https://img.shields.io/badge/quality%20gate-Grade%20A%2B%20%E2%9C%93-00f5a0?style=flat-square&logo=shield" alt="Quality Gate Badge">
+            <img id="badgeImage" src="https://img.shields.io/badge/quality%20gate-Grade%20A%2B%20%E2%9C%93-6366f1?style=flat-square&logo=shield" alt="Quality Gate Badge">
           </div>
           <div class="badge-snippet-code" id="badgeMarkdown">
-            [![arnav-audit](https://img.shields.io/badge/quality%20gate-Grade%20A%2B%20%E2%9C%93-00f5a0?style=flat-square&logo=shield)](https://mejor-iota.vercel.app/)
+            [![arnav-audit](https://img.shields.io/badge/quality%20gate-Grade%20A%2B%20%E2%9C%93-6366f1?style=flat-square&logo=shield)](https://mejor-iota.vercel.app/)
           </div>
           <button class="btn-copy" onclick="copyBadgeSnippet()" style="margin: 0 auto;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
@@ -2831,7 +2860,7 @@ jobs:
 
       <div class="footer-bottom">
         <div>
-          Engineered with precision by <strong>Arnav</strong> • Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener" style="color: var(--emerald); text-decoration: none;">MIT</a>
+          Engineered with precision by <strong>Arnav</strong> • Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener" style="color: #a5b4fc; text-decoration: none;">MIT</a>
         </div>
         <div style="display: flex; align-items: center; gap: 14px;">
           <span style="color: var(--text-dim); font-size: 12px;">Press <span class="kbd">?</span> for shortcuts</span>
@@ -2923,8 +2952,8 @@ jobs:
       navigator.clipboard.writeText(cmd);
       const orig = btn.innerText;
       btn.innerText = '✓ Copied';
-      btn.style.background = 'var(--emerald)';
-      btn.style.color = '#030712';
+      btn.style.background = 'var(--indigo)';
+      btn.style.color = '#ffffff';
       showToast('Copied: ' + cmd);
       setTimeout(() => {
         btn.innerText = orig;
@@ -2933,16 +2962,16 @@ jobs:
       }, 2000);
     }
 
-    // Terminal Simulator Data & Logic (Clean, High-Readability Layout)
+    // Terminal Simulator Data & Logic (Clean, High-Readability Executive Layout)
     const TERMINAL_DATA = {
       default: `<span class="term-dim">$ npx arnav-audit .</span>
 
-<span class="term-emerald term-bold">▲ arnav-audit v1.1.0 — Codebase Quality Gate</span>
+<span class="term-indigo term-bold">▲ arnav-audit v1.1.0 — Codebase Quality Gate</span>
 <span class="term-dim">ℹ Architecture: In-Memory Heuristics • 100% Offline &amp; Air-Gapped</span>
-<span class="term-cyan">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
+<span class="term-sapphire">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
 
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
-  <span class="term-bold">AUDIT REPORT OVERVIEW</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-emerald">12.4ms</span> (91,200 lines/sec)
+  <span class="term-bold">AUDIT REPORT OVERVIEW</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-sapphire">12.4ms</span> (91,200 lines/sec)
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
   Overall Score:  <span class="term-emerald term-bold">100/100 (Grade A+ Enterprise Verified)</span>
   Violations:     <span class="term-emerald">0 Critical</span>  |  <span class="term-emerald">0 Major</span>  |  <span class="term-emerald">0 Minor</span>  |  <span class="term-dim">0 Suggestions</span>
@@ -2967,10 +2996,10 @@ jobs:
       prompts: `<span class="term-dim">$ npx arnav-audit . --prompts</span>
 
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
-  <span class="term-emerald term-bold">AI COPILOT REMEDIATION PROMPT (Cursor / Claude Code / Antigravity)</span>
+  <span class="term-indigo term-bold">AI COPILOT REMEDIATION PROMPT (Cursor / Claude Code / Antigravity)</span>
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
 
-<span class="term-cyan">## AUDIT REMEDIATION INSTRUCTIONS (via arnav-audit)</span>
+<span class="term-sapphire">## AUDIT REMEDIATION INSTRUCTIONS (via arnav-audit)</span>
 Fix the following 2 verified codebase defects:
 
 <span class="term-bold">### 1. [CRITICAL] Hardcoded AWS Access Key Exposed (SEC-AWS-KEY • CWE-798)</span>
@@ -2993,11 +3022,11 @@ Fix the following 2 verified codebase defects:
 
       security: `<span class="term-dim">$ npx arnav-audit . --security-only</span>
 
-<span class="term-cyan">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
+<span class="term-sapphire">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
 <span class="term-dim">Filter: Secret Gateways &amp; Sensitive Credentials Leaks only</span>
 
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
-  <span class="term-bold">SECURITY GATE REPORT</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-emerald">4.2ms</span>
+  <span class="term-bold">SECURITY GATE REPORT</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-sapphire">4.2ms</span>
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
   Overall Score:  <span class="term-emerald term-bold">100/100 (Grade A+)</span>
   Findings:       <span class="term-emerald">0 Security Violations</span>
@@ -3006,11 +3035,11 @@ Fix the following 2 verified codebase defects:
 
       backend: `<span class="term-dim">$ npx arnav-audit . --backend-only</span>
 
-<span class="term-cyan">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
+<span class="term-sapphire">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
 <span class="term-dim">Filter: Backend Security, SQLi, RCE, SSRF &amp; Weak Points only</span>
 
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
-  <span class="term-bold">BACKEND VULNERABILITY REPORT</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-emerald">5.1ms</span>
+  <span class="term-bold">BACKEND VULNERABILITY REPORT</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-sapphire">5.1ms</span>
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
   Overall Score:  <span class="term-emerald term-bold">100/100 (Grade A+)</span>
   Findings:       <span class="term-emerald">0 Backend Weak Points</span>
@@ -3019,11 +3048,11 @@ Fix the following 2 verified codebase defects:
 
       leakage: `<span class="term-dim">$ npx arnav-audit . --leakage-only</span>
 
-<span class="term-cyan">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
+<span class="term-sapphire">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
 <span class="term-dim">Filter: Memory, Timers, File Handles &amp; Resource Leakage only</span>
 
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
-  <span class="term-bold">RESOURCE LEAKAGE REPORT</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-emerald">3.8ms</span>
+  <span class="term-bold">RESOURCE LEAKAGE REPORT</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-sapphire">3.8ms</span>
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
   Overall Score:  <span class="term-emerald term-bold">100/100 (Grade A+)</span>
   Findings:       <span class="term-emerald">0 Resource Leaks</span>
@@ -3032,11 +3061,11 @@ Fix the following 2 verified codebase defects:
 
       ui: `<span class="term-dim">$ npx arnav-audit . --ui-only</span>
 
-<span class="term-cyan">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
+<span class="term-sapphire">▸ Scanning repository:</span> <span class="term-bold">/workspace/my-app</span>
 <span class="term-dim">Filter: Invisible UI/UX Traps, iOS Safari Zoom &amp; A11y Defects only</span>
 
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
-  <span class="term-bold">UI/UX &amp; ACCESSIBILITY REPORT</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-emerald">4.0ms</span>
+  <span class="term-bold">UI/UX &amp; ACCESSIBILITY REPORT</span>  •  Scanned <span class="term-bold">142</span> files in <span class="term-sapphire">4.0ms</span>
 <span class="term-dim">————————————————————————————————————————————————————————————————————</span>
   Overall Score:  <span class="term-emerald term-bold">100/100 (Grade A+)</span>
   Findings:       <span class="term-emerald">0 UI/UX Traps</span>
@@ -3045,7 +3074,7 @@ Fix the following 2 verified codebase defects:
 
       files: `<span class="term-dim">$ npx arnav-audit . --files</span>
 
-<span class="term-cyan">▸ Verified File Coverage Trace:</span>
+<span class="term-sapphire">▸ Verified File Coverage Trace:</span>
  <span class="term-emerald">✓ PASS</span>  src/config/gateway.ts
  <span class="term-emerald">✓ PASS</span>  src/config/storage.ts
  <span class="term-emerald">✓ PASS</span>  apps/api/controllers/auth.py
@@ -3086,7 +3115,7 @@ Fix the following 2 verified codebase defects:
 
     function rerunTerminalScan() {
       const termEl = document.getElementById('termOutput');
-      termEl.innerHTML = '<span class="term-cyan">▸ Running instant local AST scan across codebase...</span>';
+      termEl.innerHTML = '<span class="term-sapphire">▸ Running instant local AST scan across codebase...</span>';
       playSoftClick();
       setTimeout(() => {
         termEl.innerHTML = TERMINAL_DATA[activeTermTab];
@@ -3376,7 +3405,7 @@ export function setupResizeListener(onResize: () => void) {
           cwe: 'CWE-1374',
           title: 'Obliterated Keyboard Focus Ring',
           desc: 'Removing outline indicators destroys keyboard accessibility (WCAG 2.4.7 violation).',
-          remedy: 'Use :focus-visible { outline: 2px solid #00f5a0; outline-offset: 2px; }.'
+          remedy: 'Use :focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }.'
         });
       }
       if (REG_100VW.test(code)) {
@@ -3402,7 +3431,7 @@ export function setupResizeListener(onResize: () => void) {
               <div class="gauge-wrapper">
                 <svg class="gauge-svg" viewBox="0 0 100 100">
                   <circle class="gauge-bg" cx="50" cy="50" r="40"></circle>
-                  <circle class="gauge-meter" cx="50" cy="50" r="40" stroke="#00f5a0" style="stroke-dashoffset: 0;"></circle>
+                  <circle class="gauge-meter" cx="50" cy="50" r="40" stroke="#10b981" style="stroke-dashoffset: 0;"></circle>
                 </svg>
                 <div class="gauge-val" style="color: var(--emerald);">A+</div>
               </div>
@@ -3585,7 +3614,7 @@ arnav_audit:
       const name = encodeURIComponent(document.getElementById('badgeProjectName').value || 'project');
       const style = document.getElementById('badgeStyle').value;
       const grade = document.getElementById('badgeGrade').value;
-      const url = `https://img.shields.io/badge/quality%20gate-${grade}-00f5a0?style=${style}&logo=shield`;
+      const url = `https://img.shields.io/badge/quality%20gate-${grade}-6366f1?style=${style}&logo=shield`;
       
       document.getElementById('badgeImage').src = url;
       const markdown = `[![arnav-audit](${url})](https://mejor-iota.vercel.app/)`;
